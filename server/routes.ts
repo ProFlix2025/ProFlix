@@ -289,6 +289,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Video file is required' });
       }
 
+      let tags = [];
+      try {
+        tags = req.body.tags ? JSON.parse(req.body.tags) : [];
+      } catch (e) {
+        // If parsing fails, treat as empty array
+        tags = [];
+      }
+
       const videoData = {
         title: req.body.title,
         description: req.body.description,
@@ -298,6 +306,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: parseInt(req.body.categoryId),
         subcategoryId: parseInt(req.body.subcategoryId),
         creatorId,
+        privacy: req.body.privacy || 'public',
+        tags,
+        language: req.body.language || 'en',
         isPublished: req.body.isPublished === 'true',
       };
 
@@ -359,6 +370,254 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error deleting video:', error);
       res.status(500).json({ message: 'Failed to delete video' });
+    }
+  });
+
+  // Enhanced video routes
+  app.get('/api/trending', async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 20;
+      const videos = await storage.getTrendingVideos(limit);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching trending videos:', error);
+      res.status(500).json({ message: 'Failed to fetch trending videos' });
+    }
+  });
+
+  app.get('/api/recommended', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const videos = await storage.getRecommendedVideos(userId, limit);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching recommended videos:', error);
+      res.status(500).json({ message: 'Failed to fetch recommended videos' });
+    }
+  });
+
+  // Subscription routes
+  app.post('/api/subscribe/:channelId', isAuthenticated, async (req: any, res) => {
+    try {
+      const subscriberId = req.user.claims.sub;
+      const channelId = req.params.channelId;
+      
+      if (subscriberId === channelId) {
+        return res.status(400).json({ message: 'Cannot subscribe to yourself' });
+      }
+
+      const subscription = await storage.subscribe(subscriberId, channelId);
+      res.json(subscription);
+    } catch (error) {
+      console.error('Error subscribing:', error);
+      res.status(500).json({ message: 'Failed to subscribe' });
+    }
+  });
+
+  app.delete('/api/subscribe/:channelId', isAuthenticated, async (req: any, res) => {
+    try {
+      const subscriberId = req.user.claims.sub;
+      const channelId = req.params.channelId;
+      
+      await storage.unsubscribe(subscriberId, channelId);
+      res.json({ message: 'Unsubscribed successfully' });
+    } catch (error) {
+      console.error('Error unsubscribing:', error);
+      res.status(500).json({ message: 'Failed to unsubscribe' });
+    }
+  });
+
+  app.get('/api/subscriptions', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const subscriptions = await storage.getSubscriptions(userId);
+      res.json(subscriptions);
+    } catch (error) {
+      console.error('Error fetching subscriptions:', error);
+      res.status(500).json({ message: 'Failed to fetch subscriptions' });
+    }
+  });
+
+  app.get('/api/channel/:channelId/subscribers', async (req, res) => {
+    try {
+      const channelId = req.params.channelId;
+      const subscribers = await storage.getSubscribers(channelId);
+      res.json(subscribers);
+    } catch (error) {
+      console.error('Error fetching subscribers:', error);
+      res.status(500).json({ message: 'Failed to fetch subscribers' });
+    }
+  });
+
+  app.get('/api/channel/:channelId/subscription-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const subscriberId = req.user.claims.sub;
+      const channelId = req.params.channelId;
+      const isSubscribed = await storage.isSubscribed(subscriberId, channelId);
+      res.json({ isSubscribed });
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+      res.status(500).json({ message: 'Failed to check subscription status' });
+    }
+  });
+
+  // Video like routes
+  app.post('/api/videos/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      const like = await storage.likeVideo(userId, videoId);
+      res.json(like);
+    } catch (error) {
+      console.error('Error liking video:', error);
+      res.status(500).json({ message: 'Failed to like video' });
+    }
+  });
+
+  app.delete('/api/videos/:id/like', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      await storage.unlikeVideo(userId, videoId);
+      res.json({ message: 'Like removed' });
+    } catch (error) {
+      console.error('Error unliking video:', error);
+      res.status(500).json({ message: 'Failed to unlike video' });
+    }
+  });
+
+  app.post('/api/videos/:id/dislike', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      const dislike = await storage.dislikeVideo(userId, videoId);
+      res.json(dislike);
+    } catch (error) {
+      console.error('Error disliking video:', error);
+      res.status(500).json({ message: 'Failed to dislike video' });
+    }
+  });
+
+  app.delete('/api/videos/:id/dislike', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      await storage.undislikeVideo(userId, videoId);
+      res.json({ message: 'Dislike removed' });
+    } catch (error) {
+      console.error('Error removing dislike:', error);
+      res.status(500).json({ message: 'Failed to remove dislike' });
+    }
+  });
+
+  app.get('/api/videos/:id/like-status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      const likeStatus = await storage.getVideoLikeStatus(userId, videoId);
+      const counts = await storage.getVideoLikeCounts(videoId);
+      
+      res.json({
+        userLike: likeStatus?.isLike,
+        userDislike: likeStatus && !likeStatus.isLike,
+        ...counts
+      });
+    } catch (error) {
+      console.error('Error getting like status:', error);
+      res.status(500).json({ message: 'Failed to get like status' });
+    }
+  });
+
+  // Comment routes
+  app.get('/api/videos/:id/comments', async (req, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      const comments = await storage.getComments(videoId);
+      res.json(comments);
+    } catch (error) {
+      console.error('Error fetching comments:', error);
+      res.status(500).json({ message: 'Failed to fetch comments' });
+    }
+  });
+
+  app.post('/api/videos/:id/comments', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      const { content, parentId } = req.body;
+      
+      const comment = await storage.createComment({
+        videoId,
+        userId,
+        content,
+        parentId: parentId || null,
+      });
+      
+      res.status(201).json(comment);
+    } catch (error) {
+      console.error('Error creating comment:', error);
+      res.status(500).json({ message: 'Failed to create comment' });
+    }
+  });
+
+  app.get('/api/comments/:id/replies', async (req, res) => {
+    try {
+      const parentId = parseInt(req.params.id);
+      const replies = await storage.getCommentReplies(parentId);
+      res.json(replies);
+    } catch (error) {
+      console.error('Error fetching replies:', error);
+      res.status(500).json({ message: 'Failed to fetch replies' });
+    }
+  });
+
+  // Watch history routes
+  app.post('/api/watch-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { videoId, watchTime } = req.body;
+      
+      const watchEntry = await storage.addToWatchHistory(userId, videoId, watchTime);
+      res.json(watchEntry);
+    } catch (error) {
+      console.error('Error adding to watch history:', error);
+      res.status(500).json({ message: 'Failed to add to watch history' });
+    }
+  });
+
+  app.get('/api/watch-history', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const history = await storage.getWatchHistory(userId, limit);
+      res.json(history);
+    } catch (error) {
+      console.error('Error fetching watch history:', error);
+      res.status(500).json({ message: 'Failed to fetch watch history' });
+    }
+  });
+
+  // Channel management routes
+  app.put('/api/channel/settings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { channelName, channelDescription } = req.body;
+      
+      const updatedUser = await storage.updateUserChannel(userId, {
+        channelName,
+        channelDescription,
+      });
+      
+      res.json(updatedUser);
+    } catch (error) {
+      console.error('Error updating channel:', error);
+      res.status(500).json({ message: 'Failed to update channel' });
     }
   });
 

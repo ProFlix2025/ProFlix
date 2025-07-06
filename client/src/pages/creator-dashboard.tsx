@@ -25,6 +25,9 @@ const uploadSchema = z.object({
   duration: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().min(1, "Subcategory is required"),
+  privacy: z.enum(["public", "unlisted", "private"]).default("public"),
+  tags: z.string().optional(),
+  language: z.string().default("en"),
   isPublished: z.boolean().default(false),
 });
 
@@ -69,6 +72,9 @@ export default function CreatorDashboard() {
       duration: "",
       categoryId: "",
       subcategoryId: "",
+      privacy: "public",
+      tags: "",
+      language: "en",
       isPublished: false,
     },
   });
@@ -157,8 +163,15 @@ export default function CreatorDashboard() {
       formData.append('thumbnail', thumbnailFile);
     }
     
+    // Convert tags string to array
+    const tagsArray = values.tags ? values.tags.split(',').map(tag => tag.trim()).filter(tag => tag) : [];
+    
     Object.entries(values).forEach(([key, value]) => {
-      formData.append(key, String(value));
+      if (key === 'tags') {
+        formData.append(key, JSON.stringify(tagsArray));
+      } else {
+        formData.append(key, String(value));
+      }
     });
 
     uploadMutation.mutate(formData);
@@ -371,6 +384,76 @@ export default function CreatorDashboard() {
                     </FormItem>
                   )}
                 />
+
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  <FormField
+                    control={form.control}
+                    name="privacy"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Privacy</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Privacy" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="public">Public</SelectItem>
+                            <SelectItem value="unlisted">Unlisted</SelectItem>
+                            <SelectItem value="private">Private</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="language"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Language</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select Language" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
+                            <SelectItem value="it">Italian</SelectItem>
+                            <SelectItem value="pt">Portuguese</SelectItem>
+                            <SelectItem value="ru">Russian</SelectItem>
+                            <SelectItem value="ja">Japanese</SelectItem>
+                            <SelectItem value="ko">Korean</SelectItem>
+                            <SelectItem value="zh">Chinese</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="tags"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Tags</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="tag1, tag2, tag3"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
                 <div className="flex items-center space-x-4">
                   <Button 
