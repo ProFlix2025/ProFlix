@@ -1,0 +1,87 @@
+✅ Option 1: Post a Clear Prompt in a Replit Bounty / AI Chat / Dev Chat
+Here’s a clean version you can copy-paste into Replit AI, a Replit Bounty post, or a message to a dev:
+
+🟩 Project Title:
+ProFlix – Creator Video Platform (Netflix-style MVP)
+
+📝 Description:
+I'm building a Netflix-style app called ProFlix where creators upload content and viewers watch. For now, everything is free — no payment integration needed yet. The MVP should allow creators to upload videos into organized categories, and viewers to browse and watch.
+
+👤 Users:
+
+Viewers: Sign up, browse, and watch videos.
+
+Creators: Sign up, upload videos, assign category/subcategory.
+
+✅ Core MVP Features (Phase 1):
+
+User Authentication
+
+Signup/login with role selection: Creator or Viewer
+
+Dashboards
+
+Viewers: Browse videos by category/subcategory, search titles
+
+Creators: Upload videos (title, description, category, subcategory, thumbnail)
+
+Video Upload & Playback
+
+Upload MP4 files
+
+Add title, description
+
+Choose category and subcategory
+
+Content Organization
+
+Homepage: Shows top categories
+
+Inside: Subcategories → videos (Netflix-style tiles)
+
+Search
+
+Search videos by title or keyword
+
+📂 Top 10 Categories (with Subcategories):
+
+Art → Tattooing, Digital Art, Painting
+
+Fitness → Weightlifting, Yoga, Martial Arts
+
+Entrepreneurship → Real Estate, E-commerce, Branding
+
+Beauty → Skincare, Makeup, Hair Tutorials
+
+Construction → Plumbing, Electrical, Carpentry
+
+Music → Singing, DJ Sets, Instrument Lessons
+
+Film & Media → Acting, Directing, VFX Editing
+
+Food → Cooking, Baking, Food Reviews
+
+Sports → Basketball, Football, Skateboarding
+
+Dating & Lifestyle → Dating Tips, Self-Improvement, Travel Vlogs
+
+🔜 Future Features (not required now):
+
+Stripe payments
+
+Earnings dashboard (80/20 revenue split to creators)
+
+Watch time analytics
+
+Payouts based on hours watched
+
+Let me know if this should be built with Replit DB, Supabase, Firebase, or another backend (I'm open). Just need something simple that works for now.
+
+👥 Revenue Model (Future):
+
+Creators earn 80% of revenue based on hours watched
+
+Platform keeps 20%
+
+Stripe or similar for payouts later
+
