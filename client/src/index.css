@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 100%);
+  --muted: hsl(0, 0%, 8%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --popover: hsl(0, 0%, 8%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --border: hsl(0, 0%, 34%);
+  --input: hsl(0, 0%, 20%);
+  --primary: hsl(0, 84%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 20%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(0, 0%, 20%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(0, 84%, 60%);
+  --radius: 0.5rem;
+  
+  /* Netflix-inspired colors */
+  --netflix-red: hsl(0, 84%, 60%);
+  --netflix-black: hsl(0, 0%, 8%);
+  --netflix-gray: hsl(0, 0%, 20%);
+  --netflix-light-gray: hsl(0, 0%, 70%);
+  --netflix-border: hsl(0, 0%, 34%);
+}
+
+.dark {
+  --background: hsl(0, 0%, 0%);
+  --foreground: hsl(0, 0%, 100%);
+  --muted: hsl(0, 0%, 8%);
+  --muted-foreground: hsl(0, 0%, 70%);
+  --popover: hsl(0, 0%, 8%);
+  --popover-foreground: hsl(0, 0%, 100%);
+  --card: hsl(0, 0%, 8%);
+  --card-foreground: hsl(0, 0%, 100%);
+  --border: hsl(0, 0%, 34%);
+  --input: hsl(0, 0%, 20%);
+  --primary: hsl(0, 84%, 60%);
+  --primary-foreground: hsl(0, 0%, 100%);
+  --secondary: hsl(0, 0%, 20%);
+  --secondary-foreground: hsl(0, 0%, 100%);
+  --accent: hsl(0, 0%, 20%);
+  --accent-foreground: hsl(0, 0%, 100%);
+  --destructive: hsl(0, 84%, 60%);
+  --destructive-foreground: hsl(0, 0%, 100%);
+  --ring: hsl(0, 84%, 60%);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+    background-color: black;
+    color: white;
+  }
+}
+
+@layer utilities {
+  .netflix-red {
+    color: var(--netflix-red);
+  }
+  
+  .bg-netflix-red {
+    background-color: var(--netflix-red);
+  }
+  
+  .netflix-black {
+    color: var(--netflix-black);
+  }
+  
+  .bg-netflix-black {
+    background-color: var(--netflix-black);
+  }
+  
+  .netflix-gray {
+    color: var(--netflix-gray);
+  }
+  
+  .bg-netflix-gray {
+    background-color: var(--netflix-gray);
+  }
+  
+  .netflix-light-gray {
+    color: var(--netflix-light-gray);
+  }
+  
+  .bg-netflix-light-gray {
+    background-color: var(--netflix-light-gray);
+  }
+  
+  .border-netflix-border {
+    border-color: var(--netflix-border);
+  }
+  
+  .video-aspect {
+    aspect-ratio: 16 / 9;
+  }
+}
