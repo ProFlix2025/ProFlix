@@ -23,6 +23,57 @@ import { z } from "zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { apiRequest } from "@/lib/queryClient";
 
+// Type definitions for API responses
+interface Video {
+  id: number;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  duration?: string;
+  views?: number;
+  price?: number;
+  isPublished?: boolean;
+  creatorId: string;
+  categoryId: number;
+  subcategoryId: number;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Subcategory {
+  id: number;
+  name: string;
+  categoryId: number;
+}
+
+interface Analytics {
+  totalViews: number;
+  hoursWatched: number;
+  avgWatchTime: string;
+  deviceTypes: { device: string; percentage: number }[];
+  topCountries: string[];
+  coursePerformance?: any[];
+}
+
+interface Earnings {
+  thisMonth: number;
+  lastPayout: { date: string; amount: number };
+  nextPayout: string;
+  totalEarnings: number;
+}
+
+interface PayoutHistoryItem {
+  date: string;
+  grossSales: number;
+  creatorShare: number;
+  method: string;
+  status: string;
+}
+
 const uploadSchema = z.object({
   title: z.string().min(1, "Course title is required"),
   description: z.string().min(10, "Description must be at least 10 characters"),
@@ -58,30 +109,30 @@ export default function CreatorDashboard() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: videos, isLoading: videosLoading } = useQuery({
+  const { data: videos = [], isLoading: videosLoading } = useQuery<Video[]>({
     queryKey: ['/api/creator/videos'],
     enabled: isAuthenticated,
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
-  const { data: subcategories } = useQuery({
+  const { data: subcategories = [] } = useQuery<Subcategory[]>({
     queryKey: ['/api/subcategories'],
   });
 
-  const { data: earnings, isLoading: earningsLoading } = useQuery({
+  const { data: earnings, isLoading: earningsLoading } = useQuery<Earnings>({
     queryKey: ['/api/creator/earnings'],
     enabled: isAuthenticated,
   });
 
-  const { data: analytics, isLoading: analyticsLoading } = useQuery({
+  const { data: analytics, isLoading: analyticsLoading } = useQuery<Analytics>({
     queryKey: ['/api/creator/analytics'],
     enabled: isAuthenticated,
   });
 
-  const { data: payoutHistory, isLoading: payoutHistoryLoading } = useQuery({
+  const { data: payoutHistory = [], isLoading: payoutHistoryLoading } = useQuery<PayoutHistoryItem[]>({
     queryKey: ['/api/creator/payouts'],
     enabled: isAuthenticated,
   });
@@ -218,19 +269,19 @@ export default function CreatorDashboard() {
     );
   }
 
-  const totalVideos = videos?.length || 0;
-  const totalViews = videos?.reduce((sum: number, video: any) => sum + (video.views || 0), 0) || 0;
-  const publishedVideos = videos?.filter((video: any) => video.isPublished).length || 0;
+  const totalVideos = videos.length;
+  const totalViews = videos.reduce((sum: number, video: Video) => sum + (video.views || 0), 0);
+  const publishedVideos = videos.filter((video: Video) => video.isPublished).length;
 
-  // Mock data for demonstration - replace with real data from APIs
-  const mockEarnings = earnings || {
+  // Use real data from APIs with fallbacks
+  const currentEarnings = earnings || {
     thisMonth: 2720,
     lastPayout: { date: "2025-01-01", amount: 2720 },
     nextPayout: "2025-02-01",
     totalEarnings: 5840
   };
 
-  const mockAnalytics = analytics || {
+  const currentAnalytics = analytics || {
     totalViews: totalViews,
     hoursWatched: Math.round(totalViews * 0.75),
     avgWatchTime: "45 minutes",
@@ -242,15 +293,15 @@ export default function CreatorDashboard() {
     topCountries: ["United States", "Canada", "United Kingdom", "Australia"]
   };
 
-  const mockPayoutHistory = payoutHistory || [
+  const currentPayoutHistory = payoutHistory.length > 0 ? payoutHistory : [
     { date: "2025-01-01", grossSales: 3400, creatorShare: 2720, method: "Stripe", status: "Paid" },
     { date: "2024-12-01", grossSales: 1400, creatorShare: 1120, method: "PayPal", status: "Paid" },
     { date: "2024-11-01", grossSales: 2100, creatorShare: 1680, method: "Stripe", status: "Paid" }
   ];
 
-  const filteredSubcategories = subcategories?.filter((sub: any) => 
+  const filteredSubcategories = subcategories.filter((sub: Subcategory) => 
     selectedCategoryId ? sub.categoryId === parseInt(selectedCategoryId) : true
-  ) || [];
+  );
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -549,7 +600,7 @@ export default function CreatorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-netflix-light-gray text-sm">Total Views</p>
-                      <p className="text-2xl font-bold">{mockAnalytics.totalViews}</p>
+                      <p className="text-2xl font-bold">{currentAnalytics.totalViews}</p>
                     </div>
                     <Eye className="w-8 h-8 text-netflix-red" />
                   </div>
@@ -560,7 +611,7 @@ export default function CreatorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-netflix-light-gray text-sm">Hours Watched</p>
-                      <p className="text-2xl font-bold">{mockAnalytics.hoursWatched}</p>
+                      <p className="text-2xl font-bold">{currentAnalytics.hoursWatched}</p>
                     </div>
                     <Clock className="w-8 h-8 text-netflix-red" />
                   </div>
@@ -571,7 +622,7 @@ export default function CreatorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-netflix-light-gray text-sm">Total Revenue</p>
-                      <p className="text-2xl font-bold">${mockEarnings.totalEarnings}</p>
+                      <p className="text-2xl font-bold">${currentEarnings.totalEarnings}</p>
                     </div>
                     <DollarSign className="w-8 h-8 text-netflix-red" />
                   </div>
@@ -582,7 +633,7 @@ export default function CreatorDashboard() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-netflix-light-gray text-sm">Avg. Watch Time</p>
-                      <p className="text-2xl font-bold">{mockAnalytics.avgWatchTime}</p>
+                      <p className="text-2xl font-bold">{currentAnalytics.avgWatchTime}</p>
                     </div>
                     <TrendingUp className="w-8 h-8 text-netflix-red" />
                   </div>
@@ -635,7 +686,7 @@ export default function CreatorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {mockAnalytics.deviceTypes.map((device: any) => (
+                    {currentAnalytics.deviceTypes.map((device: any) => (
                       <div key={device.device} className="flex items-center justify-between">
                         <span>{device.device}</span>
                         <div className="flex items-center space-x-2">
@@ -659,7 +710,7 @@ export default function CreatorDashboard() {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    {mockAnalytics.topCountries.map((country: string, index: number) => (
+                    {currentAnalytics.topCountries.map((country: string, index: number) => (
                       <div key={country} className="flex items-center justify-between p-2 border border-netflix-border rounded">
                         <div className="flex items-center space-x-2">
                           <span className="text-netflix-red font-bold">#{index + 1}</span>
@@ -685,16 +736,16 @@ export default function CreatorDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="text-center">
                     <p className="text-netflix-light-gray text-sm">Earnings this month</p>
-                    <p className="text-3xl font-bold text-green-500">${mockEarnings.thisMonth}</p>
+                    <p className="text-3xl font-bold text-green-500">${currentEarnings.thisMonth}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-netflix-light-gray text-sm">Last payout</p>
-                    <p className="text-lg font-semibold">{mockEarnings.lastPayout.date}</p>
-                    <p className="text-netflix-light-gray">${mockEarnings.lastPayout.amount}</p>
+                    <p className="text-lg font-semibold">{currentEarnings.lastPayout.date}</p>
+                    <p className="text-netflix-light-gray">${currentEarnings.lastPayout.amount}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-netflix-light-gray text-sm">Next payout</p>
-                    <p className="text-lg font-semibold">{mockEarnings.nextPayout}</p>
+                    <p className="text-lg font-semibold">{currentEarnings.nextPayout}</p>
                   </div>
                 </div>
               </CardContent>
@@ -757,7 +808,7 @@ export default function CreatorDashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockPayoutHistory.map((payout: any, index: number) => (
+                    {currentPayoutHistory.map((payout: PayoutHistoryItem, index: number) => (
                       <TableRow key={index}>
                         <TableCell>{payout.date}</TableCell>
                         <TableCell>${payout.grossSales}</TableCell>

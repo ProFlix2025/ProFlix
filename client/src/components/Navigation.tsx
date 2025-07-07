@@ -13,7 +13,7 @@ export default function Navigation() {
   const { user, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
   });
 
@@ -49,7 +49,7 @@ export default function Navigation() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="bg-netflix-black border-netflix-border">
-              {categories?.map((category: any) => (
+              {Array.isArray(categories) && categories.map((category: any) => (
                 <DropdownMenuItem key={category.id} asChild>
                   <Link href={`/category/${category.slug}`} className="text-white hover:bg-netflix-gray">
                     {category.name}
@@ -58,7 +58,7 @@ export default function Navigation() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
-          {user?.role === 'creator' && (
+          {user && (user as any)?.role === 'creator' && (
             <Link href="/creator" className="text-white hover:text-netflix-light-gray transition-colors">
               <div className="flex items-center space-x-1">
                 <Video className="w-4 h-4" />
@@ -107,13 +107,13 @@ export default function Navigation() {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2">
                 <Avatar className="w-8 h-8">
-                  <AvatarImage src={user.profileImageUrl} alt={user.firstName || user.email} />
+                  <AvatarImage src={(user as any)?.profileImageUrl} alt={(user as any)?.firstName || (user as any)?.email} />
                   <AvatarFallback>
                     <User className="w-4 h-4" />
                   </AvatarFallback>
                 </Avatar>
                 <span className="hidden md:inline text-white">
-                  {user.firstName || user.email}
+                  {(user as any)?.firstName || (user as any)?.email}
                 </span>
               </Button>
             </DropdownMenuTrigger>

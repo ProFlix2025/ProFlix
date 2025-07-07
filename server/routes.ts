@@ -30,7 +30,7 @@ const upload = multer({
     } else if (file.fieldname === 'thumbnail' && file.mimetype.startsWith('image/')) {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type'), false);
+      cb(null, false);
     }
   },
   limits: {

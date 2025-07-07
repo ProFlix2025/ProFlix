@@ -13,6 +13,20 @@ import { Badge } from "@/components/ui/badge";
 import { Play, Clock, Star, DollarSign, Check } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
+interface Course {
+  id: number;
+  title: string;
+  description?: string;
+  thumbnailUrl?: string;
+  duration?: string;
+  views?: number;
+  price?: number;
+  tags?: string[];
+  creatorId: string;
+  categoryId: number;
+  subcategoryId: number;
+}
+
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
@@ -79,13 +93,13 @@ export default function CoursePurchase() {
   const videoId = params?.videoId ? parseInt(params.videoId) : null;
 
   // Fetch course details
-  const { data: course, isLoading: courseLoading } = useQuery({
+  const { data: course = {} as Course, isLoading: courseLoading } = useQuery<Course>({
     queryKey: ['/api/videos', videoId],
     enabled: !!videoId,
   });
 
   // Check if user already purchased this course
-  const { data: hasPurchased } = useQuery({
+  const { data: hasPurchased = false } = useQuery<boolean>({
     queryKey: ['/api/my-purchases', videoId],
     enabled: !!videoId && isAuthenticated,
   });
@@ -274,12 +288,12 @@ export default function CoursePurchase() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-2">
                     <span>Course Price:</span>
-                    <span className="text-2xl font-bold">${course.price / 100}</span>
+                    <span className="text-2xl font-bold">${(course.price || 0) / 100}</span>
                   </div>
                   <Separator className="bg-netflix-border" />
                   <div className="flex justify-between items-center mt-2">
                     <span className="font-semibold">Total:</span>
-                    <span className="text-2xl font-bold text-netflix-red">${course.price / 100}</span>
+                    <span className="text-2xl font-bold text-netflix-red">${(course.price || 0) / 100}</span>
                   </div>
                 </div>
 
