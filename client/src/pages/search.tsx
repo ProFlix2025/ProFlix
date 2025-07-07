@@ -54,16 +54,16 @@ export default function SearchPage() {
           {/* Search Results */}
           {!isLoading && searchQuery && (
             <div>
-              {searchResults.length > 0 ? (
+              {(searchResults as any[])?.length > 0 ? (
                 <>
                   <div className="flex items-center justify-between mb-6">
                     <p className="text-netflix-light-gray">
-                      Found {searchResults.length} course{searchResults.length !== 1 ? 's' : ''}
+                      Found {(searchResults as any[]).length} course{(searchResults as any[]).length !== 1 ? 's' : ''}
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {searchResults.map((video: any) => (
+                    {(searchResults as any[]).map((video: any) => (
                       <VideoCard key={video.id} video={video} />
                     ))}
                   </div>

@@ -138,14 +138,14 @@ export default function Navigation() {
           </Link>
         )}
 
-        {user && (user as any)?.role === 'creator' && (
+        {user && (user as any)?.role === 'creator' ? (
           <Link href="/creator" className="text-white hover:text-netflix-red transition-colors">
             <div className="flex items-center space-x-2">
               <Video className="w-5 h-5" />
               <span className="text-lg">Creator Dashboard</span>
             </div>
           </Link>
-        )}
+        ) : null}
       </div>
     </nav>
   );
