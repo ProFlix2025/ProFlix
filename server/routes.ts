@@ -782,6 +782,206 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator-specific routes
+  app.get('/api/creator/videos', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videos = await storage.getVideosByCreator(userId);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching creator videos:', error);
+      res.status(500).json({ message: 'Failed to fetch creator videos' });
+    }
+  });
+
+  app.post('/api/creator/videos', isAuthenticated, upload.fields([
+    { name: 'video', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 }
+  ]), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      if (!req.files?.video?.[0]) {
+        return res.status(400).json({ message: 'Video file is required' });
+      }
+
+      const videoFile = req.files.video[0];
+      const thumbnailFile = req.files?.thumbnail?.[0];
+      
+      const videoData = {
+        ...req.body,
+        creatorId: userId,
+        videoUrl: `/uploads/${videoFile.filename}`,
+        thumbnailUrl: thumbnailFile ? `/uploads/${thumbnailFile.filename}` : null,
+        tags: req.body.tags ? JSON.parse(req.body.tags) : [],
+        views: 0,
+        likes: 0,
+        dislikes: 0,
+        uploadedAt: new Date(),
+      };
+
+      // Validate using schema
+      const validatedData = insertVideoSchema.parse(videoData);
+      const video = await storage.createVideo(validatedData);
+      
+      res.json(video);
+    } catch (error) {
+      console.error('Error uploading video:', error);
+      res.status(500).json({ message: 'Failed to upload video' });
+    }
+  });
+
+  app.delete('/api/creator/videos/:id', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      // Verify the video belongs to this creator
+      const video = await storage.getVideo(videoId);
+      if (!video || video.creatorId !== userId) {
+        return res.status(404).json({ message: 'Video not found or unauthorized' });
+      }
+      
+      await storage.deleteVideo(videoId);
+      res.json({ message: 'Video deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting video:', error);
+      res.status(500).json({ message: 'Failed to delete video' });
+    }
+  });
+
+  // Creator Analytics
+  app.get('/api/creator/analytics', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videos = await storage.getVideosByCreator(userId);
+      
+      const totalViews = videos.reduce((sum, video) => sum + (video.views || 0), 0);
+      const hoursWatched = Math.round(totalViews * 0.75); // Estimate based on average watch time
+      
+      const analytics = {
+        totalViews,
+        hoursWatched,
+        avgWatchTime: "45 minutes", // This would come from detailed analytics
+        deviceTypes: [
+          { device: "Desktop", percentage: 65 },
+          { device: "Mobile", percentage: 30 },
+          { device: "Tablet", percentage: 5 }
+        ],
+        topCountries: ["United States", "Canada", "United Kingdom", "Australia"],
+        coursePerformance: videos.map(video => ({
+          id: video.id,
+          title: video.title,
+          views: video.views || 0,
+          watchTime: Math.round((video.views || 0) * 0.75),
+          sales: video.price || 0,
+          earnings: ((video.price || 0) * 0.8) // 80% revenue share
+        }))
+      };
+      
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  // Creator Earnings
+  app.get('/api/creator/earnings', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const totalEarnings = await storage.getCreatorEarnings(userId);
+      
+      const earnings = {
+        thisMonth: Math.round(totalEarnings * 0.6), // Simulate current month earnings
+        lastPayout: { 
+          date: "2025-01-01", 
+          amount: Math.round(totalEarnings * 0.4) 
+        },
+        nextPayout: "2025-02-01",
+        totalEarnings: totalEarnings
+      };
+      
+      res.json(earnings);
+    } catch (error) {
+      console.error('Error fetching earnings:', error);
+      res.status(500).json({ message: 'Failed to fetch earnings' });
+    }
+  });
+
+  // Creator Payout History
+  app.get('/api/creator/payouts', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Mock payout history - in production, this would come from a payouts table
+      const payoutHistory = [
+        { 
+          date: "2025-01-01", 
+          grossSales: 3400, 
+          creatorShare: 2720, 
+          method: "Stripe", 
+          status: "Paid" 
+        },
+        { 
+          date: "2024-12-01", 
+          grossSales: 1400, 
+          creatorShare: 1120, 
+          method: "PayPal", 
+          status: "Paid" 
+        },
+        { 
+          date: "2024-11-01", 
+          grossSales: 2100, 
+          creatorShare: 1680, 
+          method: "Stripe", 
+          status: "Paid" 
+        }
+      ];
+      
+      res.json(payoutHistory);
+    } catch (error) {
+      console.error('Error fetching payout history:', error);
+      res.status(500).json({ message: 'Failed to fetch payout history' });
+    }
+  });
+
+  // PayPal Integration Routes
+  app.get('/api/paypal/setup', async (req, res) => {
+    try {
+      // This would implement PayPal client token generation
+      // For now, return a mock response
+      res.json({
+        clientToken: "sandbox_paypal_client_token",
+        message: "PayPal setup ready"
+      });
+    } catch (error) {
+      console.error('Error setting up PayPal:', error);
+      res.status(500).json({ message: 'Failed to setup PayPal' });
+    }
+  });
+
+  app.post('/api/creator/paypal/connect', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { paypalEmail } = req.body;
+      
+      if (!paypalEmail) {
+        return res.status(400).json({ message: 'PayPal email is required' });
+      }
+      
+      // In production, this would store the PayPal email and validate it
+      // For now, just simulate the connection
+      res.json({ 
+        message: 'PayPal account connected successfully',
+        paypalEmail 
+      });
+    } catch (error) {
+      console.error('Error connecting PayPal:', error);
+      res.status(500).json({ message: 'Failed to connect PayPal account' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

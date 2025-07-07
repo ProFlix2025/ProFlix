@@ -1,0 +1,112 @@
+🔐 ProFlix Creator Portal MVP (with Stripe + PayPal Auto Payouts)
+This MVP gives creators:
+
+✅ A simple Upload Page
+
+📊 A clear Analytics Dashboard
+
+💸 An automated Payout Dashboard
+All revenue is split automatically: 80% to creator, 20% to platform.
+
+✅ 1. Upload Page (/creator/upload)
+Fields:
+
+Course Title
+
+Description
+
+Upload Video (min. 10 minutes)
+
+Thumbnail (optional, auto-generated fallback)
+
+Price Selector ($25–$999)
+
+Category & Subcategory
+
+Toggle: “Offer Free Preview?”
+
+Validations:
+
+Video must be at least 10:00
+
+File types: MP4, MOV
+
+Auto thumbnail capture if not provided
+
+Submission:
+
+Upload & Publish button
+
+After publish: confirmation + edit link
+
+📊 2. Analytics Dashboard (/creator/dashboard)
+Top Stats (Monthly):
+
+👁️ Total Views
+
+⏱️ Hours Watched
+
+💰 Total Revenue
+
+🧍 Avg. Watch Time per Viewer
+
+Performance Table:
+
+Course	Views	Watch Time	Sales	Earnings (80%)
+Pro Tattooing	980	110 hrs	$3,400	$2,720
+Mastering Fades	560	65 hrs	$1,400	$1,120
+
+Charts:
+
+Line: Daily Watch Time (30 days)
+
+Pie: Device Types
+
+Map or list: Top Countries
+
+💸 3. Payments Dashboard (/creator/payouts)
+Creators receive 80% of all sales, automatically split at checkout via Stripe or PayPal.
+
+Payout Summary
+Earnings this month: $2,720.00
+
+Last payout: Aug 1, 2025
+
+Next payout: Sept 1, 2025
+
+Payment Methods
+[✔] Stripe Connected
+
+Button: Update Stripe Info
+
+ PayPal Connected
+
+Button: Connect PayPal
+
+Creators choose one primary payout method. If both are connected, fallback logic sends via Stripe first.
+
+Payment History Table:
+Date	Gross Sales	Your Share (80%)	Method	Status
+Aug 1, 2025	$3,400.00	$2,720.00	Stripe	Paid
+Jul 1, 2025	$1,400.00	$1,120.00	PayPal	Paid
+
+⚙️ Tech Stack Recommendations
+Backend
+Auth: Firebase Auth or Replit Auth
+
+Storage: Firebase Storage or AWS S3
+
+Database: Supabase or Replit DB
+
+Video Player: Plyr.js or Video.js
+
+Payment Integration
+✅ Stripe Connect (Standard)
+
+Use Connect accounts for auto-split payments
+
+✅ PayPal Payouts API
+
+Use PayPal Payouts or Mass Pay for batch or instant payouts
+
+Collect creator PayPal email in onboarding
