@@ -5,35 +5,35 @@ import Navigation from "@/components/Navigation";
 import VideoGrid from "@/components/VideoGrid";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Play, Plus, TrendingUp, History, Users, Home as HomeIcon } from "lucide-react";
+import { Play, Plus, TrendingUp, History, Heart, Home as HomeIcon } from "lucide-react";
 import { Link } from "wouter";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
 
-  const { data: videos, isLoading } = useQuery({
+  const { data: videos = [], isLoading } = useQuery({
     queryKey: ['/api/videos'],
   });
 
-  const { data: categories } = useQuery({
+  const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
   });
 
-  const { data: trendingVideos } = useQuery({
+  const { data: trendingVideos = [] } = useQuery({
     queryKey: ['/api/trending'],
   });
 
-  const { data: recommendedVideos } = useQuery({
+  const { data: recommendedVideos = [] } = useQuery({
     queryKey: ['/api/recommended'],
     enabled: isAuthenticated,
   });
 
-  const { data: subscriptions } = useQuery({
-    queryKey: ['/api/subscriptions'],
+  const { data: favorites = [] } = useQuery({
+    queryKey: ['/api/favorites'],
     enabled: isAuthenticated,
   });
 
-  const { data: watchHistory } = useQuery({
+  const { data: watchHistory = [] } = useQuery({
     queryKey: ['/api/watch-history'],
     enabled: isAuthenticated,
   });
@@ -57,7 +57,7 @@ export default function Home() {
     );
   }
 
-  const featuredVideo = videos?.[0];
+  const featuredVideo = Array.isArray(videos) && videos.length > 0 ? videos[0] : null;
 
   return (
     <div className="min-h-screen bg-black text-white">
@@ -102,9 +102,9 @@ export default function Home() {
             </TabsTrigger>
             {isAuthenticated && (
               <>
-                <TabsTrigger value="subscriptions" className="flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  Subscriptions
+                <TabsTrigger value="favorites" className="flex items-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Favorites
                 </TabsTrigger>
                 <TabsTrigger value="history" className="flex items-center gap-2">
                   <History className="w-4 h-4" />
@@ -123,7 +123,7 @@ export default function Home() {
             <div>
               <h3 className="text-2xl font-bold mb-6">Browse by Category</h3>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {categories?.map((category: any) => (
+                {Array.isArray(categories) && categories.map((category: any) => (
                   <Link key={category.id} href={`/category/${category.slug}`}>
                     <Button 
                       variant="outline" 
@@ -137,7 +137,7 @@ export default function Home() {
             </div>
 
             {/* Featured Content */}
-            {categories?.map((category: any) => (
+            {Array.isArray(categories) && categories.map((category: any) => (
               <VideoGrid
                 key={category.id}
                 title={category.name}
@@ -151,7 +151,7 @@ export default function Home() {
             <div className="space-y-6">
               <h3 className="text-2xl font-bold">Trending Videos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {trendingVideos?.map((video: any) => (
+                {Array.isArray(trendingVideos) && trendingVideos.map((video: any) => (
                   <Link key={video.id} href={`/video/${video.id}`}>
                     <div className="bg-netflix-gray rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
                       <div className="aspect-video relative">
@@ -184,31 +184,43 @@ export default function Home() {
 
           {isAuthenticated && (
             <>
-              <TabsContent value="subscriptions" className="mt-8">
+              <TabsContent value="favorites" className="mt-8">
                 <div className="space-y-6">
-                  <h3 className="text-2xl font-bold">Subscriptions</h3>
-                  {subscriptions?.length > 0 ? (
+                  <h3 className="text-2xl font-bold">Your Favorites</h3>
+                  {Array.isArray(favorites) && favorites.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                      {subscriptions.map((creator: any) => (
-                        <div key={creator.id} className="bg-netflix-gray rounded-lg p-4 text-center">
-                          <div className="w-16 h-16 bg-netflix-red rounded-full flex items-center justify-center text-white text-xl font-bold mx-auto mb-3">
-                            {creator.firstName?.charAt(0) || creator.email?.charAt(0) || 'C'}
+                      {favorites.map((video: any) => (
+                        <Link key={video.id} href={`/video/${video.id}`}>
+                          <div className="bg-netflix-gray rounded-lg overflow-hidden hover:scale-105 transition-transform duration-300">
+                            <div className="aspect-video relative">
+                              {video.thumbnailUrl ? (
+                                <img 
+                                  src={video.thumbnailUrl} 
+                                  alt={video.title}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full bg-netflix-dark-gray flex items-center justify-center">
+                                  <Play className="w-12 h-12 text-netflix-light-gray" />
+                                </div>
+                              )}
+                            </div>
+                            <div className="p-4">
+                              <h4 className="font-semibold text-white mb-2 line-clamp-2">{video.title}</h4>
+                              <div className="flex items-center text-netflix-light-gray text-sm">
+                                <span>{video.views || 0} views</span>
+                                <span className="mx-2">•</span>
+                                <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+                              </div>
+                            </div>
                           </div>
-                          <h4 className="font-semibold text-white mb-2">
-                            {creator.firstName 
-                              ? `${creator.firstName} ${creator.lastName || ''}`.trim()
-                              : creator.email}
-                          </h4>
-                          <p className="text-netflix-light-gray text-sm">
-                            {creator.channelName || 'Content Creator'}
-                          </p>
-                        </div>
+                        </Link>
                       ))}
                     </div>
                   ) : (
                     <div className="text-center py-12">
-                      <Users className="w-16 h-16 text-netflix-light-gray mx-auto mb-4" />
-                      <p className="text-netflix-light-gray">No subscriptions yet. Subscribe to creators to see their content here!</p>
+                      <Heart className="w-16 h-16 text-netflix-light-gray mx-auto mb-4" />
+                      <p className="text-netflix-light-gray">No favorites yet. Add videos to your favorites to see them here!</p>
                     </div>
                   )}
                 </div>
@@ -217,7 +229,7 @@ export default function Home() {
               <TabsContent value="history" className="mt-8">
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold">Watch History</h3>
-                  {watchHistory?.length > 0 ? (
+                  {Array.isArray(watchHistory) && watchHistory.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {watchHistory.map((video: any) => (
                         <Link key={video.id} href={`/video/${video.id}`}>
@@ -259,7 +271,7 @@ export default function Home() {
               <TabsContent value="recommended" className="mt-8">
                 <div className="space-y-6">
                   <h3 className="text-2xl font-bold">Recommended for You</h3>
-                  {recommendedVideos?.length > 0 ? (
+                  {Array.isArray(recommendedVideos) && recommendedVideos.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                       {recommendedVideos.map((video: any) => (
                         <Link key={video.id} href={`/video/${video.id}`}>

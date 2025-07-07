@@ -11,6 +11,8 @@ import {
   watchHistory,
   creatorApplications,
   coursePurchases,
+  favorites,
+  sharedVideos,
   type User,
   type UpsertUser,
   type Category,
@@ -34,6 +36,10 @@ import {
   type InsertCreatorApplication,
   type CoursePurchase,
   type InsertCoursePurchase,
+  type Favorite,
+  type InsertFavorite,
+  type SharedVideo,
+  type InsertSharedVideo,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count } from "drizzle-orm";
@@ -84,13 +90,16 @@ export interface IStorage {
   getTrendingVideos(limit?: number): Promise<Video[]>;
   getRecommendedVideos(userId: string, limit?: number): Promise<Video[]>;
   
-  // Subscription operations
-  subscribe(subscriberId: string, channelId: string): Promise<Subscription>;
-  unsubscribe(subscriberId: string, channelId: string): Promise<void>;
-  getSubscriptions(userId: string): Promise<User[]>;
-  getSubscribers(channelId: string): Promise<User[]>;
-  isSubscribed(subscriberId: string, channelId: string): Promise<boolean>;
-  getSubscriptionCount(channelId: string): Promise<number>;
+  // Favorites operations
+  addToFavorites(userId: string, videoId: number): Promise<Favorite>;
+  removeFromFavorites(userId: string, videoId: number): Promise<void>;
+  getFavorites(userId: string): Promise<Video[]>;
+  isFavorited(userId: string, videoId: number): Promise<boolean>;
+  
+  // Shared videos operations
+  shareVideo(userId: string, videoId: number, recipientEmail?: string, message?: string): Promise<SharedVideo>;
+  getSharedVideos(userId: string): Promise<SharedVideo[]>;
+  getSharedVideoByToken(shareToken: string): Promise<SharedVideo | undefined>;
   
   // Video like operations
   likeVideo(userId: string, videoId: number): Promise<VideoLike>;
@@ -284,75 +293,7 @@ export class DatabaseStorage implements IStorage {
       .limit(limit);
   }
 
-  // Subscription operations
-  async subscribe(subscriberId: string, channelId: string): Promise<Subscription> {
-    const [subscription] = await db
-      .insert(subscriptions)
-      .values({ subscriberId, channelId })
-      .onConflictDoNothing()
-      .returning();
-    
-    // Update subscriber count
-    await db.update(users)
-      .set({ subscriberCount: sql`subscriber_count + 1` })
-      .where(eq(users.id, channelId));
-    
-    return subscription;
-  }
 
-  async unsubscribe(subscriberId: string, channelId: string): Promise<void> {
-    await db.delete(subscriptions)
-      .where(and(
-        eq(subscriptions.subscriberId, subscriberId),
-        eq(subscriptions.channelId, channelId)
-      ));
-    
-    // Update subscriber count
-    await db.update(users)
-      .set({ subscriberCount: sql`subscriber_count - 1` })
-      .where(eq(users.id, channelId));
-  }
-
-  async getSubscriptions(userId: string): Promise<User[]> {
-    const result = await db
-      .select({ user: users })
-      .from(subscriptions)
-      .innerJoin(users, eq(subscriptions.channelId, users.id))
-      .where(eq(subscriptions.subscriberId, userId));
-    
-    return result.map(r => r.user);
-  }
-
-  async getSubscribers(channelId: string): Promise<User[]> {
-    const result = await db
-      .select({ user: users })
-      .from(subscriptions)
-      .innerJoin(users, eq(subscriptions.subscriberId, users.id))
-      .where(eq(subscriptions.channelId, channelId));
-    
-    return result.map(r => r.user);
-  }
-
-  async isSubscribed(subscriberId: string, channelId: string): Promise<boolean> {
-    const [subscription] = await db
-      .select()
-      .from(subscriptions)
-      .where(and(
-        eq(subscriptions.subscriberId, subscriberId),
-        eq(subscriptions.channelId, channelId)
-      ));
-    
-    return !!subscription;
-  }
-
-  async getSubscriptionCount(channelId: string): Promise<number> {
-    const [result] = await db
-      .select({ count: count() })
-      .from(subscriptions)
-      .where(eq(subscriptions.channelId, channelId));
-    
-    return result.count;
-  }
 
   // Video like operations
   async likeVideo(userId: string, videoId: number): Promise<VideoLike> {
@@ -650,6 +591,74 @@ export class DatabaseStorage implements IStorage {
       .where(eq(videos.creatorId, creatorId));
     
     return result[0]?.totalEarnings || 0;
+  }
+
+  // Favorites operations
+  async addToFavorites(userId: string, videoId: number): Promise<Favorite> {
+    const [favorite] = await db
+      .insert(favorites)
+      .values({ userId, videoId })
+      .returning();
+    return favorite;
+  }
+
+  async removeFromFavorites(userId: string, videoId: number): Promise<void> {
+    await db
+      .delete(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.videoId, videoId)));
+  }
+
+  async getFavorites(userId: string): Promise<Video[]> {
+    const result = await db
+      .select({ video: videos })
+      .from(favorites)
+      .innerJoin(videos, eq(videos.id, favorites.videoId))
+      .where(eq(favorites.userId, userId))
+      .orderBy(desc(favorites.createdAt));
+    
+    return result.map(r => r.video);
+  }
+
+  async isFavorited(userId: string, videoId: number): Promise<boolean> {
+    const [favorite] = await db
+      .select({ id: favorites.id })
+      .from(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.videoId, videoId)));
+    return !!favorite;
+  }
+
+  // Shared videos operations
+  async shareVideo(userId: string, videoId: number, recipientEmail?: string, message?: string): Promise<SharedVideo> {
+    const shareToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    
+    const [sharedVideo] = await db
+      .insert(sharedVideos)
+      .values({
+        userId,
+        videoId,
+        shareToken,
+        recipientEmail,
+        message,
+      })
+      .returning();
+    
+    return sharedVideo;
+  }
+
+  async getSharedVideos(userId: string): Promise<SharedVideo[]> {
+    return await db
+      .select()
+      .from(sharedVideos)
+      .where(eq(sharedVideos.userId, userId))
+      .orderBy(desc(sharedVideos.createdAt));
+  }
+
+  async getSharedVideoByToken(shareToken: string): Promise<SharedVideo | undefined> {
+    const [sharedVideo] = await db
+      .select()
+      .from(sharedVideos)
+      .where(eq(sharedVideos.shareToken, shareToken));
+    return sharedVideo;
   }
 }
 

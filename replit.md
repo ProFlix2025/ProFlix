@@ -131,6 +131,10 @@ Changelog:
   - Enhanced Creator Dashboard with proper API integration for analytics, earnings, and payout history
   - Added PayPal integration routes for alternative payment processing
   - Improved Navigation component with proper user authentication handling
+  - Removed subscription system and replaced with Favorites functionality
+  - Added video sharing capability with unique share tokens
+  - Created dedicated Favorites page with remove and share options
+  - Updated database schema with favorites and shared videos tables
 
 ## User Preferences
 

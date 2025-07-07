@@ -558,68 +558,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Subscription routes
-  app.post('/api/subscribe/:channelId', isAuthenticated, async (req: any, res) => {
+  // Favorites routes
+  app.post('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
-      const subscriberId = req.user.claims.sub;
-      const channelId = req.params.channelId;
+      const { videoId } = req.body;
+      const userId = req.user.claims.sub;
       
-      if (subscriberId === channelId) {
-        return res.status(400).json({ message: 'Cannot subscribe to yourself' });
+      if (!videoId) {
+        return res.status(400).json({ message: 'Video ID is required' });
       }
-
-      const subscription = await storage.subscribe(subscriberId, channelId);
-      res.json(subscription);
-    } catch (error) {
-      console.error('Error subscribing:', error);
-      res.status(500).json({ message: 'Failed to subscribe' });
-    }
-  });
-
-  app.delete('/api/subscribe/:channelId', isAuthenticated, async (req: any, res) => {
-    try {
-      const subscriberId = req.user.claims.sub;
-      const channelId = req.params.channelId;
       
-      await storage.unsubscribe(subscriberId, channelId);
-      res.json({ message: 'Unsubscribed successfully' });
+      const favorite = await storage.addToFavorites(userId, videoId);
+      res.json(favorite);
     } catch (error) {
-      console.error('Error unsubscribing:', error);
-      res.status(500).json({ message: 'Failed to unsubscribe' });
+      console.error('Error adding to favorites:', error);
+      res.status(500).json({ message: 'Failed to add to favorites' });
     }
   });
 
-  app.get('/api/subscriptions', isAuthenticated, async (req: any, res) => {
+  app.delete('/api/favorites/:videoId', isAuthenticated, async (req: any, res) => {
+    try {
+      const { videoId } = req.params;
+      const userId = req.user.claims.sub;
+      
+      await storage.removeFromFavorites(userId, parseInt(videoId));
+      res.json({ message: 'Removed from favorites successfully' });
+    } catch (error) {
+      console.error('Error removing from favorites:', error);
+      res.status(500).json({ message: 'Failed to remove from favorites' });
+    }
+  });
+
+  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const subscriptions = await storage.getSubscriptions(userId);
-      res.json(subscriptions);
+      const favorites = await storage.getFavorites(userId);
+      res.json(favorites);
     } catch (error) {
-      console.error('Error fetching subscriptions:', error);
-      res.status(500).json({ message: 'Failed to fetch subscriptions' });
+      console.error('Error fetching favorites:', error);
+      res.status(500).json({ message: 'Failed to fetch favorites' });
     }
   });
 
-  app.get('/api/channel/:channelId/subscribers', async (req, res) => {
+  app.get('/api/favorites/:videoId', isAuthenticated, async (req: any, res) => {
     try {
-      const channelId = req.params.channelId;
-      const subscribers = await storage.getSubscribers(channelId);
-      res.json(subscribers);
+      const { videoId } = req.params;
+      const userId = req.user.claims.sub;
+      const isFavorited = await storage.isFavorited(userId, parseInt(videoId));
+      res.json({ isFavorited });
     } catch (error) {
-      console.error('Error fetching subscribers:', error);
-      res.status(500).json({ message: 'Failed to fetch subscribers' });
+      console.error('Error checking favorite status:', error);
+      res.status(500).json({ message: 'Failed to check favorite status' });
     }
   });
 
-  app.get('/api/channel/:channelId/subscription-status', isAuthenticated, async (req: any, res) => {
+  // Share video routes
+  app.post('/api/share', isAuthenticated, async (req: any, res) => {
     try {
-      const subscriberId = req.user.claims.sub;
-      const channelId = req.params.channelId;
-      const isSubscribed = await storage.isSubscribed(subscriberId, channelId);
-      res.json({ isSubscribed });
+      const { videoId, recipientEmail, message } = req.body;
+      const userId = req.user.claims.sub;
+      
+      if (!videoId) {
+        return res.status(400).json({ message: 'Video ID is required' });
+      }
+      
+      const sharedVideo = await storage.shareVideo(userId, videoId, recipientEmail, message);
+      res.json(sharedVideo);
     } catch (error) {
-      console.error('Error checking subscription status:', error);
-      res.status(500).json({ message: 'Failed to check subscription status' });
+      console.error('Error sharing video:', error);
+      res.status(500).json({ message: 'Failed to share video' });
+    }
+  });
+
+  app.get('/api/shared', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const sharedVideos = await storage.getSharedVideos(userId);
+      res.json(sharedVideos);
+    } catch (error) {
+      console.error('Error fetching shared videos:', error);
+      res.status(500).json({ message: 'Failed to fetch shared videos' });
+    }
+  });
+
+  app.get('/api/shared/:shareToken', async (req, res) => {
+    try {
+      const { shareToken } = req.params;
+      const sharedVideo = await storage.getSharedVideoByToken(shareToken);
+      
+      if (!sharedVideo) {
+        return res.status(404).json({ message: 'Shared video not found' });
+      }
+      
+      res.json(sharedVideo);
+    } catch (error) {
+      console.error('Error fetching shared video:', error);
+      res.status(500).json({ message: 'Failed to fetch shared video' });
     }
   });
 

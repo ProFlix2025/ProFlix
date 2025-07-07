@@ -193,6 +193,31 @@ export const watchHistory = pgTable("watch_history", {
   watchTime: integer("watch_time").default(0), // seconds watched
 });
 
+// Favorites table
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  videoId: integer("video_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_favorites_user_id").on(table.userId),
+  index("idx_favorites_video_id").on(table.videoId),
+]);
+
+// Shared videos table
+export const sharedVideos = pgTable("shared_videos", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  videoId: integer("video_id").notNull(),
+  shareToken: varchar("share_token").notNull().unique(),
+  recipientEmail: varchar("recipient_email"),
+  message: text("message"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_shared_videos_user_id").on(table.userId),
+  index("idx_shared_videos_share_token").on(table.shareToken),
+]);
+
 // Relations
 export const categoriesRelations = relations(categories, ({ many }) => ({
   subcategories: many(subcategories),
@@ -325,6 +350,28 @@ export const watchHistoryRelations = relations(watchHistory, ({ one }) => ({
   }),
 }));
 
+export const favoritesRelations = relations(favorites, ({ one }) => ({
+  user: one(users, {
+    fields: [favorites.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [favorites.videoId],
+    references: [videos.id],
+  }),
+}));
+
+export const sharedVideosRelations = relations(sharedVideos, ({ one }) => ({
+  user: one(users, {
+    fields: [sharedVideos.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [sharedVideos.videoId],
+    references: [videos.id],
+  }),
+}));
+
 // Zod schemas
 export const insertCategorySchema = createInsertSchema(categories).omit({
   id: true,
@@ -400,6 +447,16 @@ export const insertCoursePurchaseSchema = createInsertSchema(coursePurchases).om
   createdAt: true,
 });
 
+export const insertFavoriteSchema = createInsertSchema(favorites).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSharedVideoSchema = createInsertSchema(sharedVideos).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -424,3 +481,7 @@ export type CreatorApplication = typeof creatorApplications.$inferSelect;
 export type InsertCreatorApplication = z.infer<typeof insertCreatorApplicationSchema>;
 export type CoursePurchase = typeof coursePurchases.$inferSelect;
 export type InsertCoursePurchase = z.infer<typeof insertCoursePurchaseSchema>;
+export type Favorite = typeof favorites.$inferSelect;
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type SharedVideo = typeof sharedVideos.$inferSelect;
+export type InsertSharedVideo = z.infer<typeof insertSharedVideoSchema>;

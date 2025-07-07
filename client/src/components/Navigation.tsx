@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Shield, FileText } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Shield, FileText, Heart } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
@@ -58,6 +58,14 @@ export default function Navigation() {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+          {isAuthenticated && (
+            <Link href="/favorites" className="text-white hover:text-netflix-light-gray transition-colors">
+              <div className="flex items-center space-x-1">
+                <Heart className="w-4 h-4" />
+                <span>Favorites</span>
+              </div>
+            </Link>
+          )}
           {user && (user as any)?.role === 'creator' && (
             <Link href="/creator" className="text-white hover:text-netflix-light-gray transition-colors">
               <div className="flex items-center space-x-1">
