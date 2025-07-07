@@ -740,8 +740,8 @@ export default function CreatorDashboard() {
                   </div>
                   <div className="text-center">
                     <p className="text-netflix-light-gray text-sm">Last payout</p>
-                    <p className="text-lg font-semibold">{currentEarnings.lastPayout.date}</p>
-                    <p className="text-netflix-light-gray">${currentEarnings.lastPayout.amount}</p>
+                    <p className="text-lg font-semibold">{currentEarnings.lastPayout?.date || "No payouts yet"}</p>
+                    <p className="text-netflix-light-gray">${currentEarnings.lastPayout?.amount || 0}</p>
                   </div>
                   <div className="text-center">
                     <p className="text-netflix-light-gray text-sm">Next payout</p>

@@ -26,7 +26,11 @@ function Router() {
       <div className="flex-grow">
         <Switch>
           {isLoading || !isAuthenticated ? (
-            <Route path="/" component={Landing} />
+            <>
+              <Route path="/" component={Landing} />
+              <Route path="/dmca-policy" component={DMCAPolicy} />
+              <Route path="/terms-of-use" component={TermsOfUse} />
+            </>
           ) : (
             <>
               <Route path="/" component={Home} />
