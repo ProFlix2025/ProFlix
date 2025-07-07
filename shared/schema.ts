@@ -116,6 +116,7 @@ export const videos = pgTable("videos", {
   dislikes: integer("dislikes").default(0),
   isPublished: boolean("is_published").default(false),
   isFeatured: boolean("is_featured").default(false),
+  offerFreePreview: boolean("offer_free_preview").default(false),
   tags: text("tags").array(), // Array of tags
   language: varchar("language").default("en"),
   createdAt: timestamp("created_at").defaultNow(),

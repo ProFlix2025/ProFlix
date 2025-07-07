@@ -23,6 +23,9 @@ export default function VideoPlayer() {
   const { toast } = useToast();
   const [comment, setComment] = useState("");
   const [showComments, setShowComments] = useState(true);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [hasTriggeredPaywall, setHasTriggeredPaywall] = useState(false);
   const videoId = params.id;
 
   const { data: video, isLoading } = useQuery({
@@ -35,9 +38,9 @@ export default function VideoPlayer() {
     enabled: !!videoId && isAuthenticated,
   });
 
-  const { data: subscriptionStatus } = useQuery({
-    queryKey: [`/api/channel/${video?.creatorId}/subscription-status`],
-    enabled: !!video?.creatorId && isAuthenticated,
+  const { data: hasPurchased } = useQuery({
+    queryKey: [`/api/videos/${videoId}/purchased`],
+    enabled: !!videoId && isAuthenticated,
   });
 
   const { data: comments } = useQuery({
@@ -166,6 +169,36 @@ export default function VideoPlayer() {
     }
   }, [video, viewMutation]);
 
+  // Monitor video time for preview restrictions
+  useEffect(() => {
+    if (video && videoRef.current) {
+      const handleTimeUpdate = () => {
+        const time = videoRef.current?.currentTime || 0;
+        setCurrentTime(time);
+        
+        // Check if user needs to purchase (2 minutes = 120 seconds)
+        const needsPurchase = !hasPurchased && video.offerFreePreview && time >= 120;
+        
+        if (needsPurchase && !hasTriggeredPaywall) {
+          setHasTriggeredPaywall(true);
+          setShowPaywall(true);
+          // Pause the video
+          if (videoRef.current) {
+            videoRef.current.pause();
+          }
+        }
+      };
+
+      videoRef.current.addEventListener('timeupdate', handleTimeUpdate);
+      
+      return () => {
+        if (videoRef.current) {
+          videoRef.current.removeEventListener('timeupdate', handleTimeUpdate);
+        }
+      };
+    }
+  }, [video, hasPurchased, hasTriggeredPaywall]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-black text-white">
@@ -219,6 +252,66 @@ export default function VideoPlayer() {
                     <source src={video.videoUrl} type="video/mp4" />
                     Your browser does not support the video tag.
                   </video>
+                  
+                  {/* Preview Time Indicator */}
+                  {video.offerFreePreview && !hasPurchased && !showPaywall && currentTime > 0 && (
+                    <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white text-sm px-3 py-2 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                        <span>Preview: {Math.max(0, 120 - Math.floor(currentTime))}s left</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Preview Paywall Overlay */}
+                  {showPaywall && (
+                    <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center">
+                      <div className="text-center p-8 max-w-md">
+                        <div className="mb-6">
+                          <div className="w-16 h-16 bg-netflix-red rounded-full flex items-center justify-center mx-auto mb-4">
+                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <h3 className="text-2xl font-bold text-white mb-2">Preview Ended</h3>
+                          <p className="text-netflix-light-gray">
+                            You've watched the 2-minute free preview. Purchase this course to continue watching.
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-4">
+                          <div className="bg-netflix-gray rounded-lg p-4">
+                            <p className="text-lg font-semibold text-white">
+                              ${(video.price / 100).toFixed(2)}
+                            </p>
+                            <p className="text-sm text-netflix-light-gray">
+                              One-time purchase • Lifetime access
+                            </p>
+                          </div>
+                          
+                          <Button 
+                            onClick={() => navigate(`/course-purchase/${video.id}`)}
+                            className="w-full bg-netflix-red hover:bg-red-700 text-white"
+                          >
+                            Purchase Course
+                          </Button>
+                          
+                          <Button 
+                            onClick={() => {
+                              setShowPaywall(false);
+                              if (videoRef.current) {
+                                videoRef.current.currentTime = 0;
+                              }
+                            }}
+                            variant="outline"
+                            className="w-full"
+                          >
+                            Watch Preview Again
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

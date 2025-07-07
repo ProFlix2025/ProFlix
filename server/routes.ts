@@ -405,6 +405,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/videos/:id/purchased', isAuthenticated, async (req: any, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      const userId = req.user.claims.sub;
+      const hasPurchased = await storage.hasUserPurchasedCourse(userId, videoId);
+      res.json({ purchased: hasPurchased });
+    } catch (error) {
+      console.error('Error checking purchase status:', error);
+      res.status(500).json({ message: 'Failed to check purchase status' });
+    }
+  });
+
   app.post('/api/videos/:id/view', async (req, res) => {
     try {
       const id = parseInt(req.params.id);

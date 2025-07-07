@@ -11,6 +11,8 @@ interface VideoCardProps {
     thumbnailUrl?: string;
     duration?: string;
     views?: number;
+    price?: number;
+    offerFreePreview?: boolean;
     category?: { name: string };
     subcategory?: { name: string };
     creator?: { firstName?: string; lastName?: string; email?: string };
@@ -44,6 +46,11 @@ export default function VideoCard({ video }: VideoCardProps) {
             {video.duration && (
               <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
                 {video.duration}
+              </div>
+            )}
+            {video.offerFreePreview && (
+              <div className="absolute top-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold">
+                FREE PREVIEW
               </div>
             )}
           </div>
