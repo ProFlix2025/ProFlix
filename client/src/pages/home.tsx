@@ -25,17 +25,17 @@ export default function Home() {
 
   const { data: recommendedVideos = [] } = useQuery({
     queryKey: ['/api/recommended'],
-    enabled: isAuthenticated,
+    // Always load recommendations - returns trending for unauthenticated users
   });
 
   const { data: favorites = [] } = useQuery({
     queryKey: ['/api/favorites'],
-    enabled: isAuthenticated,
+    // Always load - returns empty array for unauthenticated users
   });
 
   const { data: watchHistory = [] } = useQuery({
     queryKey: ['/api/watch-history'],
-    enabled: isAuthenticated,
+    // Always load - returns empty array for unauthenticated users
   });
 
   // Setup categories on first load

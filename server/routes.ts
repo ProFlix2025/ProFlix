@@ -52,14 +52,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Auth routes
-  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+  app.get('/api/auth/user', (req: any, res) => {
     try {
+      // If not authenticated, return null instead of error
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json(null);
+      }
+      
       const userId = req.user.claims.sub;
-      const user = await storage.getUser(userId);
-      res.json(user);
+      storage.getUser(userId).then(user => {
+        res.json(user);
+      }).catch(error => {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Failed to fetch user" });
+      });
     } catch (error) {
       console.error("Error fetching user:", error);
-      res.status(500).json({ message: "Failed to fetch user" });
+      res.json(null); // Return null instead of error for unauthenticated users
     }
   });
 
@@ -405,9 +414,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/videos/:id/purchased', isAuthenticated, async (req: any, res) => {
+  app.get('/api/videos/:id/purchased', async (req: any, res) => {
     try {
       const videoId = parseInt(req.params.id);
+      
+      // If not authenticated, user hasn't purchased anything
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json({ purchased: false });
+      }
+      
       const userId = req.user.claims.sub;
       const hasPurchased = await storage.hasUserPurchasedCourse(userId, videoId);
       res.json({ purchased: hasPurchased });
@@ -572,8 +587,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/recommended', isAuthenticated, async (req: any, res) => {
+  app.get('/api/recommended', async (req: any, res) => {
     try {
+      // If not authenticated, return trending videos as recommendations
+      if (!req.isAuthenticated() || !req.user) {
+        const limit = parseInt(req.query.limit as string) || 20;
+        const trendingVideos = await storage.getTrendingVideos(limit);
+        return res.json(trendingVideos);
+      }
+      
       const userId = req.user.claims.sub;
       const limit = parseInt(req.query.limit as string) || 20;
       const videos = await storage.getRecommendedVideos(userId, limit);
@@ -615,8 +637,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/favorites', isAuthenticated, async (req: any, res) => {
+  app.get('/api/favorites', async (req: any, res) => {
     try {
+      // If not authenticated, return empty array
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json([]);
+      }
+      
       const userId = req.user.claims.sub;
       const favorites = await storage.getFavorites(userId);
       res.json(favorites);
@@ -812,8 +839,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/watch-history', isAuthenticated, async (req: any, res) => {
+  app.get('/api/watch-history', async (req: any, res) => {
     try {
+      // If not authenticated, return empty array
+      if (!req.isAuthenticated() || !req.user) {
+        return res.json([]);
+      }
+      
       const userId = req.user.claims.sub;
       const limit = parseInt(req.query.limit as string) || 50;
       const history = await storage.getWatchHistory(userId, limit);
