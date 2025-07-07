@@ -31,11 +31,17 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("viewer"), // 'creator' or 'viewer'
+  role: varchar("role").notNull().default("viewer"), // 'creator', 'viewer', 'admin'
+  creatorStatus: varchar("creator_status").default("none"), // 'none', 'pending', 'approved', 'rejected'
+  subscriptionTier: varchar("subscription_tier").default("free"), // 'free', 'basic', 'premium'
+  monthlyHoursUsed: integer("monthly_hours_used").default(0),
+  monthlyHoursLimit: integer("monthly_hours_limit").default(8), // 8 for free, 20 for basic, 100 for premium
+  subscriptionEndsAt: timestamp("subscription_ends_at"),
   channelName: varchar("channel_name"),
   channelDescription: text("channel_description"),
   subscriberCount: integer("subscriber_count").default(0),
   totalViews: integer("total_views").default(0),
+  totalEarnings: integer("total_earnings").default(0), // In cents
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -59,7 +65,39 @@ export const subcategories = pgTable("subcategories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Videos table
+// Creator Applications table
+export const creatorApplications = pgTable("creator_applications", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  fullName: varchar("full_name").notNull(),
+  stageName: varchar("stage_name"),
+  email: varchar("email").notNull(),
+  phoneNumber: varchar("phone_number"),
+  city: varchar("city"),
+  country: varchar("country"),
+  socialLinks: text("social_links"), // JSON string of social media links
+  courseTitle: varchar("course_title").notNull(),
+  professionalBackground: text("professional_background").notNull(),
+  hasSoldCourses: boolean("has_sold_courses").default(false),
+  previousSales: varchar("previous_sales"),
+  priceRange: varchar("price_range").notNull(), // 'under_100', '100_250', '250_500', '500_1000'
+  contentReadiness: varchar("content_readiness").notNull(), // 'ready', 'partial', 'not_ready'
+  whyTopCreator: text("why_top_creator").notNull(),
+  hasAudience: boolean("has_audience").default(false),
+  audienceDetails: text("audience_details"),
+  freePreview: varchar("free_preview").notNull(), // 'yes', 'maybe', 'no'
+  supportNeeds: text("support_needs"),
+  agreedToTerms: boolean("agreed_to_terms").default(false),
+  agreedToRevenue: boolean("agreed_to_revenue").default(false),
+  agreedToContent: boolean("agreed_to_content").default(false),
+  signatureName: varchar("signature_name").notNull(),
+  status: varchar("status").default("pending"), // 'pending', 'approved', 'rejected'
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Videos table (now for courses)
 export const videos = pgTable("videos", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
@@ -67,21 +105,36 @@ export const videos = pgTable("videos", {
   videoUrl: varchar("video_url").notNull(),
   thumbnailUrl: varchar("thumbnail_url"),
   duration: varchar("duration"), // stored as string like "15:30"
+  durationMinutes: integer("duration_minutes").default(0), // Duration in minutes for hour tracking
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id").notNull(),
   creatorId: varchar("creator_id").notNull(),
+  price: integer("price").notNull(), // Price in cents, max $1000 = 100000 cents
   views: integer("views").default(0),
+  purchases: integer("purchases").default(0),
   likes: integer("likes").default(0),
   dislikes: integer("dislikes").default(0),
   isPublished: boolean("is_published").default(false),
-  privacy: varchar("privacy").notNull().default("public"), // 'public', 'unlisted', 'private'
+  isFeatured: boolean("is_featured").default(false),
   tags: text("tags").array(), // Array of tags
   language: varchar("language").default("en"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Subscriptions table
+// Course Purchases table
+export const coursePurchases = pgTable("course_purchases", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  videoId: integer("video_id").notNull(),
+  priceAtPurchase: integer("price_at_purchase").notNull(), // Price in cents when purchased
+  creatorEarnings: integer("creator_earnings").notNull(), // 80% of price in cents
+  platformEarnings: integer("platform_earnings").notNull(), // 20% of price in cents
+  stripePaymentId: varchar("stripe_payment_id"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Subscriptions table (for creator follows)
 export const subscriptions = pgTable("subscriptions", {
   id: serial("id").primaryKey(),
   subscriberId: varchar("subscriber_id").notNull(),
@@ -179,6 +232,26 @@ export const usersRelations = relations(users, ({ many }) => ({
   comments: many(comments),
   playlists: many(playlists),
   watchHistory: many(watchHistory),
+  creatorApplications: many(creatorApplications),
+  coursePurchases: many(coursePurchases),
+}));
+
+export const creatorApplicationsRelations = relations(creatorApplications, ({ one }) => ({
+  user: one(users, {
+    fields: [creatorApplications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const coursePurchasesRelations = relations(coursePurchases, ({ one }) => ({
+  user: one(users, {
+    fields: [coursePurchases.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [coursePurchases.videoId],
+    references: [videos.id],
+  }),
 }));
 
 export const subscriptionsRelations = relations(subscriptions, ({ one }) => ({
@@ -301,6 +374,31 @@ export const insertVideoLikeSchema = createInsertSchema(videoLikes).omit({
   createdAt: true,
 });
 
+export const insertCreatorApplicationSchema = createInsertSchema(creatorApplications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  status: true,
+  adminNotes: true,
+}).extend({
+  priceRange: z.enum(["under_100", "100_250", "250_500", "500_1000"]),
+  contentReadiness: z.enum(["ready", "partial", "not_ready"]),
+  freePreview: z.enum(["yes", "maybe", "no"]),
+  socialLinks: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  city: z.string().optional(),
+  country: z.string().optional(),
+  stageName: z.string().optional(),
+  previousSales: z.string().optional(),
+  audienceDetails: z.string().optional(),
+  supportNeeds: z.string().optional(),
+});
+
+export const insertCoursePurchaseSchema = createInsertSchema(coursePurchases).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -321,3 +419,7 @@ export type VideoLike = typeof videoLikes.$inferSelect;
 export type InsertVideoLike = z.infer<typeof insertVideoLikeSchema>;
 export type PlaylistVideo = typeof playlistVideos.$inferSelect;
 export type WatchHistory = typeof watchHistory.$inferSelect;
+export type CreatorApplication = typeof creatorApplications.$inferSelect;
+export type InsertCreatorApplication = z.infer<typeof insertCreatorApplicationSchema>;
+export type CoursePurchase = typeof coursePurchases.$inferSelect;
+export type InsertCoursePurchase = z.infer<typeof insertCoursePurchaseSchema>;

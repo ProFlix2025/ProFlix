@@ -9,6 +9,8 @@ import {
   playlists,
   playlistVideos,
   watchHistory,
+  creatorApplications,
+  coursePurchases,
   type User,
   type UpsertUser,
   type Category,
@@ -28,6 +30,10 @@ import {
   type InsertVideoLike,
   type PlaylistVideo,
   type WatchHistory,
+  type CreatorApplication,
+  type InsertCreatorApplication,
+  type CoursePurchase,
+  type InsertCoursePurchase,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count } from "drizzle-orm";
@@ -39,6 +45,12 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUserChannel(userId: string, channelData: { channelName?: string; channelDescription?: string }): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
+  
+  // Creator application operations
+  createCreatorApplication(application: InsertCreatorApplication): Promise<CreatorApplication>;
+  getCreatorApplicationByUserId(userId: string): Promise<CreatorApplication | undefined>;
+  getCreatorApplications(status?: string): Promise<CreatorApplication[]>;
+  updateCreatorApplicationStatus(id: number, status: string, adminNotes?: string): Promise<CreatorApplication>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -548,6 +560,50 @@ export class DatabaseStorage implements IStorage {
 
   async clearWatchHistory(userId: string): Promise<void> {
     await db.delete(watchHistory).where(eq(watchHistory.userId, userId));
+  }
+
+  // Creator application operations
+  async createCreatorApplication(application: InsertCreatorApplication): Promise<CreatorApplication> {
+    const [app] = await db
+      .insert(creatorApplications)
+      .values(application)
+      .returning();
+    return app;
+  }
+
+  async getCreatorApplicationByUserId(userId: string): Promise<CreatorApplication | undefined> {
+    const [app] = await db
+      .select()
+      .from(creatorApplications)
+      .where(eq(creatorApplications.userId, userId));
+    return app;
+  }
+
+  async getCreatorApplications(status?: string): Promise<CreatorApplication[]> {
+    if (status) {
+      return await db
+        .select()
+        .from(creatorApplications)
+        .where(eq(creatorApplications.status, status))
+        .orderBy(desc(creatorApplications.createdAt));
+    }
+    return await db
+      .select()
+      .from(creatorApplications)
+      .orderBy(desc(creatorApplications.createdAt));
+  }
+
+  async updateCreatorApplicationStatus(id: number, status: string, adminNotes?: string): Promise<CreatorApplication> {
+    const [app] = await db
+      .update(creatorApplications)
+      .set({ 
+        status, 
+        adminNotes,
+        updatedAt: new Date() 
+      })
+      .where(eq(creatorApplications.id, id))
+      .returning();
+    return app;
   }
 }
 

@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import CreatorDashboard from "@/pages/creator-dashboard";
 import CategoryView from "@/pages/category-view";
 import VideoPlayer from "@/pages/video-player";
+import CreatorApplication from "@/pages/creator-application";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -22,6 +23,7 @@ function Router() {
         <>
           <Route path="/" component={Home} />
           <Route path="/creator" component={CreatorDashboard} />
+          <Route path="/creator-application" component={CreatorApplication} />
           <Route path="/category/:slug" component={CategoryView} />
           <Route path="/video/:id" component={VideoPlayer} />
         </>

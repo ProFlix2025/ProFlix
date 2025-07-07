@@ -3,7 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
-import { insertVideoSchema, updateVideoSchema } from "@shared/schema";
+import { insertVideoSchema, updateVideoSchema, insertCreatorApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
 import path from "path";
@@ -53,6 +53,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Creator application routes
+  app.post('/api/creator-applications', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user already has an application
+      const existingApp = await storage.getCreatorApplicationByUserId(userId);
+      if (existingApp) {
+        return res.status(400).json({ message: "You have already submitted an application" });
+      }
+
+      const validation = insertCreatorApplicationSchema.safeParse(req.body);
+      if (!validation.success) {
+        return res.status(400).json({ 
+          message: "Invalid application data", 
+          errors: validation.error.errors 
+        });
+      }
+
+      const application = await storage.createCreatorApplication({
+        ...validation.data,
+        userId,
+      });
+
+      res.json(application);
+    } catch (error) {
+      console.error("Error creating creator application:", error);
+      res.status(500).json({ message: "Failed to submit application" });
+    }
+  });
+
+  app.get('/api/creator-applications/me', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const application = await storage.getCreatorApplicationByUserId(userId);
+      res.json(application);
+    } catch (error) {
+      console.error("Error fetching creator application:", error);
+      res.status(500).json({ message: "Failed to fetch application" });
     }
   });
 
