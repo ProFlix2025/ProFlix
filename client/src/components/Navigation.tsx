@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Shield, FileText, Heart } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-
+  
   const { data: categories = [] } = useQuery({
     queryKey: ['/api/categories'],
   });
@@ -20,7 +20,7 @@ export default function Navigation() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
     }
   };
 
@@ -29,85 +29,34 @@ export default function Navigation() {
   };
 
   return (
-    <nav className="bg-netflix-black border-b border-netflix-border px-4 py-3 flex items-center justify-between">
-      <div className="flex items-center space-x-6">
+    <nav className="bg-netflix-black border-b border-netflix-border px-6 py-4">
+      {/* Top row with logo, search, and user menu */}
+      <div className="flex items-center justify-between mb-4">
+        {/* Logo */}
         <Link href="/">
-          <h1 className="text-2xl font-bold text-netflix-red cursor-pointer">ProFlix</h1>
+          <h1 className="text-3xl font-bold text-netflix-red cursor-pointer">ProFlix</h1>
         </Link>
-        <div className="hidden md:flex space-x-6">
-          <Link href="/" className="text-white hover:text-netflix-light-gray transition-colors">
-            <div className="flex items-center space-x-1">
-              <Home className="w-4 h-4" />
-              <span>Home</span>
-            </div>
-          </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="text-white hover:text-netflix-light-gray">
-                <Grid3X3 className="w-4 h-4 mr-1" />
-                Categories
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent className="bg-netflix-black border-netflix-border">
-              {Array.isArray(categories) && categories.map((category: any) => (
-                <DropdownMenuItem key={category.id} asChild>
-                  <Link href={`/category/${category.slug}`} className="text-white hover:bg-netflix-gray">
-                    {category.name}
-                  </Link>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-          {isAuthenticated && (
-            <Link href="/favorites" className="text-white hover:text-netflix-light-gray transition-colors">
-              <div className="flex items-center space-x-1">
-                <Heart className="w-4 h-4" />
-                <span>Favorites</span>
-              </div>
-            </Link>
-          )}
-          {user && (user as any)?.role === 'creator' && (
-            <Link href="/creator" className="text-white hover:text-netflix-light-gray transition-colors">
-              <div className="flex items-center space-x-1">
-                <Video className="w-4 h-4" />
-                <span>Creator Dashboard</span>
-              </div>
-            </Link>
-          )}
-          <Link href="/dmca-policy" className="text-white hover:text-netflix-light-gray transition-colors">
-            <div className="flex items-center space-x-1">
-              <Shield className="w-4 h-4" />
-              <span>DMCA Policy</span>
-            </div>
-          </Link>
-          <Link href="/terms-of-use" className="text-white hover:text-netflix-light-gray transition-colors">
-            <div className="flex items-center space-x-1">
-              <FileText className="w-4 h-4" />
-              <span>Terms of Use</span>
-            </div>
-          </Link>
+
+        {/* Centered Search Bar */}
+        <div className="flex-1 max-w-2xl mx-8">
+          <form onSubmit={handleSearch} className="relative">
+            <Input
+              type="text"
+              placeholder="Search for courses and videos..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="bg-netflix-gray border-netflix-border text-white placeholder-netflix-light-gray w-full h-12 text-lg pr-12 rounded-full"
+            />
+            <Button
+              type="submit"
+              variant="ghost"
+              size="sm"
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-netflix-light-gray hover:text-white rounded-full"
+            >
+              <Search className="w-5 h-5" />
+            </Button>
+          </form>
         </div>
-      </div>
-      
-      <div className="flex items-center space-x-4">
-        {/* Search */}
-        <form onSubmit={handleSearch} className="relative">
-          <Input
-            type="text"
-            placeholder="Search videos..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="bg-netflix-gray border-netflix-border text-white placeholder-netflix-light-gray w-64 pr-10"
-          />
-          <Button
-            type="submit"
-            variant="ghost"
-            size="sm"
-            className="absolute right-1 top-1/2 transform -translate-y-1/2 text-netflix-light-gray hover:text-white"
-          >
-            <Search className="w-4 h-4" />
-          </Button>
-        </form>
         
         {/* User Menu */}
         {isAuthenticated && user ? (
@@ -150,6 +99,52 @@ export default function Navigation() {
           >
             Sign In
           </Button>
+        )}
+      </div>
+
+      {/* Bottom row with navigation links */}
+      <div className="flex items-center justify-center space-x-8">
+        <Link href="/" className="text-white hover:text-netflix-red transition-colors">
+          <div className="flex items-center space-x-2">
+            <Home className="w-5 h-5" />
+            <span className="text-lg">Home</span>
+          </div>
+        </Link>
+        
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="text-white hover:text-netflix-red text-lg">
+              <Grid3X3 className="w-5 h-5 mr-2" />
+              Categories
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="bg-netflix-black border-netflix-border max-h-96 overflow-y-auto">
+            {Array.isArray(categories) && categories.map((category: any) => (
+              <DropdownMenuItem key={category.id} asChild>
+                <Link href={`/category/${category.slug}`} className="text-white hover:bg-netflix-gray">
+                  {category.name}
+                </Link>
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {isAuthenticated && (
+          <Link href="/favorites" className="text-white hover:text-netflix-red transition-colors">
+            <div className="flex items-center space-x-2">
+              <Heart className="w-5 h-5" />
+              <span className="text-lg">Favorites</span>
+            </div>
+          </Link>
+        )}
+
+        {user && (user as any)?.role === 'creator' && (
+          <Link href="/creator" className="text-white hover:text-netflix-red transition-colors">
+            <div className="flex items-center space-x-2">
+              <Video className="w-5 h-5" />
+              <span className="text-lg">Creator Dashboard</span>
+            </div>
+          </Link>
         )}
       </div>
     </nav>

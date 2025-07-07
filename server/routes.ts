@@ -377,6 +377,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+      if (!query) {
+        return res.status(400).json({ message: 'Query parameter is required' });
+      }
+      const videos = await storage.searchVideos(query);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error searching videos:', error);
+      res.status(500).json({ message: 'Failed to search videos' });
+    }
+  });
+
   app.get('/api/videos/:id', async (req, res) => {
     try {
       const id = parseInt(req.params.id);
