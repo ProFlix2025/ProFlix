@@ -149,4 +149,11 @@ Preferred communication style: Simple, everyday language.
 - January 07, 2025: Platform ready for deployment to proflix.app
 - Production-ready features: Complete payment processing, creator monetization, 2-minute previews
 - Security: Added error boundaries, security headers, environment validation
+- Public access: Website browsing works without authentication, sign-in only required for purchases
+- Pre-application link: https://proflix.replit.app/apply
 - Next steps: Deploy website first, then mobile apps
+
+## Current Issues
+- Replit Auth automatically triggering on deployed site (proflix.replit.app)
+- Users getting forced to authenticate before accessing public content
+- Need to configure deployment to allow public access without authentication prompt

@@ -45,7 +45,12 @@ if (!process.env.STRIPE_SECRET_KEY) {
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware
+  // Public routes that don't require authentication
+  app.get('/health', (req, res) => {
+    res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  });
+
+  // Auth middleware - only sets up routes, doesn't force authentication
   await setupAuth(app);
 
   // Serve uploaded files

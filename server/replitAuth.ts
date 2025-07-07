@@ -102,8 +102,9 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
+    // Only authenticate when explicitly requested via /api/login
     passport.authenticate(`replitauth:${req.hostname}`, {
-      prompt: "login consent",
+      prompt: "login consent", 
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
