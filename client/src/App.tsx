@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Footer from "@/components/Footer";
-import Landing from "@/pages/landing";
+
 import Home from "@/pages/home";
 import SearchPage from "@/pages/search";
 import CreatorDashboard from "@/pages/creator-dashboard";
