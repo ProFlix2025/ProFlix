@@ -135,6 +135,10 @@ Changelog:
   - Added video sharing capability with unique share tokens
   - Created dedicated Favorites page with remove and share options
   - Updated database schema with favorites and shared videos tables
+  - Implemented complete 2-minute free preview system with paywall overlay and countdown timer
+  - Added "FREE PREVIEW" badges to video cards when creators enable preview option
+  - Created comprehensive Privacy Policy page (effective January 07, 2025) and added to footer
+  - Enhanced video player with preview monitoring and purchase verification functionality
 
 ## User Preferences
 

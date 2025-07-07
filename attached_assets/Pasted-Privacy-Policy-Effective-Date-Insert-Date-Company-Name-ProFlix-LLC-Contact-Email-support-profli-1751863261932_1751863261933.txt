@@ -1,0 +1,80 @@
+Privacy Policy
+Effective Date: [Insert Date]
+Company Name: ProFlix LLC
+Contact Email: support@proflix.app
+
+This Privacy Policy explains how ProFlix LLC ("ProFlix", "we", "our", or "us") collects, uses, and discloses information about users of our website, services, and platform (the "Service"). By using ProFlix, you agree to the terms of this policy.
+
+1. Information We Collect
+A. Information You Provide
+
+Account registration (name, email, password)
+
+Creator submissions (profile, videos, images)
+
+Payment and payout details (Stripe, PayPal, or bank info)
+
+Communications with our team or support
+
+B. Automatically Collected Information
+
+Device/browser info
+
+IP address
+
+Pages visited, time on site
+
+Cookies and analytics data
+
+2. How We Use Your Information
+We use your information to:
+
+Operate and improve the ProFlix platform
+
+Process payments and pay creators
+
+Provide customer support
+
+Detect and prevent fraud or abuse
+
+Send updates, offers, and platform news (you may opt out anytime)
+
+3. Payments & Payouts
+Payments are handled by third-party processors (e.g., Stripe, PayPal). We do not store full credit card numbers or sensitive banking data. All financial transactions are encrypted and processed securely.
+
+4. Cookies and Tracking
+We use cookies and similar technologies to personalize your experience and gather usage data. You can disable cookies via your browser settings, but this may affect your experience.
+
+5. Sharing of Information
+We do not sell your personal data. We may share data with:
+
+Service providers (hosting, analytics, payment processors)
+
+Legal authorities (if required by law or to protect our platform)
+
+6. Your Rights and Choices
+You can:
+
+Access or update your account information
+
+Delete your account by contacting support
+
+Opt out of marketing emails
+
+Request a copy of your stored data (as required by law)
+
+7. Data Retention
+We retain data as long as your account is active or as needed to comply with legal obligations and resolve disputes.
+
+8. Security
+We use encryption, access controls, and secure servers to protect your data. However, no method of transmission over the internet is 100% secure.
+
+9. Children's Privacy
+ProFlix is not intended for users under the age of 18. We do not knowingly collect data from minors. If we become aware that a child has provided us personal info, we will delete it immediately.
+
+10. Changes to This Policy
+We may update this Privacy Policy at any time. You will be notified of material changes via email or site notice. Continued use of ProFlix after changes means you accept the revised policy.
+
+11. Contact Us
+If you have any questions or concerns about this policy, email us at:
+support@proflix.app

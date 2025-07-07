@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { Shield, FileText } from "lucide-react";
+import { Shield, FileText, Lock } from "lucide-react";
 
 export default function Footer() {
   return (
@@ -26,6 +26,12 @@ export default function Footer() {
               <div className="flex items-center space-x-2">
                 <FileText className="w-4 h-4" />
                 <span>Terms of Use</span>
+              </div>
+            </Link>
+            <Link href="/privacy-policy" className="text-netflix-light-gray hover:text-white transition-colors">
+              <div className="flex items-center space-x-2">
+                <Lock className="w-4 h-4" />
+                <span>Privacy Policy</span>
               </div>
             </Link>
           </div>
