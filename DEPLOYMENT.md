@@ -20,7 +20,16 @@ This guide helps you deploy ProFlix to your own domain (proflix.app) using Namec
 5. Point your Namecheap domain to Railway
 6. Cost: ~$5-20/month
 
-### Option 2: Vercel (Great for Full-Stack)
+### Option 2: Render (Great for Backend-focused apps)
+**Perfect for Node.js with built-in frontend serving**
+1. Go to render.com and sign up
+2. Create "Web Service" from GitHub
+3. Backend-only build (see RENDER_DEPLOYMENT.md)
+4. Configure environment variables
+5. Point your domain to Render
+6. Cost: Free tier available, $7/month for production
+
+### Option 3: Vercel (Great for Full-Stack)
 **Excellent for React + API**
 1. Go to vercel.com and sign up
 2. Import your project from GitHub
@@ -29,7 +38,7 @@ This guide helps you deploy ProFlix to your own domain (proflix.app) using Namec
 5. Point your domain to Vercel
 6. Cost: Free tier available
 
-### Option 3: DigitalOcean App Platform
+### Option 4: DigitalOcean App Platform
 **Good balance of control and simplicity**
 1. Create DigitalOcean account
 2. Use App Platform to deploy
