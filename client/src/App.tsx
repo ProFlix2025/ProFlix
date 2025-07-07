@@ -18,6 +18,7 @@ import DMCAPolicy from "@/pages/dmca-policy";
 import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
+import Apply from "@/pages/apply";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -27,28 +28,18 @@ function Router() {
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
         <Switch>
-          {isLoading || !isAuthenticated ? (
-            <>
-              <Route path="/" component={Landing} />
-              <Route path="/dmca-policy" component={DMCAPolicy} />
-              <Route path="/terms-of-use" component={TermsOfUse} />
-              <Route path="/privacy-policy" component={PrivacyPolicy} />
-            </>
-          ) : (
-            <>
-              <Route path="/" component={Home} />
-              <Route path="/search" component={SearchPage} />
-              <Route path="/creator" component={CreatorDashboard} />
-              <Route path="/creator-application" component={CreatorApplication} />
-              <Route path="/course-purchase/:videoId" component={CoursePurchase} />
-              <Route path="/favorites" component={Favorites} />
-              <Route path="/dmca-policy" component={DMCAPolicy} />
-              <Route path="/terms-of-use" component={TermsOfUse} />
-              <Route path="/privacy-policy" component={PrivacyPolicy} />
-              <Route path="/category/:slug" component={CategoryView} />
-              <Route path="/video/:id" component={VideoPlayer} />
-            </>
-          )}
+          <Route path="/" component={Home} />
+          <Route path="/apply" component={Apply} />
+          <Route path="/search" component={SearchPage} />
+          <Route path="/creator" component={CreatorDashboard} />
+          <Route path="/creator-application" component={CreatorApplication} />
+          <Route path="/course-purchase/:videoId" component={CoursePurchase} />
+          <Route path="/favorites" component={Favorites} />
+          <Route path="/dmca-policy" component={DMCAPolicy} />
+          <Route path="/terms-of-use" component={TermsOfUse} />
+          <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/category/:slug" component={CategoryView} />
+          <Route path="/video/:id" component={VideoPlayer} />
           <Route component={NotFound} />
         </Switch>
       </div>

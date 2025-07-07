@@ -1042,6 +1042,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Create a pre-application (no auth required)
+  app.post("/api/pre-applications", async (req, res) => {
+    try {
+      // For now, we'll store this in the same table but mark it differently
+      // In production, you might want a separate table or email these to support@proflix.app
+      const preApplication = {
+        userId: "guest", // No user ID for public applications
+        fullName: req.body.fullName,
+        email: req.body.email,
+        phone: req.body.phone || null,
+        country: "Unknown", // Default value
+        socialLinks: req.body.socialHandles || null,
+        courseTitle: req.body.contentType || "General Content", // Map content type to course title
+        professionalBackground: req.body.whyJoin || "Not provided",
+        hasSoldCourses: req.body.sellingElsewhere || false,
+        previousSales: req.body.sellingWhere || null,
+        priceRange: "under_100" as const, // Default value
+        contentReadiness: "not_ready" as const, // Default value  
+        whyTopCreator: req.body.additionalInfo || "Pre-application submission",
+        hasAudience: false, // Default value
+        audienceDetails: req.body.socialHandles || null,
+        freePreview: "maybe" as const, // Default value
+        supportNeeds: req.body.specialRequests || null,
+        agreedToTerms: true, // Auto-agree for pre-applications
+        agreedToRevenue: true, // Auto-agree for pre-applications
+        agreedToContent: true, // Auto-agree for pre-applications
+        signatureName: req.body.fullName,
+        status: "pre-application", // Mark as pre-application
+      };
+
+      const application = await storage.createCreatorApplication(preApplication);
+      
+      // TODO: In production, also email this to support@proflix.app
+      // await sendEmail(process.env.SENDGRID_API_KEY, {
+      //   to: "support@proflix.app",
+      //   from: "noreply@proflix.app",
+      //   subject: "New ProFlix Creator Pre-Application",
+      //   html: `<p>New creator application from ${preApplication.fullName} (${preApplication.email})</p>`
+      // });
+
+      res.json({ message: "Pre-application submitted successfully" });
+    } catch (error: any) {
+      console.error("Pre-application error:", error);
+      res.status(500).json({ message: "Error submitting pre-application: " + error.message });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

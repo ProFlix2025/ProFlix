@@ -129,6 +129,13 @@ export default function Navigation() {
           </DropdownMenuContent>
         </DropdownMenu>
 
+        <Link href="/apply" className="text-white hover:text-netflix-red transition-colors">
+          <div className="flex items-center space-x-2">
+            <Video className="w-5 h-5" />
+            <span className="text-lg">Apply</span>
+          </div>
+        </Link>
+
         {isAuthenticated && (
           <Link href="/favorites" className="text-white hover:text-netflix-red transition-colors">
             <div className="flex items-center space-x-2">
