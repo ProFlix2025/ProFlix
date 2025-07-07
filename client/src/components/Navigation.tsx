@@ -25,6 +25,10 @@ export default function Navigation() {
   };
 
   const handleLogout = () => {
+    // Clear any local storage/session data
+    localStorage.clear();
+    sessionStorage.clear();
+    // Redirect to logout endpoint
     window.location.href = '/api/logout';
   };
 
