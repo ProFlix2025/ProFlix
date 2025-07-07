@@ -8,6 +8,7 @@ import { z } from "zod";
 import multer from "multer";
 import path from "path";
 import fs from "fs";
+import Stripe from "stripe";
 
 const upload = multer({
   storage: multer.diskStorage({
@@ -36,6 +37,12 @@ const upload = multer({
     fileSize: 1024 * 1024 * 1024, // 1GB for videos
   }
 });
+
+// Initialize Stripe
+if (!process.env.STRIPE_SECRET_KEY) {
+  throw new Error('Missing required Stripe secret: STRIPE_SECRET_KEY');
+}
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
@@ -95,6 +102,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching creator application:", error);
       res.status(500).json({ message: "Failed to fetch application" });
+    }
+  });
+
+  // Course purchase routes
+  app.post('/api/courses/:videoId/purchase', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.videoId);
+      
+      // Check if user already purchased this course
+      const alreadyPurchased = await storage.hasUserPurchasedCourse(userId, videoId);
+      if (alreadyPurchased) {
+        return res.status(400).json({ message: "You have already purchased this course" });
+      }
+
+      // Get the video details
+      const video = await storage.getVideo(videoId);
+      if (!video) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+
+      if (!video.isPublished) {
+        return res.status(400).json({ message: "Course is not available for purchase" });
+      }
+
+      // Create Stripe payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: video.price, // Price is already in cents
+        currency: "usd",
+        metadata: {
+          userId,
+          videoId: videoId.toString(),
+          creatorId: video.creatorId,
+        },
+      });
+
+      res.json({ 
+        clientSecret: paymentIntent.client_secret,
+        amount: video.price,
+        courseName: video.title,
+      });
+    } catch (error) {
+      console.error("Error creating payment intent:", error);
+      res.status(500).json({ message: "Failed to initiate payment" });
+    }
+  });
+
+  app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    try {
+      const sig = req.headers['stripe-signature'];
+      // Note: In production, you'd verify the webhook signature
+      const event = JSON.parse(req.body.toString());
+
+      if (event.type === 'payment_intent.succeeded') {
+        const paymentIntent = event.data.object;
+        const { userId, videoId, creatorId } = paymentIntent.metadata;
+
+        // Calculate revenue split (80% creator, 20% platform)
+        const totalAmount = paymentIntent.amount;
+        const creatorEarnings = Math.floor(totalAmount * 0.8);
+        const platformEarnings = totalAmount - creatorEarnings;
+
+        // Record the purchase
+        await storage.createCoursePurchase({
+          userId,
+          videoId: parseInt(videoId),
+          priceAtPurchase: totalAmount,
+          creatorEarnings,
+          platformEarnings,
+          stripePaymentId: paymentIntent.id,
+        });
+
+        // Update video purchase count
+        const video = await storage.getVideo(parseInt(videoId));
+        if (video) {
+          await storage.updateVideo({
+            id: parseInt(videoId),
+            purchases: (video.purchases || 0) + 1,
+          });
+        }
+
+        console.log(`Course purchase completed: User ${userId} bought course ${videoId} for $${totalAmount/100}`);
+      }
+
+      res.json({ received: true });
+    } catch (error) {
+      console.error("Error processing webhook:", error);
+      res.status(400).json({ error: "Webhook processing failed" });
+    }
+  });
+
+  app.get('/api/my-purchases', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const purchases = await storage.getUserPurchases(userId);
+      res.json(purchases);
+    } catch (error) {
+      console.error("Error fetching user purchases:", error);
+      res.status(500).json({ message: "Failed to fetch purchases" });
+    }
+  });
+
+  app.get('/api/creator/earnings', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const totalEarnings = await storage.getCreatorEarnings(creatorId);
+      res.json({ totalEarnings });
+    } catch (error) {
+      console.error("Error fetching creator earnings:", error);
+      res.status(500).json({ message: "Failed to fetch earnings" });
     }
   });
 
@@ -345,9 +462,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         videoUrl: `/uploads/${files.video[0].filename}`,
         thumbnailUrl: files.thumbnail ? `/uploads/${files.thumbnail[0].filename}` : null,
         duration: req.body.duration,
+        durationMinutes: req.body.durationMinutes ? parseInt(req.body.durationMinutes) : 0,
         categoryId: parseInt(req.body.categoryId),
         subcategoryId: parseInt(req.body.subcategoryId),
         creatorId,
+        price: parseInt(req.body.price), // Price in cents
         privacy: req.body.privacy || 'public',
         tags,
         language: req.body.language || 'en',

@@ -25,6 +25,7 @@ const uploadSchema = z.object({
   duration: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
   subcategoryId: z.string().min(1, "Subcategory is required"),
+  price: z.number().min(10, "Course price must be at least $10").max(1000, "Course price cannot exceed $1,000"),
   privacy: z.enum(["public", "unlisted", "private"]).default("public"),
   tags: z.string().optional(),
   language: z.string().default("en"),
@@ -72,6 +73,7 @@ export default function CreatorDashboard() {
       duration: "",
       categoryId: "",
       subcategoryId: "",
+      price: 10,
       privacy: "public",
       tags: "",
       language: "en",
@@ -169,6 +171,9 @@ export default function CreatorDashboard() {
     Object.entries(values).forEach(([key, value]) => {
       if (key === 'tags') {
         formData.append(key, JSON.stringify(tagsArray));
+      } else if (key === 'price') {
+        // Convert price from dollars to cents
+        formData.append(key, String(Math.round(Number(value) * 100)));
       } else {
         formData.append(key, String(value));
       }
@@ -375,9 +380,32 @@ export default function CreatorDashboard() {
                       <FormLabel>Description</FormLabel>
                       <FormControl>
                         <Textarea 
-                          placeholder="Describe your video content..."
+                          placeholder="Describe your course content..."
                           rows={4}
                           {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="price"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Course Price ($10 - $1,000)</FormLabel>
+                      <FormControl>
+                        <Input 
+                          {...field}
+                          type="number"
+                          min="10"
+                          max="1000"
+                          step="1"
+                          placeholder="99"
+                          className="bg-netflix-dark-gray border-netflix-border"
+                          onChange={(e) => field.onChange(Number(e.target.value))}
                         />
                       </FormControl>
                       <FormMessage />

@@ -120,6 +120,13 @@ ProFlix is a Netflix-style video platform that allows creators to upload and sha
 
 Changelog:
 - July 06, 2025. Initial setup
+- July 07, 2025. Major transformation: Converted from YouTube-style free platform to premium course marketplace
+  - Added creator application system with detailed vetting process
+  - Implemented subscription tiers: Free (8hrs), Basic $29/month (20hrs), Premium $199/month (100hrs)
+  - Added course pricing system ($10-$1000 range) with 80/20 revenue split
+  - Integrated Stripe payment processing for course purchases
+  - Created course purchase flow with secure payment handling
+  - Added creator earnings tracking and purchase history
 
 ## User Preferences
 

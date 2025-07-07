@@ -52,6 +52,12 @@ export interface IStorage {
   getCreatorApplications(status?: string): Promise<CreatorApplication[]>;
   updateCreatorApplicationStatus(id: number, status: string, adminNotes?: string): Promise<CreatorApplication>;
   
+  // Course purchase operations
+  createCoursePurchase(purchase: InsertCoursePurchase): Promise<CoursePurchase>;
+  getUserPurchases(userId: string): Promise<CoursePurchase[]>;
+  hasUserPurchasedCourse(userId: string, videoId: number): Promise<boolean>;
+  getCreatorEarnings(creatorId: string): Promise<number>;
+  
   // Category operations
   getCategories(): Promise<Category[]>;
   getCategoryBySlug(slug: string): Promise<Category | undefined>;
@@ -604,6 +610,46 @@ export class DatabaseStorage implements IStorage {
       .where(eq(creatorApplications.id, id))
       .returning();
     return app;
+  }
+
+  // Course purchase operations
+  async createCoursePurchase(purchase: InsertCoursePurchase): Promise<CoursePurchase> {
+    const [coursePurchase] = await db
+      .insert(coursePurchases)
+      .values(purchase)
+      .returning();
+    return coursePurchase;
+  }
+
+  async getUserPurchases(userId: string): Promise<CoursePurchase[]> {
+    return await db
+      .select()
+      .from(coursePurchases)
+      .where(eq(coursePurchases.userId, userId))
+      .orderBy(desc(coursePurchases.createdAt));
+  }
+
+  async hasUserPurchasedCourse(userId: string, videoId: number): Promise<boolean> {
+    const [purchase] = await db
+      .select()
+      .from(coursePurchases)
+      .where(and(
+        eq(coursePurchases.userId, userId),
+        eq(coursePurchases.videoId, videoId)
+      ));
+    return !!purchase;
+  }
+
+  async getCreatorEarnings(creatorId: string): Promise<number> {
+    const result = await db
+      .select({
+        totalEarnings: sql<number>`COALESCE(SUM(${coursePurchases.creatorEarnings}), 0)`,
+      })
+      .from(coursePurchases)
+      .innerJoin(videos, eq(coursePurchases.videoId, videos.id))
+      .where(eq(videos.creatorId, creatorId));
+    
+    return result[0]?.totalEarnings || 0;
   }
 }
 

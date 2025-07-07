@@ -345,6 +345,7 @@ export const insertVideoSchema = createInsertSchema(videos).omit({
   updatedAt: true,
 }).extend({
   tags: z.array(z.string()).optional(),
+  price: z.number().min(1000, "Course price must be at least $10").max(100000, "Course price cannot exceed $1,000"), // Price in cents
 });
 
 export const updateVideoSchema = insertVideoSchema.partial().extend({
