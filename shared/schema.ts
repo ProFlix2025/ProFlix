@@ -42,6 +42,9 @@ export const users = pgTable("users", {
   subscriberCount: integer("subscriber_count").default(0),
   totalViews: integer("total_views").default(0),
   totalEarnings: integer("total_earnings").default(0), // In cents
+  purchasePin: varchar("purchase_pin", { length: 6 }), // 6-digit PIN for quick purchases
+  stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID for saved cards
+  defaultPaymentMethod: varchar("default_payment_method"), // Default saved card ID
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
