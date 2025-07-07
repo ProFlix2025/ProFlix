@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3 } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Shield, FileText } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
@@ -66,6 +66,18 @@ export default function Navigation() {
               </div>
             </Link>
           )}
+          <Link href="/dmca-policy" className="text-white hover:text-netflix-light-gray transition-colors">
+            <div className="flex items-center space-x-1">
+              <Shield className="w-4 h-4" />
+              <span>DMCA Policy</span>
+            </div>
+          </Link>
+          <Link href="/terms-of-use" className="text-white hover:text-netflix-light-gray transition-colors">
+            <div className="flex items-center space-x-1">
+              <FileText className="w-4 h-4" />
+              <span>Terms of Use</span>
+            </div>
+          </Link>
         </div>
       </div>
       

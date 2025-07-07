@@ -1,0 +1,71 @@
+ Terms of Use
+Effective Date: [Insert Date]
+
+Welcome to ProFlix, operated by Starlite Medical LLC (“ProFlix”, “we”, “our”, or “us”). By accessing or using our website, mobile app, or any of our services (collectively, the “Platform”), you agree to comply with and be bound by the following Terms of Use.
+
+Please read these terms carefully. If you do not agree with them, do not use the Platform.
+
+1. Acceptance of Terms
+By using the Platform, you confirm that:
+
+You are at least 18 years old (or have legal parental/guardian consent).
+
+You have read, understood, and agree to be bound by these Terms of Use and our [Privacy Policy].
+
+2. Platform Overview
+ProFlix is a platform that allows verified creators to upload and sell pre-recorded video content, including but not limited to tutorials, mini-courses, and educational material. Viewers may browse, stream, or purchase access to content depending on the creator’s settings.
+
+3. Intellectual Property
+All content uploaded by creators remains the intellectual property of the creator, unless otherwise agreed.
+
+Users may not download, copy, share, or redistribute content without written permission from the copyright owner.
+
+If you believe content infringes your copyright, please refer to our [DMCA Takedown Policy].
+
+4. User Accounts
+You are responsible for maintaining the confidentiality of your account login information. You agree not to share your login or let others access your account.
+
+We reserve the right to suspend or terminate accounts at our sole discretion, including for violations of these Terms or for any illegal, abusive, or inappropriate behavior.
+
+5. Payments & Revenue
+For now, access to content may be offered free or paid, depending on the creator.
+
+When payments are enabled, creators will receive 80% of revenue from their content, and ProFlix will retain a 20% service fee.
+
+All payouts and payment processing will be handled through a third-party provider such as Stripe. You must comply with their terms as well.
+
+6. Content Guidelines
+Creators agree not to upload content that is:
+
+Illegal, obscene, pornographic, or hateful
+
+Misleading, plagiarized, or stolen from others
+
+In violation of any law or third-party rights
+
+We reserve the right to remove any content at our discretion.
+
+7. License to Use
+By uploading content, you grant ProFlix a non-exclusive, royalty-free license to host, display, and stream your content to users on the platform for the purpose of delivering our service.
+
+You do not give up ownership of your content.
+
+8. Limitation of Liability
+To the fullest extent permitted by law, ProFlix and Starlite Medical LLC are not liable for any damages, losses, or legal claims resulting from:
+
+Platform downtime or technical errors
+
+User-generated content
+
+Unauthorized access to your account
+
+Use of the Platform is at your own risk.
+
+9. Modifications
+We may update these Terms at any time. When we do, we will update the “Effective Date” at the top of this page. Continued use of the Platform after changes means you agree to the new terms.
+
+10. Contact
+Questions? Reach out to us at:
+Email: [Insert Support Email]
+Legal Entity: Starlite Medical LLC (soon to be ProFlix LLC)
+

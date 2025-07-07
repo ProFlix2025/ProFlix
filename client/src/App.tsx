@@ -11,6 +11,8 @@ import CategoryView from "@/pages/category-view";
 import VideoPlayer from "@/pages/video-player";
 import CreatorApplication from "@/pages/creator-application";
 import CoursePurchase from "@/pages/course-purchase";
+import DMCAPolicy from "@/pages/dmca-policy";
+import TermsOfUse from "@/pages/terms-of-use";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -26,6 +28,8 @@ function Router() {
           <Route path="/creator" component={CreatorDashboard} />
           <Route path="/creator-application" component={CreatorApplication} />
           <Route path="/course-purchase/:videoId" component={CoursePurchase} />
+          <Route path="/dmca-policy" component={DMCAPolicy} />
+          <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/category/:slug" component={CategoryView} />
           <Route path="/video/:id" component={VideoPlayer} />
         </>
