@@ -71,12 +71,14 @@ app.use((req, res, next) => {
   if (isDevelopment) {
     await setupVite(app, server);
   } else {
-    // Serve static files from the build output for production
-    app.use(express.static(path.join(__dirname, './public')));
+    // Serve production Vite build (static assets)
+    console.log(`Serving static files from: ${path.join(__dirname, 'public')}`);
+    app.use(express.static(path.join(__dirname, 'public')));
     
-    // Fallback to index.html for SPA routes
+    // Handle client-side routing (history fallback)
     app.get('*', (req, res) => {
-      res.sendFile(path.join(__dirname, './public/index.html'));
+      console.log(`Serving SPA fallback for: ${req.path}`);
+      res.sendFile(path.join(__dirname, 'public', 'index.html'));
     });
   }
 

@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(0, 0%, 0%);
-  --foreground: hsl(0, 0%, 100%);
+  --background: hsl(0, 0%, 8%);
+  --foreground: hsl(0, 0%, 95%);
   --muted: hsl(0, 0%, 8%);
   --muted-foreground: hsl(0, 0%, 70%);
   --popover: hsl(0, 0%, 8%);
