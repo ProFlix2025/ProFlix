@@ -90,6 +90,23 @@ export interface IStorage {
   getTrendingVideos(limit?: number): Promise<Video[]>;
   getRecommendedVideos(userId: string, limit?: number): Promise<Video[]>;
   
+  // 3-Tier specific operations
+  getCreatorStats(creatorId: string): Promise<{
+    totalVideos: number;
+    totalViews: number;
+    totalEarnings: number;
+    uploadHoursUsed: number;
+    uploadHoursLimit: number;
+    accountType: string;
+    streamingVideos: number;
+    basicVideos: number;
+    premiumVideos: number;
+    streamingEarnings: number;
+    basicEarnings: number;
+  }>;
+  upgradeCreatorAccount(userId: string, accountType: string): Promise<User>;
+  updateCreatorPaymentUrls(userId: string, paypalUrl?: string, stripeUrl?: string): Promise<User>;
+  
   // Favorites operations
   addToFavorites(userId: string, videoId: number): Promise<Favorite>;
   removeFromFavorites(userId: string, videoId: number): Promise<void>;
@@ -659,6 +676,99 @@ export class DatabaseStorage implements IStorage {
       .from(sharedVideos)
       .where(eq(sharedVideos.shareToken, shareToken));
     return sharedVideo;
+  }
+
+  // 3-Tier system methods
+  async getCreatorStats(creatorId: string): Promise<{
+    totalVideos: number;
+    totalViews: number;
+    totalEarnings: number;
+    uploadHoursUsed: number;
+    uploadHoursLimit: number;
+    accountType: string;
+    streamingVideos: number;
+    basicVideos: number;
+    premiumVideos: number;
+    streamingEarnings: number;
+    basicEarnings: number;
+  }> {
+    const user = await this.getUser(creatorId);
+    if (!user) throw new Error('User not found');
+
+    // Get video counts by type
+    const videoStats = await db
+      .select({
+        videoType: videos.videoType,
+        count: count(),
+        totalViews: sql<number>`SUM(${videos.views})`,
+      })
+      .from(videos)
+      .where(eq(videos.creatorId, creatorId))
+      .groupBy(videos.videoType);
+
+    const streamingVideos = videoStats.find(s => s.videoType === 'streaming')?.count || 0;
+    const basicVideos = videoStats.find(s => s.videoType === 'basic')?.count || 0;
+    const premiumVideos = videoStats.find(s => s.videoType === 'premium')?.count || 0;
+    const totalViews = videoStats.reduce((sum, stat) => sum + (stat.totalViews || 0), 0);
+
+    // Get earnings from purchases
+    const purchaseStats = await db
+      .select({
+        creatorEarnings: sql<number>`SUM(${coursePurchases.creatorEarnings})`,
+        purchaseType: coursePurchases.purchaseType,
+      })
+      .from(coursePurchases)
+      .innerJoin(videos, eq(coursePurchases.videoId, videos.id))
+      .where(eq(videos.creatorId, creatorId))
+      .groupBy(coursePurchases.purchaseType);
+
+    const streamingEarnings = purchaseStats.find(s => s.purchaseType === 'streaming_subscription')?.creatorEarnings || 0;
+    const basicEarnings = purchaseStats.find(s => s.purchaseType === 'basic')?.creatorEarnings || 0;
+
+    return {
+      totalVideos: streamingVideos + basicVideos + premiumVideos,
+      totalViews,
+      totalEarnings: streamingEarnings + basicEarnings,
+      uploadHoursUsed: user.uploadHoursUsed || 0,
+      uploadHoursLimit: user.uploadHoursLimit || 5,
+      accountType: user.accountType || 'free',
+      streamingVideos,
+      basicVideos,
+      premiumVideos,
+      streamingEarnings,
+      basicEarnings,
+    };
+  }
+
+  async upgradeCreatorAccount(userId: string, accountType: string): Promise<User> {
+    const uploadLimit = accountType === 'pro' ? 500 : 5;
+    
+    const [user] = await db
+      .update(users)
+      .set({
+        accountType,
+        uploadHoursLimit: uploadLimit,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async updateCreatorPaymentUrls(userId: string, paypalUrl?: string, stripeUrl?: string): Promise<User> {
+    const updateData: any = { updatedAt: new Date() };
+    
+    if (paypalUrl !== undefined) updateData.paypalPaymentUrl = paypalUrl;
+    if (stripeUrl !== undefined) updateData.stripePaymentUrl = stripeUrl;
+
+    const [user] = await db
+      .update(users)
+      .set(updateData)
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
   }
 }
 

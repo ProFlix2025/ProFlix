@@ -10,6 +10,7 @@ import Footer from "@/components/Footer";
 import Home from "@/pages/home";
 import SearchPage from "@/pages/search";
 import CreatorDashboard from "@/pages/creator-dashboard";
+import CreatorDashboardNew from "@/pages/creator-dashboard-new";
 import CategoryView from "@/pages/category-view";
 import VideoPlayer from "@/pages/video-player";
 import CreatorApplication from "@/pages/creator-application";
@@ -32,6 +33,7 @@ function Router() {
           <Route path="/apply" component={Apply} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />
+          <Route path="/creator-new" component={CreatorDashboardNew} />
           <Route path="/creator-application" component={CreatorApplication} />
           <Route path="/course-purchase/:videoId" component={CoursePurchase} />
           <Route path="/favorites" component={Favorites} />

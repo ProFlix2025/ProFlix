@@ -1,8 +1,41 @@
-# ProFlix - Creator Video Platform
+# ProFlix - 3-Tier Video Monetization Platform
 
 ## Overview
 
-ProFlix is a Netflix-style video platform that allows creators to upload and share video content while providing viewers with an organized browsing experience. The application is built as a full-stack web application using React for the frontend, Express for the backend, and PostgreSQL with Drizzle ORM for data management.
+ProFlix is a Netflix-style video platform with a sophisticated 3-tier monetization system that maximizes revenue for both creators and the platform. Creators can monetize through streaming royalties, direct sales, and premium courses while viewers access content through subscriptions or individual purchases.
+
+### 3-Tier Video Model
+
+**1. Streaming Videos (Subscription)**
+- $29/month unlimited access (1-month free trial)
+- All creators must donate 1 video to streaming library
+- 70% of subscription revenue distributed to creators based on watch time
+- Platform keeps 30%
+
+**2. Basic Videos (< $99)**
+- Direct sales through platform payment processing
+- Platform takes 30% commission
+- Creator keeps 70%
+- Also available to streaming subscribers
+
+**3. Premium Videos ($100-$4,000)**
+- High-ticket courses and bundles
+- Creators use their own PayPal/Stripe checkout links
+- Creator keeps 100% of revenue
+- Platform hosts content but takes no commission
+
+### Creator Account Tiers
+
+**Free Creators**
+- Up to 5 hours of video uploads
+- Can sell basic and premium videos
+- Must donate 1 video to streaming
+
+**Pro Creators ($199/month)**
+- Up to 500 hours of video uploads
+- Full creator dashboard and analytics
+- Advanced course building tools
+- Priority support
 
 ## System Architecture
 

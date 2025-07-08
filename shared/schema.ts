@@ -34,8 +34,20 @@ export const users = pgTable("users", {
   role: varchar("role").notNull().default("viewer"), // 'creator', 'viewer', 'admin'
   creatorStatus: varchar("creator_status").default("none"), // 'none', 'pending', 'approved', 'rejected'
   subscriptionTier: varchar("subscription_tier").default("free"), // 'free', 'basic', 'premium'
+  accountType: varchar("account_type").default("free"), // 'free' (5h), 'pro' ($199/month, 500h)
+  uploadHoursUsed: integer("upload_hours_used").default(0),
+  uploadHoursLimit: integer("upload_hours_limit").default(5), // 5 hours for free, 500 for pro
   monthlyHoursUsed: integer("monthly_hours_used").default(0),
   monthlyHoursLimit: integer("monthly_hours_limit").default(8), // 8 for free, 20 for basic, 100 for premium
+  
+  // Streaming subscription ($29/month)
+  isStreamingSubscriber: boolean("is_streaming_subscriber").default(false),
+  streamingTrialEndsAt: timestamp("streaming_trial_ends_at"),
+  streamingSubscriptionEndsAt: timestamp("streaming_subscription_ends_at"),
+  
+  // Creator payment URLs for premium videos ($100-$4000)
+  paypalPaymentUrl: varchar("paypal_payment_url"),
+  stripePaymentUrl: varchar("stripe_payment_url"),
   subscriptionEndsAt: timestamp("subscription_ends_at"),
   channelName: varchar("channel_name"),
   channelDescription: text("channel_description"),
@@ -100,7 +112,7 @@ export const creatorApplications = pgTable("creator_applications", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Videos table (now for courses)
+// Videos table - 3-Tier Model (Streaming, Basic, Premium)
 export const videos = pgTable("videos", {
   id: serial("id").primaryKey(),
   title: varchar("title").notNull(),
@@ -112,7 +124,21 @@ export const videos = pgTable("videos", {
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id").notNull(),
   creatorId: varchar("creator_id").notNull(),
-  price: integer("price").notNull(), // Price in cents, max $1000 = 100000 cents
+  
+  // 3-Tier Video Model
+  videoType: varchar("video_type").notNull().default("streaming"), // 'streaming', 'basic', 'premium'
+  
+  // Basic videos (< $99) - Platform handled
+  price: integer("price").default(0), // Price in cents for basic videos
+  
+  // Premium videos ($100-$4000) - Creator's own payment
+  externalPaymentUrl: varchar("external_payment_url"), // Creator's PayPal/Stripe link
+  externalPrice: integer("external_price"), // in cents for premium videos
+  
+  // Streaming requirements
+  isDonatedToStreaming: boolean("is_donated_to_streaming").default(false), // Required donation
+  streamingWatchTime: integer("streaming_watch_time").default(0), // Hours watched for royalties
+  
   views: integer("views").default(0),
   purchases: integer("purchases").default(0),
   likes: integer("likes").default(0),
@@ -126,15 +152,42 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Course Purchases table
+// Course Purchases table - Updated for 3-tier model
 export const coursePurchases = pgTable("course_purchases", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   videoId: integer("video_id").notNull(),
+  purchaseType: varchar("purchase_type").notNull(), // 'basic', 'premium', 'streaming_subscription'
   priceAtPurchase: integer("price_at_purchase").notNull(), // Price in cents when purchased
-  creatorEarnings: integer("creator_earnings").notNull(), // 80% of price in cents
-  platformEarnings: integer("platform_earnings").notNull(), // 20% of price in cents
+  
+  // Revenue split based on video type
+  creatorEarnings: integer("creator_earnings").notNull(), // 70% basic, 100% premium, streaming based on watch time
+  platformEarnings: integer("platform_earnings").notNull(), // 30% basic, 0% premium, 30% streaming
+  
   stripePaymentId: varchar("stripe_payment_id"),
+  paypalPaymentId: varchar("paypal_payment_id"), // For external premium payments
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Streaming royalties table - for $29/month subscription revenue distribution
+export const streamingRoyalties = pgTable("streaming_royalties", {
+  id: serial("id").primaryKey(),
+  creatorId: varchar("creator_id").notNull(),
+  videoId: integer("video_id").notNull(),
+  month: varchar("month").notNull(), // YYYY-MM format
+  totalWatchTime: integer("total_watch_time").default(0), // in minutes
+  royaltyEarnings: integer("royalty_earnings").default(0), // 70% of revenue based on watch time
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pro account subscriptions table - $199/month for 500h uploads
+export const proSubscriptions = pgTable("pro_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  status: varchar("status").default("active"), // 'active', 'cancelled', 'expired'
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -489,3 +542,7 @@ export type Favorite = typeof favorites.$inferSelect;
 export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type SharedVideo = typeof sharedVideos.$inferSelect;
 export type InsertSharedVideo = z.infer<typeof insertSharedVideoSchema>;
+export type StreamingRoyalty = typeof streamingRoyalties.$inferSelect;
+export type InsertStreamingRoyalty = typeof streamingRoyalties.$inferInsert;
+export type ProSubscription = typeof proSubscriptions.$inferSelect;
+export type InsertProSubscription = typeof proSubscriptions.$inferInsert;

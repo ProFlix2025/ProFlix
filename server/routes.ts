@@ -1091,6 +1091,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator Dashboard Routes for 3-Tier System
+  app.get('/api/creator/stats', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stats = await storage.getCreatorStats(userId);
+      res.json(stats);
+    } catch (error) {
+      console.error("Error fetching creator stats:", error);
+      res.status(500).json({ message: "Failed to fetch creator stats" });
+    }
+  });
+
+  app.post('/api/creator/upgrade', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { accountType } = req.body;
+      
+      if (!['pro', 'streaming'].includes(accountType)) {
+        return res.status(400).json({ message: "Invalid account type" });
+      }
+
+      const user = await storage.upgradeCreatorAccount(userId, accountType);
+      res.json(user);
+    } catch (error) {
+      console.error("Error upgrading account:", error);
+      res.status(500).json({ message: "Failed to upgrade account" });
+    }
+  });
+
+  app.post('/api/creator/payment-urls', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { paypalUrl, stripeUrl } = req.body;
+      
+      const user = await storage.updateCreatorPaymentUrls(userId, paypalUrl, stripeUrl);
+      res.json(user);
+    } catch (error) {
+      console.error("Error updating payment URLs:", error);
+      res.status(500).json({ message: "Failed to update payment URLs" });
+    }
+  });
+
+  // Streaming subscription endpoints
+  app.post('/api/subscribe/streaming', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      // Mark as subscribed with 1-month free trial
+      const trialEnd = new Date();
+      trialEnd.setMonth(trialEnd.getMonth() + 1);
+
+      const user = await storage.upsertUser({
+        id: userId,
+        isStreamingSubscriber: true,
+        streamingTrialEndsAt: trialEnd,
+      });
+
+      res.json({ success: true, user });
+    } catch (error) {
+      console.error("Error subscribing to streaming:", error);
+      res.status(500).json({ message: "Failed to subscribe to streaming" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
