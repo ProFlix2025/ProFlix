@@ -77,6 +77,25 @@ app.use((req, res, next) => {
       console.log(`Serving SPA fallback for: ${req.path}`);
       res.sendFile(path.join(__dirname, "public", "index.html"));
     });
+    
+    // Auto-initialize database in production after server starts
+    setTimeout(async () => {
+      try {
+        console.log('🔄 Auto-initializing production database...');
+        const response = await fetch(`http://localhost:${port}/api/setup`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        if (response.ok) {
+          console.log('✅ Production database initialized successfully');
+        } else {
+          console.log('⚠️ Database initialization failed, categories may not load');
+        }
+      } catch (error) {
+        console.log('⚠️ Database auto-setup error:', error.message);
+      }
+    }, 3000); // Wait 3 seconds for server to fully start
   }
 
   const port = process.env.PORT ? parseInt(process.env.PORT) : isDevelopment ? 5000 : 3000;
