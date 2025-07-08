@@ -8,9 +8,10 @@ import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 
-if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
-}
+// Removed REPLIT_DOMAINS check for production deployment
+// if (!process.env.REPLIT_DOMAINS) {
+//   throw new Error("Environment variable REPLIT_DOMAINS not provided");
+// }
 
 const getOidcConfig = memoize(
   async () => {
@@ -84,19 +85,20 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`,
-      },
-      verify,
-    );
-    passport.use(strategy);
-  }
+  // Removed REPLIT_DOMAINS usage for production deployment
+  // for (const domain of process.env
+  //   .REPLIT_DOMAINS!.split(",")) {
+  //   const strategy = new Strategy(
+  //     {
+  //       name: `replitauth:${domain}`,
+  //       config,
+  //       scope: "openid email profile offline_access",
+  //       callbackURL: `https://${domain}/api/callback`,
+  //     },
+  //     verify,
+  //   );
+  //   passport.use(strategy);
+  // }
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
