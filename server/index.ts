@@ -84,21 +84,28 @@ app.use((req, res, next) => {
   const port = process.env.PORT ? parseInt(process.env.PORT) : (isDevelopment ? 5000 : 3000);
   
   console.log(`Starting ProFlix server...`);
-  console.log(`Port: ${port}`);
+  console.log(`Port: ${port} (from ${process.env.PORT ? 'Render' : 'default'})`);
   console.log(`Environment: ${process.env.NODE_ENV || 'undefined'}`);
   console.log(`Static files: ${path.join(__dirname, './public')}`);
+  console.log(`Database URL: ${process.env.DATABASE_URL ? 'SET' : 'MISSING'}`);
   
   server.listen(port, "0.0.0.0", () => {
     console.log(`✅ ProFlix server successfully running on port ${port}`);
-    console.log(`✅ Ready to accept connections`);
+    console.log(`✅ Ready to accept connections at 0.0.0.0:${port}`);
     log(`serving on port ${port}`);
   }).on('error', (err) => {
     console.error('❌ Server startup failed:', err);
     console.error('❌ Error details:', {
       code: err.code,
       port: port,
-      message: err.message
+      message: err.message,
+      errno: err.errno
     });
+    
+    if (err.code === 'EADDRINUSE') {
+      console.error('❌ Port already in use - this should not happen on Render');
+    }
+    
     process.exit(1);
   });
 })();
