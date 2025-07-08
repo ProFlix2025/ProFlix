@@ -1,18 +1,22 @@
 #!/bin/bash
 
-# Render-compatible build script
-echo "Building ProFlix for Render deployment..."
+# Render deployment script for ProFlix
+echo "🚀 Starting ProFlix build process..."
 
 # Install dependencies
+echo "📦 Installing dependencies..."
 npm install
 
-# Build frontend with npx to ensure vite is found
-npx vite build
+# Install drizzle-kit globally for production
+echo "🔧 Installing drizzle-kit..."
+npm install -g drizzle-kit
 
-# Build server with npx to ensure esbuild is found
-npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+# Create database schema directly
+echo "🔄 Creating database schema..."
+drizzle-kit push || echo "⚠️ Database schema will be created at runtime"
 
-echo "Build complete!"
-echo "Frontend built to: dist/public/"
-echo "Server built to: dist/index.js"
-echo "Ready for deployment with 'node dist/index.js'"
+# Build the application
+echo "🏗️ Building application..."
+npm run build
+
+echo "✅ Build complete! ProFlix is ready for deployment."

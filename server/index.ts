@@ -82,15 +82,30 @@ app.use((req, res, next) => {
     setTimeout(async () => {
       try {
         console.log('🔄 Auto-initializing production database...');
-        const response = await fetch(`http://localhost:${port}/api/setup`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
         
-        if (response.ok) {
-          console.log('✅ Production database initialized successfully');
+        // Import and run database initialization directly
+        const { initializeDatabase } = await import('./initDb');
+        const dbSuccess = await initializeDatabase();
+        
+        if (dbSuccess) {
+          console.log('✅ Database schema created');
+          
+          // Import and run category setup
+          const { storage } = await import('./storage');
+          
+          // Check if categories already exist
+          const existingCategories = await storage.getCategories();
+          if (existingCategories.length === 0) {
+            console.log('📋 Setting up categories...');
+            await setupCategories();
+            console.log('✅ Categories initialized');
+          } else {
+            console.log('✅ Categories already exist');
+          }
+          
+          console.log('✅ Production database fully initialized');
         } else {
-          console.log('⚠️ Database initialization failed, categories may not load');
+          console.log('⚠️ Database schema creation failed');
         }
       } catch (error) {
         console.log('⚠️ Database auto-setup error:', error.message);

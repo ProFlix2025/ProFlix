@@ -217,34 +217,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Database schema initialization for production
   app.post('/api/db-push', async (req, res) => {
     try {
-      console.log('🔄 Creating database tables...');
+      const { initializeDatabase } = await import('./initDb');
+      const success = await initializeDatabase();
       
-      // Import database and schema
-      const { db } = await import('./db');
-      const { 
-        sessions, users, categories, subcategories, videos, 
-        favorites, sharedVideos, videoLikes, comments, 
-        playlists, playlistVideos, watchHistory, 
-        creatorApplications, coursePurchases 
-      } = await import('@shared/schema');
-      
-      // Check if tables exist by trying to query categories
-      try {
-        await db.select().from(categories).limit(1);
-        console.log('✅ Database tables already exist');
-      } catch (tableError) {
-        console.log('📋 Database tables need to be created manually');
-        console.log('Please run: npm run db:push on your deployment server');
+      if (success) {
+        res.json({ 
+          message: 'Database schema initialized successfully',
+          tablesCreated: true
+        });
+      } else {
+        res.status(500).json({ 
+          message: 'Database initialization failed',
+          tablesCreated: false
+        });
       }
-      
-      res.json({ 
-        message: 'Database check complete. If categories still fail, run npm run db:push on your deployment environment.',
-        tablesExist: true
-      });
     } catch (error) {
-      console.error('DB check error:', error);
+      console.error('DB initialization error:', error);
       res.status(500).json({ 
-        message: 'Database schema check failed',
+        message: 'Database schema initialization failed',
         error: error.message
       });
     }
