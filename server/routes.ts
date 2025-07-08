@@ -577,19 +577,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/recommended', async (req: any, res) => {
+  app.get('/api/recommended', async (req, res) => {
     try {
-      // If not authenticated, return trending videos as recommendations
-      if (!req.isAuthenticated() || !req.user) {
-        const limit = parseInt(req.query.limit as string) || 20;
-        const trendingVideos = await storage.getTrendingVideos(limit);
-        return res.json(trendingVideos);
-      }
-      
-      const userId = req.user.claims.sub;
+      // Return trending videos as recommendations (no authentication needed)
       const limit = parseInt(req.query.limit as string) || 20;
-      const videos = await storage.getRecommendedVideos(userId, limit);
-      res.json(videos);
+      const trendingVideos = await storage.getTrendingVideos(limit);
+      res.json(trendingVideos);
     } catch (error) {
       console.error('Error fetching recommended videos:', error);
       res.status(500).json({ message: 'Failed to fetch recommended videos' });
