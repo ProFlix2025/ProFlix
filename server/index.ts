@@ -44,6 +44,15 @@ app.use((req, res, next) => {
 });
 
 (async () => {
+  // Add health check endpoint for Render deployment
+  app.get('/health', (req, res) => {
+    res.status(200).json({ 
+      status: 'healthy', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'undefined'
+    });
+  });
+
   const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
@@ -57,7 +66,9 @@ app.use((req, res, next) => {
   // importantly only setup vite in development and after
   // setting up all the other routes so the catch-all route
   // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
+  const isDevelopment = process.env.NODE_ENV === "development";
+  
+  if (isDevelopment) {
     await setupVite(app, server);
   } else {
     // Serve static files from the build output for production
@@ -70,9 +81,24 @@ app.use((req, res, next) => {
   }
 
   // Use PORT environment variable for production deployment (Render, etc.)
-  // Fall back to 5000 for development
-  const port = process.env.PORT ? parseInt(process.env.PORT) : 5000;
+  const port = process.env.PORT ? parseInt(process.env.PORT) : (isDevelopment ? 5000 : 3000);
+  
+  console.log(`Starting ProFlix server...`);
+  console.log(`Port: ${port}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'undefined'}`);
+  console.log(`Static files: ${path.join(__dirname, './public')}`);
+  
   server.listen(port, "0.0.0.0", () => {
+    console.log(`✅ ProFlix server successfully running on port ${port}`);
+    console.log(`✅ Ready to accept connections`);
     log(`serving on port ${port}`);
+  }).on('error', (err) => {
+    console.error('❌ Server startup failed:', err);
+    console.error('❌ Error details:', {
+      code: err.code,
+      port: port,
+      message: err.message
+    });
+    process.exit(1);
   });
 })();
