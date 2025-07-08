@@ -207,3 +207,5 @@ Preferred communication style: Simple, everyday language.
 - Verified React app successfully mounts and renders in production mode
 - DEPLOYMENT READY: Created simplified server (index-simple.ts) with proper PORT handling for Render
 - All production issues resolved: Static files, React mounting, server configuration
+- RENDER BUILD FIX: Identified issue with build command - needs npx prefixes for vite and esbuild
+- Created build-render.sh script and updated documentation with exact Render configuration
