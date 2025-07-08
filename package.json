@@ -18,6 +18,7 @@
     "drizzle-orm": "^0.39.1",
     "esbuild": "^0.25.0",
     "express": "^4.21.2",
+    "lucide-react": "^0.525.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "postcss": "^8.4.47",
