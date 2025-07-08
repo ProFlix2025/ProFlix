@@ -214,6 +214,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Database schema push endpoint for production
+  app.post('/api/db-push', async (req, res) => {
+    try {
+      // This endpoint should trigger database migrations/schema push
+      // In production, run: npm run db:push
+      res.json({ message: 'Run npm run db:push on your server to initialize the database schema' });
+    } catch (error) {
+      console.error('DB push error:', error);
+      res.status(500).json({ message: 'Failed to initialize database schema' });
+    }
+  });
+
   // Initialize categories and subcategories
   app.post('/api/setup', async (req, res) => {
     try {
