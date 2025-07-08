@@ -58,7 +58,7 @@ STRIPE_SECRET_KEY=your_stripe_secret_key
 VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
 PAYPAL_CLIENT_ID=your_paypal_client_id
 PAYPAL_CLIENT_SECRET=your_paypal_client_secret
-REPLIT_DOMAINS=your_domain.com
+DOMAIN=your_domain.com
 ```
 
 ## 🎯 Key Routes

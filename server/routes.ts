@@ -2,7 +2,7 @@ import type { Express } from "express";
 import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./simpleAuth";
 import { insertVideoSchema, updateVideoSchema, insertCreatorApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -57,24 +57,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Auth routes
-  app.get('/api/auth/user', (req: any, res) => {
-    try {
-      // If not authenticated, return null instead of error
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json(null);
-      }
-      
-      const userId = req.user.claims.sub;
-      storage.getUser(userId).then(user => {
-        res.json(user);
-      }).catch(error => {
-        console.error("Error fetching user:", error);
-        res.status(500).json({ message: "Failed to fetch user" });
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.json(null); // Return null instead of error for unauthenticated users
-    }
+  app.get('/api/auth/user', async (req, res) => {
+    // For now, return null (no user) - can be updated later with proper auth
+    res.json(null);
   });
 
   // Creator application routes
@@ -642,16 +627,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/favorites', async (req: any, res) => {
+  app.get('/api/favorites', async (req, res) => {
     try {
-      // If not authenticated, return empty array
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json([]);
-      }
-      
-      const userId = req.user.claims.sub;
-      const favorites = await storage.getFavorites(userId);
-      res.json(favorites);
+      // Return empty array for now (no authentication)
+      res.json([]);
     } catch (error) {
       console.error('Error fetching favorites:', error);
       res.status(500).json({ message: 'Failed to fetch favorites' });
@@ -844,17 +823,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/watch-history', async (req: any, res) => {
+  app.get('/api/watch-history', async (req, res) => {
     try {
-      // If not authenticated, return empty array
-      if (!req.isAuthenticated() || !req.user) {
-        return res.json([]);
-      }
-      
-      const userId = req.user.claims.sub;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const history = await storage.getWatchHistory(userId, limit);
-      res.json(history);
+      // Return empty array for now (no authentication)
+      res.json([]);
     } catch (error) {
       console.error('Error fetching watch history:', error);
       res.status(500).json({ message: 'Failed to fetch watch history' });

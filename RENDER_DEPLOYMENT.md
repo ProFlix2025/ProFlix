@@ -52,8 +52,6 @@ Since you're deploying to Render, you'll need to modify the package.json build s
    VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
    PAYPAL_CLIENT_ID=your_paypal_client_id
    PAYPAL_CLIENT_SECRET=your_paypal_client_secret
-   REPLIT_DOMAINS=proflix.app,yourapp.onrender.com
-   REPL_ID=your_replit_app_id
    ```
 
 5. **Custom Domain Setup**
