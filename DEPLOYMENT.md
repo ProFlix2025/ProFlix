@@ -1,104 +1,48 @@
 # ProFlix Deployment Guide
 
-## Overview
-This guide helps you deploy ProFlix to your own domain (proflix.app) using Namecheap hosting.
+## Render Deployment Configuration
 
-## Prerequisites
-- Namecheap domain (proflix.app)
-- Namecheap hosting plan or VPS
-- Node.js hosting support
-- PostgreSQL database access
-
-## Recommended Deployment Options
-
-### Option 1: Railway (Recommended - Easiest)
-**Perfect for Node.js apps with database**
-1. Go to railway.app and sign up
-2. Connect your GitHub account
-3. Deploy from GitHub repository
-4. Railway auto-detects Node.js and runs build commands
-5. Point your Namecheap domain to Railway
-6. Cost: ~$5-20/month
-
-### Option 2: Render (Great for Backend-focused apps)
-**Perfect for Node.js with built-in frontend serving**
-1. Go to render.com and sign up
-2. Create "Web Service" from GitHub
-3. Backend-only build (see RENDER_DEPLOYMENT.md)
-4. Configure environment variables
-5. Point your domain to Render
-6. Cost: Free tier available, $7/month for production
-
-### Option 3: Vercel (Great for Full-Stack)
-**Excellent for React + API**
-1. Go to vercel.com and sign up
-2. Import your project from GitHub
-3. Configure environment variables
-4. Deploy automatically
-5. Point your domain to Vercel
-6. Cost: Free tier available
-
-### Option 4: DigitalOcean App Platform
-**Good balance of control and simplicity**
-1. Create DigitalOcean account
-2. Use App Platform to deploy
-3. Connect GitHub repository
-4. Configure domain
-5. Cost: ~$5-12/month
-
-## Step-by-Step Deployment with Railway (Recommended)
-
-### 1. Prepare Your Code
-Your project is already ready! The build commands are set up correctly.
-
-### 2. Set Up Railway
-1. Go to [railway.app](https://railway.app)
-2. Sign up with GitHub
-3. Click "New Project" → "Deploy from GitHub repo"
-4. Select your ProFlix repository
-5. Railway will automatically detect it's a Node.js app
-
-### 3. Configure Environment Variables
-In Railway dashboard, add these environment variables:
-```
-NODE_ENV=production
-DATABASE_URL=your_postgresql_connection_string
-SESSION_SECRET=your_session_secret_key
-STRIPE_SECRET_KEY=your_stripe_secret_key
-VITE_STRIPE_PUBLIC_KEY=your_stripe_public_key
-PAYPAL_CLIENT_ID=your_paypal_client_id
-PAYPAL_CLIENT_SECRET=your_paypal_client_secret
-REPLIT_DOMAINS=proflix.app
-REPL_ID=your_replit_app_id
+### Build Command
+```bash
+npm install && npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
 ```
 
-### 4. Configure Your Domain in Namecheap
-1. Log into Namecheap account
-2. Go to "Domain List" → Click "Manage" next to proflix.app
-3. Go to "Advanced DNS" tab
-4. Add these records:
-   - **Type**: A Record, **Host**: @, **Value**: [Railway IP]
-   - **Type**: CNAME, **Host**: www, **Value**: [Railway domain]
-5. Railway will provide the exact IP/domain in their dashboard
+### Start Command
+```bash
+node dist/index.js
+```
 
-### 5. Enable Custom Domain in Railway
-1. In Railway dashboard, go to your project
-2. Click "Settings" → "Domains"
-3. Click "Add Domain"
-4. Enter "proflix.app" and "www.proflix.app"
-5. Railway will provide DNS instructions
+### Required Environment Variables
+- `DATABASE_URL` - PostgreSQL connection string
+- `NODE_ENV=production`
+- `VITE_STRIPE_PUBLIC_KEY` - Stripe publishable key
+- `STRIPE_SECRET_KEY` - Stripe secret key
+- `PAYPAL_CLIENT_ID` - PayPal client ID
+- `PAYPAL_CLIENT_SECRET` - PayPal client secret
 
-## Database Setup
-- Use Neon Database (current setup) or migrate to hosting provider's PostgreSQL
-- Run database migrations: `npm run db:push`
+### Build Output Structure
+```
+dist/
+├── public/
+│   ├── index.html
+│   └── assets/
+│       ├── index-[hash].js
+│       └── index-[hash].css
+└── index.js (server bundle)
+```
 
-## Next Steps
-1. Choose hosting option
-2. Configure domain DNS
-3. Set up environment variables
-4. Deploy application
-5. Test functionality
+### Features Included
+- 3-tier video monetization system
+- Stripe payment processing
+- PayPal integration
+- Creator dashboard
+- Video streaming and purchase system
+- User authentication
+- Category management
+- Responsive design
 
-## Support
-- Namecheap support for hosting questions
-- ProFlix works perfectly on custom domains (no forced authentication)
+### Deployment Steps
+1. Set build command in Render dashboard
+2. Set start command in Render dashboard
+3. Configure all environment variables
+4. Deploy with "Clear Build Cache" option
