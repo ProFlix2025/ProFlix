@@ -1,8 +1,13 @@
 import express, { type Request, Response, NextFunction } from "express";
+import path from "path";
+import { fileURLToPath } from "url";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+import { setupVite, log } from "./vite";
 import { validateEnvironment } from "./middleware/validation";
 import { securityHeaders } from "./middleware/security";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
@@ -55,7 +60,13 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    // Serve static files from the build output for production
+    app.use(express.static(path.join(__dirname, './public')));
+    
+    // Fallback to index.html for SPA routes
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, './public/index.html'));
+    });
   }
 
   // Use PORT environment variable for production deployment (Render, etc.)
