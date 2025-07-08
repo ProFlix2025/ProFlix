@@ -133,22 +133,8 @@ export default function Apply() {
             We're building the creator-powered platform for premium video content.
           </p>
           <p className="text-lg mb-8 opacity-80 max-w-3xl mx-auto">
-            If you're a filmmaker, performer, educator, or content creator — we want to hear from you.
+            We want to promote your High Ticket Courses and stream your low ticket courses
           </p>
-          <div className="flex flex-wrap justify-center gap-4 text-sm">
-            <Badge variant="secondary" className="bg-white text-netflix-red px-4 py-2">
-              <Video className="w-4 h-4 mr-2" />
-              Premium Content
-            </Badge>
-            <Badge variant="secondary" className="bg-white text-netflix-red px-4 py-2">
-              <Users className="w-4 h-4 mr-2" />
-              Exclusive Creators
-            </Badge>
-            <Badge variant="secondary" className="bg-white text-netflix-red px-4 py-2">
-              <Star className="w-4 h-4 mr-2" />
-              Beta Launch
-            </Badge>
-          </div>
         </div>
       </div>
 
