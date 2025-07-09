@@ -22,6 +22,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
 import Apply from "@/pages/apply";
 import Premium from "@/pages/premium";
+import ProCreatorPortal from "@/pages/pro-creator-portal";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -34,6 +35,7 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/apply" component={Apply} />
           <Route path="/premium" component={Premium} />
+          <Route path="/pro-creator-portal" component={ProCreatorPortal} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />
           <Route path="/creator-new" component={CreatorDashboardNew} />

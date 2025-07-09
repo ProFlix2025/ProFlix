@@ -62,6 +62,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(null);
   });
 
+  // Pro Creator Portal routes
+  app.get('/api/pro-creator/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const isProCreator = user.isProCreator && 
+        (!user.proCreatorEndsAt || new Date() <= user.proCreatorEndsAt);
+      
+      res.json({
+        isProCreator,
+        proCreatorEndsAt: user.proCreatorEndsAt,
+        hasApplication: !!user.role // Check if user has applied
+      });
+    } catch (error) {
+      console.error('Error checking Pro Creator status:', error);
+      res.status(500).json({ message: 'Failed to check status' });
+    }
+  });
+
+  app.post('/api/pro-creator/subscribe', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Check if user has an approved creator application
+      const application = await storage.getCreatorApplicationByUserId(userId);
+      if (!application || application.status !== 'approved') {
+        return res.status(400).json({ 
+          message: 'You must have an approved creator application before subscribing to Pro Creator.' 
+        });
+      }
+      
+      // For now, simulate successful subscription
+      // In production, this would integrate with Stripe for $99/month subscription
+      const subscriptionEndDate = new Date();
+      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
+      
+      const user = await storage.getUser(userId);
+      if (user) {
+        await storage.updateUser(userId, {
+          isProCreator: true,
+          proCreatorEndsAt: subscriptionEndDate,
+          role: 'pro_creator'
+        });
+      }
+      
+      res.json({ 
+        message: 'Pro Creator subscription activated successfully',
+        expiresAt: subscriptionEndDate 
+      });
+    } catch (error) {
+      console.error('Error subscribing to Pro Creator:', error);
+      res.status(500).json({ message: 'Failed to subscribe' });
+    }
+  });
+
   // Creator application routes
   app.post('/api/creator-applications', isAuthenticated, async (req: any, res) => {
     try {
@@ -528,6 +588,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags = [];
       }
 
+      // Check if user is trying to sell a course (only Pro Creators can do this)
+      const isCourse = req.body.isCourse === 'true';
+      const coursePrice = parseInt(req.body.coursePrice) || 0;
+      
+      if (isCourse && coursePrice > 0) {
+        // Check if user is a Pro Creator
+        const user = await storage.getUser(creatorId);
+        if (!user || !user.isProCreator) {
+          return res.status(403).json({ 
+            message: 'Only Pro Creators can sell courses. Please apply for Pro Creator status and pay the $99/month subscription.' 
+          });
+        }
+        
+        // Check if Pro Creator subscription is still active
+        if (user.proCreatorEndsAt && new Date() > user.proCreatorEndsAt) {
+          return res.status(403).json({ 
+            message: 'Your Pro Creator subscription has expired. Please renew to continue selling courses.' 
+          });
+        }
+      }
+
       const videoData = {
         title: req.body.title,
         description: req.body.description,
@@ -538,11 +619,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         categoryId: parseInt(req.body.categoryId),
         subcategoryId: parseInt(req.body.subcategoryId),
         creatorId,
-        price: parseInt(req.body.price), // Price in cents
-        privacy: req.body.privacy || 'public',
+        // YouTube-style: All videos are free, but Pro Creators can add course upsells
+        videoType: 'free',
+        isCourse: isCourse,
+        coursePrice: coursePrice,
+        courseDescription: req.body.courseDescription || null,
         tags,
         language: req.body.language || 'en',
         isPublished: req.body.isPublished === 'true',
+        offerFreePreview: req.body.offerFreePreview === 'true',
       };
 
       const validation = insertVideoSchema.safeParse(videoData);

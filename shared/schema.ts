@@ -31,7 +31,7 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("viewer"), // 'creator', 'pro_creator', 'viewer', 'admin'
+  role: varchar("role").notNull().default("creator"), // Anyone can upload videos (creator), only pro_creator can sell courses
   
   // Viewer Premium subscription ($29/month) - ad-free + 10% course discount
   isPremiumViewer: boolean("is_premium_viewer").default(false),
