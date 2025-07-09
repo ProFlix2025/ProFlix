@@ -175,15 +175,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Test Pro Creator code generation
-  app.post('/api/test-code', async (req, res) => {
+  // Admin endpoint to generate Pro Creator codes
+  app.post('/api/admin/generate-codes', async (req, res) => {
     try {
-      // Generate a test Pro Creator code
-      const code = await storage.generateProCreatorCode();
-      res.json({ code });
+      const { count = 1, expiresInDays = 365 } = req.body;
+      const codes = [];
+      
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + expiresInDays);
+      
+      for (let i = 0; i < Math.min(count, 50); i++) {
+        const code = await storage.generateProCreatorCode(expiresAt);
+        codes.push(code);
+      }
+      
+      res.json({ 
+        codes,
+        message: `Generated ${codes.length} Pro Creator codes`,
+        expiresAt: expiresAt.toISOString()
+      });
     } catch (error) {
-      console.error('Error generating test code:', error);
-      res.status(500).json({ message: 'Failed to generate test code' });
+      console.error('Error generating codes:', error);
+      res.status(500).json({ message: 'Failed to generate codes' });
+    }
+  });
+
+  // Admin endpoint to list all codes
+  app.get('/api/admin/codes', async (req, res) => {
+    try {
+      const codes = await storage.getAllProCreatorCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error('Error fetching codes:', error);
+      res.status(500).json({ message: 'Failed to fetch codes' });
     }
   });
 
