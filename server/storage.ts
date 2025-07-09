@@ -921,8 +921,8 @@ export class DatabaseStorage implements IStorage {
       // Get total views and revenue
       const videoStats = await db
         .select({
-          totalViews: sql<number>`SUM(${videos.views})`,
-          totalRevenue: sql<number>`SUM(${videos.price})`,
+          totalViews: sql<number>`COALESCE(SUM(${videos.views}), 0)`,
+          totalRevenue: sql<number>`COALESCE(SUM(${videos.price}), 0)`,
         })
         .from(videos);
 
@@ -937,13 +937,13 @@ export class DatabaseStorage implements IStorage {
         .select({
           id: users.id,
           name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
-          earnings: sql<number>`SUM(${videos.price} * ${videos.views})`,
+          earnings: sql<number>`COALESCE(SUM(${videos.price} * ${videos.views}), 0)`,
           videos: count(videos.id),
         })
         .from(users)
         .leftJoin(videos, eq(users.id, videos.creatorId))
         .groupBy(users.id, users.firstName, users.lastName, users.email)
-        .orderBy(sql`SUM(${videos.price} * ${videos.views}) DESC`)
+        .orderBy(sql`COALESCE(SUM(${videos.price} * ${videos.views}), 0) DESC`)
         .limit(10);
 
       return {
@@ -990,12 +990,12 @@ export class DatabaseStorage implements IStorage {
           channelName: users.channelName,
           createdAt: users.createdAt,
           totalVideos: count(videos.id),
-          totalViews: sql<number>`SUM(${videos.views})`,
-          totalEarnings: sql<number>`SUM(${videos.price} * ${videos.views})`,
+          totalViews: sql<number>`COALESCE(SUM(${videos.views}), 0)`,
+          totalEarnings: sql<number>`COALESCE(SUM(${videos.price} * ${videos.views}), 0)`,
         })
         .from(users)
         .leftJoin(videos, eq(users.id, videos.creatorId))
-        .where(sql`${users.role} = 'creator' OR ${users.isProCreator} = true OR EXISTS(SELECT 1 FROM ${videos} WHERE ${videos.creatorId} = ${users.id})`)
+        .where(sql`${users.role} = 'creator' OR ${users.isProCreator} = true OR EXISTS(SELECT 1 FROM videos WHERE videos.creator_id = ${users.id})`)
         .groupBy(
           users.id,
           users.email,
@@ -1006,7 +1006,7 @@ export class DatabaseStorage implements IStorage {
           users.channelName,
           users.createdAt
         )
-        .orderBy(sql`SUM(${videos.price} * ${videos.views}) DESC`);
+        .orderBy(sql`COALESCE(SUM(${videos.price} * ${videos.views}), 0) DESC`);
 
       return creators;
     } catch (error) {
