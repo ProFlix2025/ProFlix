@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
@@ -132,6 +132,13 @@ export default function Navigation() {
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Link href="/premium" className="text-white hover:text-netflix-red transition-colors">
+          <div className="flex items-center space-x-2">
+            <Star className="w-5 h-5" />
+            <span className="text-lg">Premium</span>
+          </div>
+        </Link>
 
         <Link href="/apply" className="text-white hover:text-netflix-red transition-colors">
           <div className="flex items-center space-x-2">

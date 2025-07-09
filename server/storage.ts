@@ -13,6 +13,7 @@ import {
   coursePurchases,
   favorites,
   sharedVideos,
+  adRevenue,
   type User,
   type UpsertUser,
   type Category,
@@ -40,6 +41,8 @@ import {
   type InsertFavorite,
   type SharedVideo,
   type InsertSharedVideo,
+  type AdRevenue,
+  type InsertAdRevenue,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count } from "drizzle-orm";
@@ -89,6 +92,11 @@ export interface IStorage {
   searchVideos(query: string): Promise<Video[]>;
   getTrendingVideos(limit?: number): Promise<Video[]>;
   getRecommendedVideos(userId: string, limit?: number): Promise<Video[]>;
+  
+  // YouTube-style functionality
+  incrementVideoShares(videoId: number): Promise<void>;
+  trackAdImpression(creatorId: string, videoId: number, cpmRate: number): Promise<void>;
+  createCourseCheckout(userId: string, videoId: number, price: number): Promise<{ url: string }>;
   
   // 3-Tier specific operations
   getCreatorStats(creatorId: string): Promise<{

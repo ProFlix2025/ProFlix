@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Play, Video, Eye } from "lucide-react";
+import { Play, Video, Eye, DollarSign, Star } from "lucide-react";
 
 interface VideoCardProps {
   video: {
@@ -11,11 +11,19 @@ interface VideoCardProps {
     thumbnailUrl?: string;
     duration?: string;
     views?: number;
-    price?: number;
+    likes?: number;
+    shareCount?: number;
+    coursePrice?: number;
+    isCourse?: boolean;
     offerFreePreview?: boolean;
     category?: { name: string };
     subcategory?: { name: string };
-    creator?: { firstName?: string; lastName?: string; email?: string };
+    creator?: { 
+      firstName?: string; 
+      lastName?: string; 
+      email?: string;
+      isProCreator?: boolean;
+    };
   };
 }
 
@@ -53,16 +61,40 @@ export default function VideoCard({ video }: VideoCardProps) {
                 FREE PREVIEW
               </div>
             )}
+            {video.creator?.isProCreator && (
+              <div className="absolute top-2 right-2 bg-netflix-red text-white text-xs px-2 py-1 rounded font-semibold flex items-center gap-1">
+                <Star className="w-3 h-3" />
+                PRO
+              </div>
+            )}
+            {video.isCourse && video.coursePrice && (
+              <div className="absolute bottom-2 left-2 bg-yellow-600 text-white text-xs px-2 py-1 rounded font-semibold flex items-center gap-1">
+                <DollarSign className="w-3 h-3" />
+                ${(video.coursePrice / 100).toFixed(0)}
+              </div>
+            )}
           </div>
           <div className="mt-3">
             <h3 className="font-medium text-white truncate">{video.title}</h3>
             <p className="text-sm text-netflix-light-gray truncate">by {creatorName}</p>
             <div className="flex items-center justify-between mt-2">
-              <div className="flex items-center space-x-2">
-                <Eye className="w-3 h-3 text-netflix-light-gray" />
-                <span className="text-xs text-netflix-light-gray">
-                  {video.views || 0} views
-                </span>
+              <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-1">
+                  <Eye className="w-3 h-3 text-netflix-light-gray" />
+                  <span className="text-xs text-netflix-light-gray">
+                    {video.views || 0}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-xs text-netflix-light-gray">
+                    👍 {video.likes || 0}
+                  </span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <span className="text-xs text-netflix-light-gray">
+                    📤 {video.shareCount || 0}
+                  </span>
+                </div>
               </div>
               {video.subcategory && (
                 <Badge variant="outline" className="text-xs">
