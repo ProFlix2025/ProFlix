@@ -211,6 +211,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin analytics endpoint
+  app.get('/api/admin/analytics', async (req, res) => {
+    try {
+      const analytics = await storage.getAdminAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch analytics' });
+    }
+  });
+
+  // Admin creators management
+  app.get('/api/admin/creators', async (req, res) => {
+    try {
+      const creators = await storage.getAllCreatorsWithStats();
+      res.json(creators);
+    } catch (error) {
+      console.error('Error fetching creators:', error);
+      res.status(500).json({ message: 'Failed to fetch creators' });
+    }
+  });
+
+  // Remove creator
+  app.delete('/api/admin/creators/:id', async (req, res) => {
+    try {
+      const creatorId = req.params.id;
+      await storage.removeCreator(creatorId);
+      res.json({ message: 'Creator removed successfully' });
+    } catch (error) {
+      console.error('Error removing creator:', error);
+      res.status(500).json({ message: 'Failed to remove creator' });
+    }
+  });
+
+  // Suspend creator
+  app.post('/api/admin/creators/:id/suspend', async (req, res) => {
+    try {
+      const creatorId = req.params.id;
+      await storage.suspendCreator(creatorId);
+      res.json({ message: 'Creator suspended successfully' });
+    } catch (error) {
+      console.error('Error suspending creator:', error);
+      res.status(500).json({ message: 'Failed to suspend creator' });
+    }
+  });
+
   // Creator application routes
   app.post('/api/creator-applications', isAuthenticated, async (req: any, res) => {
     try {

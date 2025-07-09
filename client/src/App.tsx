@@ -24,6 +24,7 @@ import Apply from "@/pages/apply";
 import Premium from "@/pages/premium";
 import ProCreatorPortal from "@/pages/pro-creator-portal";
 import AdminCodes from "@/pages/admin-codes";
+import AdminDashboard from "@/pages/admin-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -38,6 +39,7 @@ function Router() {
           <Route path="/premium" component={Premium} />
           <Route path="/pro-creator-portal" component={ProCreatorPortal} />
           <Route path="/admin/codes" component={AdminCodes} />
+          <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />
           <Route path="/creator-new" component={CreatorDashboardNew} />

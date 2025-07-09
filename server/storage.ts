@@ -901,6 +901,153 @@ export class DatabaseStorage implements IStorage {
     
     return user;
   }
+
+  // Admin analytics and management functions
+  async getAdminAnalytics(): Promise<any> {
+    try {
+      // Get basic counts
+      const [userCount] = await db.select({ count: count() }).from(users);
+      const [videoCount] = await db.select({ count: count() }).from(videos);
+      
+      // Get creator stats
+      const creatorStats = await db
+        .select({
+          totalCreators: count(),
+          proCreators: sql<number>`SUM(CASE WHEN ${users.isProCreator} = true THEN 1 ELSE 0 END)`,
+        })
+        .from(users)
+        .where(sql`${users.role} = 'creator' OR ${users.isProCreator} = true`);
+
+      // Get total views and revenue
+      const videoStats = await db
+        .select({
+          totalViews: sql<number>`SUM(${videos.views})`,
+          totalRevenue: sql<number>`SUM(${videos.price})`,
+        })
+        .from(videos);
+
+      // Simulate hourly activity (in production, track real data)
+      const hourlyActivity = Array.from({ length: 24 }, (_, hour) => ({
+        hour,
+        activity: Math.floor(Math.random() * 100) + 10
+      })).sort((a, b) => b.activity - a.activity);
+
+      // Get top creators by earnings
+      const topCreators = await db
+        .select({
+          id: users.id,
+          name: sql<string>`COALESCE(${users.firstName} || ' ' || ${users.lastName}, ${users.email})`,
+          earnings: sql<number>`SUM(${videos.price} * ${videos.views})`,
+          videos: count(videos.id),
+        })
+        .from(users)
+        .leftJoin(videos, eq(users.id, videos.creatorId))
+        .groupBy(users.id, users.firstName, users.lastName, users.email)
+        .orderBy(sql`SUM(${videos.price} * ${videos.views}) DESC`)
+        .limit(10);
+
+      return {
+        totalUsers: userCount.count || 0,
+        totalCreators: creatorStats[0]?.totalCreators || 0,
+        totalProCreators: creatorStats[0]?.proCreators || 0,
+        totalVideos: videoCount.count || 0,
+        totalViews: videoStats[0]?.totalViews || 0,
+        totalRevenue: videoStats[0]?.totalRevenue || 0,
+        hourlyActivity,
+        topCreators,
+        proCreatorRevenue: 0, // Calculate from subscriptions
+        courseSalesRevenue: 0, // Calculate from course purchases
+        premiumRevenue: 0, // Calculate from premium subscriptions
+      };
+    } catch (error) {
+      console.error('Error getting admin analytics:', error);
+      return {
+        totalUsers: 0,
+        totalCreators: 0,
+        totalProCreators: 0,
+        totalVideos: 0,
+        totalViews: 0,
+        totalRevenue: 0,
+        hourlyActivity: [],
+        topCreators: [],
+        proCreatorRevenue: 0,
+        courseSalesRevenue: 0,
+        premiumRevenue: 0,
+      };
+    }
+  }
+
+  async getAllCreatorsWithStats(): Promise<any[]> {
+    try {
+      const creators = await db
+        .select({
+          id: users.id,
+          email: users.email,
+          firstName: users.firstName,
+          lastName: users.lastName,
+          isProCreator: users.isProCreator,
+          proCreatorEndsAt: users.proCreatorEndsAt,
+          channelName: users.channelName,
+          createdAt: users.createdAt,
+          totalVideos: count(videos.id),
+          totalViews: sql<number>`SUM(${videos.views})`,
+          totalEarnings: sql<number>`SUM(${videos.price} * ${videos.views})`,
+        })
+        .from(users)
+        .leftJoin(videos, eq(users.id, videos.creatorId))
+        .where(sql`${users.role} = 'creator' OR ${users.isProCreator} = true OR EXISTS(SELECT 1 FROM ${videos} WHERE ${videos.creatorId} = ${users.id})`)
+        .groupBy(
+          users.id,
+          users.email,
+          users.firstName,
+          users.lastName,
+          users.isProCreator,
+          users.proCreatorEndsAt,
+          users.channelName,
+          users.createdAt
+        )
+        .orderBy(sql`SUM(${videos.price} * ${videos.views}) DESC`);
+
+      return creators;
+    } catch (error) {
+      console.error('Error getting creators with stats:', error);
+      return [];
+    }
+  }
+
+  async removeCreator(creatorId: string): Promise<void> {
+    try {
+      // Delete creator's videos first (due to foreign key constraints)
+      await db.delete(videos).where(eq(videos.creatorId, creatorId));
+      
+      // Delete creator's other data
+      await db.delete(comments).where(eq(comments.userId, creatorId));
+      await db.delete(videoLikes).where(eq(videoLikes.userId, creatorId));
+      await db.delete(favorites).where(eq(favorites.userId, creatorId));
+      await db.delete(watchHistory).where(eq(watchHistory.userId, creatorId));
+      
+      // Finally delete the user
+      await db.delete(users).where(eq(users.id, creatorId));
+    } catch (error) {
+      console.error('Error removing creator:', error);
+      throw error;
+    }
+  }
+
+  async suspendCreator(creatorId: string): Promise<void> {
+    try {
+      await db
+        .update(users)
+        .set({
+          role: 'suspended',
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, creatorId));
+    } catch (error) {
+      console.error('Error suspending creator:', error);
+      throw error;
+    }
+  }
 }
 
 export const storage = new DatabaseStorage();

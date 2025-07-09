@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Copy, Gift, Settings, Calendar } from "lucide-react";
+import { Copy, Gift, Settings, Calendar, BarChart3 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
@@ -73,6 +73,13 @@ export default function AdminCodes() {
               </p>
             </div>
           </div>
+          <Button 
+            onClick={() => window.location.href = '/admin/dashboard'}
+            className="bg-netflix-red hover:bg-red-700"
+          >
+            <BarChart3 className="w-4 h-4 mr-2" />
+            Analytics Dashboard
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
