@@ -254,6 +254,29 @@ export class DatabaseStorage implements IStorage {
     await db.update(videos).set({ views: sql`views + 1` }).where(eq(videos.id, id));
   }
 
+  // YouTube-style video functionality
+  async incrementVideoShares(videoId: number): Promise<void> {
+    await db.update(videos)
+      .set({ shareCount: sql`${videos.shareCount} + 1` })
+      .where(eq(videos.id, videoId));
+  }
+
+  async trackAdImpression(creatorId: string, videoId: number, cpmRate: number): Promise<void> {
+    await db.insert(adRevenue).values({
+      creatorId,
+      videoId,
+      impressions: 1,
+      earnings: Math.round(cpmRate / 1000), // CPM to earnings per impression
+      cpm: cpmRate
+    });
+  }
+
+  async createCourseCheckout(userId: string, videoId: number, price: number): Promise<{ url: string }> {
+    // This would integrate with Stripe to create a checkout session
+    // For now, return a mock URL
+    return { url: `/checkout/${videoId}?price=${price}` };
+  }
+
   async searchVideos(query: string): Promise<Video[]> {
     return await db.select().from(videos).where(
       and(

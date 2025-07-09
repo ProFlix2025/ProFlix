@@ -1,0 +1,167 @@
+✅ ProFlix Platform Build Specification
+🔷 Overview
+Build a modern YouTube-style video streaming platform with built-in course monetization for creators. Must be fully functional as both:
+
+A free video platform (like YouTube) with view counts, shares, and ads.
+
+A course marketplace with upsell capability directly below each video.
+
+🏗️ TECHNOLOGY STACK
+Frontend: Vite + React + TypeScript
+
+Backend: Node.js + Express
+
+Database: PostgreSQL with Drizzle ORM
+
+Styling/UI: TailwindCSS + Radix UI
+
+Auth: Clerk or Supabase (flexible)
+
+File Uploads: Multer (or Cloudinary integration later)
+
+Payments: Stripe (for subscriptions + course sales)
+
+Deployment: Replit (dev), Render (prod)
+
+Build Tools: ESBuild, dotenv, nanoid, etc.
+
+🔑 ENVIRONMENT VARIABLES (must be set in Replit & Render)
+env
+Copy
+Edit
+VITE_STRIPE_PUBLIC_KEY=
+STRIPE_SECRET_KEY=
+DATABASE_URL=
+JWT_SECRET=
+Also allow CORS origin from frontend on backend.
+
+👤 USER ACCOUNTS
+Three user types:
+
+Viewer (free) – can watch public videos w/ ads.
+
+Premium Viewer ($29/mo) – ad-free + 10% off all course purchases.
+
+Pro Creator ($99/mo) – can upload/sell premium courses.
+
+🎥 VIDEO TYPES
+Free Streamed Content
+
+View counter
+
+Share button
+
+Optional tags or categories
+
+Skippable ads
+
+Premium Courses
+
+Purchasable content (fixed price: $20 – $4,000)
+
+Creator keeps 100% (after Stripe)
+
+Discounted 10% for Premium Viewers
+
+Must be >=10 minutes per video
+
+Connected to Pro Creator account
+
+💰 MONETIZATION STRUCTURE
+Feature	Free Viewer	Premium Viewer ($29/mo)	Pro Creator ($99/mo)
+Watch Free Videos	✅	✅	✅
+No Ads	❌	✅	✅
+Buy Premium Courses	✅	✅ (10% off)	✅
+Upload Free Videos	✅ (limit)	✅ (limit)	✅
+Sell Premium Videos	❌	❌	✅
+
+🛒 TRANSACTIONS
+Stripe Checkout for:
+
+Pro Creator subscription
+
+Premium Viewer subscription
+
+One-time course purchases
+
+Pro Creator revenue sent via Stripe Connect (or keep it manual to start)
+
+📊 CREATOR DASHBOARD FEATURES
+Upload new videos
+
+Analytics: Views, Sales, Earnings
+
+Payment Status (paid/unpaid)
+
+Edit course titles/descriptions
+
+Set prices (only for Pro Creators)
+
+🔐 AUTHENTICATION FLOW
+Sign up/login
+
+Creator onboarding
+
+Stripe payment setup for subscriptions
+
+JWT stored in localStorage or cookies (Replit-compatible)
+
+🌐 FRONTEND PAGES
+Home Feed: Trending free videos
+
+Video Page: Video player, description, CTA to buy premium course (if set)
+
+Creator Page: Channel-style layout
+
+Explore Page: Categories/tags
+
+Login/Register
+
+Upload Page (for creators)
+
+Dashboard: For creators and premium viewers
+
+🧠 BACKEND ROUTES (suggested)
+bash
+Copy
+Edit
+GET /videos                → Fetch free videos
+GET /videos/:id            → Fetch single video + metadata
+POST /upload               → Upload video (Multer)
+POST /buy-course           → Stripe purchase link
+POST /subscribe            → Subscribe to Pro Creator/Premium
+GET /dashboard             → Fetch dashboard data
+🧰 MISC SETUP TO AVOID ISSUES
+Fix __dirname in ES modules using:
+
+ts
+Copy
+Edit
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+Vite config should use the proper root and output folders:
+
+ts
+Copy
+Edit
+root: path.resolve(__dirname, 'client'),
+build: {
+  outDir: path.resolve(__dirname, 'dist/public'),
+  emptyOutDir: true,
+},
+Be sure to add Stripe public key to .env and use it in the frontend via import.meta.env.VITE_STRIPE_PUBLIC_KEY.
+
+🚀 DEPLOYMENT CHECKLIST
+ Environment variables set in Render + Replit
+
+ Stripe keys verified
+
+ File upload permissions set
+
+ Database migrations applied (Drizzle or SQL dump)
+
+ Logs enabled (console + Render dashboard)
+
+ Fallback SPA routing added to backend
+

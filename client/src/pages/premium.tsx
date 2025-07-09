@@ -1,0 +1,251 @@
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Star, 
+  CheckCircle, 
+  Play, 
+  ShoppingCart, 
+  Heart,
+  DollarSign,
+  Clock,
+  Users,
+  Trophy
+} from "lucide-react";
+import Navigation from "@/components/Navigation";
+
+export default function Premium() {
+  const { user, isAuthenticated } = useAuth();
+  const { toast } = useToast();
+  const [isUpgrading, setIsUpgrading] = useState(false);
+
+  const handleUpgrade = async () => {
+    if (!isAuthenticated) {
+      toast({
+        title: "Sign in required",
+        description: "Please sign in to upgrade to premium",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsUpgrading(true);
+    // This would integrate with Stripe
+    setTimeout(() => {
+      toast({
+        title: "Premium upgrade",
+        description: "Redirecting to payment...",
+      });
+      setIsUpgrading(false);
+    }, 1000);
+  };
+
+  const features = [
+    {
+      icon: <Play className="w-5 h-5" />,
+      title: "Ad-Free Viewing",
+      description: "Watch all videos without interruptions"
+    },
+    {
+      icon: <DollarSign className="w-5 h-5" />,
+      title: "10% Course Discount",
+      description: "Save on all premium course purchases"
+    },
+    {
+      icon: <Heart className="w-5 h-5" />,
+      title: "Priority Support",
+      description: "Get help faster with premium support"
+    },
+    {
+      icon: <Trophy className="w-5 h-5" />,
+      title: "Early Access",
+      description: "Be first to see new features and content"
+    }
+  ];
+
+  const plans = [
+    {
+      name: "Free",
+      price: "$0",
+      period: "forever",
+      features: [
+        "Watch all videos with ads",
+        "Like and share videos",
+        "Basic support",
+        "Purchase courses at full price"
+      ],
+      popular: false,
+      cta: "Current Plan"
+    },
+    {
+      name: "Premium Viewer",
+      price: "$29",
+      period: "month",
+      features: [
+        "Ad-free viewing experience",
+        "10% discount on all courses",
+        "Priority support",
+        "Early access to new features"
+      ],
+      popular: true,
+      cta: "Upgrade Now"
+    },
+    {
+      name: "Pro Creator",
+      price: "$99", 
+      period: "month",
+      features: [
+        "Everything in Premium",
+        "Sell premium courses",
+        "Advanced analytics",
+        "Custom course pages"
+      ],
+      popular: false,
+      cta: "Become Pro Creator"
+    }
+  ];
+
+  return (
+    <div className="min-h-screen bg-black text-white">
+      <Navigation />
+      
+      <div className="max-w-7xl mx-auto px-4 py-12">
+        {/* Hero Section */}
+        <div className="text-center mb-16">
+          <div className="flex items-center justify-center gap-2 mb-6">
+            <Star className="w-8 h-8 text-netflix-red" />
+            <h1 className="text-4xl md:text-6xl font-bold">
+              Go Premium
+            </h1>
+          </div>
+          <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
+            Unlock the full ProFlix experience with ad-free viewing, course discounts, and priority support
+          </p>
+          
+          {user?.isPremiumViewer && (
+            <Badge className="bg-netflix-red mb-8">
+              <CheckCircle className="w-4 h-4 mr-2" />
+              You're already a Premium member!
+            </Badge>
+          )}
+        </div>
+
+        {/* Features Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          {features.map((feature, index) => (
+            <Card key={index} className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <div className="text-netflix-red mb-4">
+                  {feature.icon}
+                </div>
+                <h3 className="font-semibold mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-400">{feature.description}</p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Pricing Plans */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          {plans.map((plan, index) => (
+            <Card 
+              key={index} 
+              className={`bg-gray-900 border-gray-800 relative ${
+                plan.popular ? 'border-netflix-red' : ''
+              }`}
+            >
+              {plan.popular && (
+                <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
+                  <Badge className="bg-netflix-red">Most Popular</Badge>
+                </div>
+              )}
+              
+              <CardHeader className="text-center">
+                <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                <div className="mt-4">
+                  <span className="text-4xl font-bold">{plan.price}</span>
+                  <span className="text-gray-400">/{plan.period}</span>
+                </div>
+              </CardHeader>
+              
+              <CardContent>
+                <ul className="space-y-3 mb-8">
+                  {plan.features.map((feature, featureIndex) => (
+                    <li key={featureIndex} className="flex items-center gap-2">
+                      <CheckCircle className="w-5 h-5 text-green-500" />
+                      <span className="text-sm">{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                
+                <Button
+                  onClick={handleUpgrade}
+                  disabled={isUpgrading || (plan.name === "Free" && !user?.isPremiumViewer)}
+                  className={`w-full ${
+                    plan.popular 
+                      ? 'bg-netflix-red hover:bg-red-700' 
+                      : 'bg-gray-700 hover:bg-gray-600'
+                  }`}
+                >
+                  {isUpgrading ? "Processing..." : plan.cta}
+                </Button>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
+        {/* Stats Section */}
+        <div className="mt-16 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+          <div>
+            <div className="text-3xl font-bold text-netflix-red mb-2">10,000+</div>
+            <div className="text-gray-400">Premium Members</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-netflix-red mb-2">500+</div>
+            <div className="text-gray-400">Premium Courses</div>
+          </div>
+          <div>
+            <div className="text-3xl font-bold text-netflix-red mb-2">$2.5M+</div>
+            <div className="text-gray-400">Creator Earnings</div>
+          </div>
+        </div>
+
+        {/* FAQ Section */}
+        <div className="mt-16">
+          <h2 className="text-3xl font-bold text-center mb-12">Frequently Asked Questions</h2>
+          <div className="max-w-3xl mx-auto space-y-6">
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">Can I cancel anytime?</h3>
+                <p className="text-gray-400">
+                  Yes, you can cancel your premium subscription at any time. You'll continue to have access until your current billing period ends.
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">How much can I save on courses?</h3>
+                <p className="text-gray-400">
+                  Premium members get 10% off all course purchases. On a $200 course, that's $20 in savings - almost covering a month of premium!
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <h3 className="font-semibold mb-2">What's the difference between Premium and Pro Creator?</h3>
+                <p className="text-gray-400">
+                  Premium is for viewers who want ad-free experience and course discounts. Pro Creator is for content creators who want to sell their own courses.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

@@ -13,6 +13,7 @@ import CreatorDashboard from "@/pages/creator-dashboard";
 import CreatorDashboardNew from "@/pages/creator-dashboard-new";
 import CategoryView from "@/pages/category-view";
 import VideoPlayer from "@/pages/video-player";
+import VideoPlayerNew from "@/pages/video-player-new";
 import CreatorApplication from "@/pages/creator-application";
 import CoursePurchase from "@/pages/course-purchase";
 import DMCAPolicy from "@/pages/dmca-policy";
@@ -20,6 +21,7 @@ import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
 import Apply from "@/pages/apply";
+import Premium from "@/pages/premium";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -31,6 +33,7 @@ function Router() {
         <Switch>
           <Route path="/" component={Home} />
           <Route path="/apply" component={Apply} />
+          <Route path="/premium" component={Premium} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />
           <Route path="/creator-new" component={CreatorDashboardNew} />
@@ -41,7 +44,7 @@ function Router() {
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
           <Route path="/category/:slug" component={CategoryView} />
-          <Route path="/video/:id" component={VideoPlayer} />
+          <Route path="/video/:id" component={VideoPlayerNew} />
           <Route component={NotFound} />
         </Switch>
       </div>
