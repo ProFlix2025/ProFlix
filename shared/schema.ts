@@ -31,15 +31,16 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("creator"), // Anyone can upload videos (creator), only pro_creator can sell courses
+  role: varchar("role").notNull().default("creator"), // Anyone can upload videos and sell courses
   
   // Viewer Premium subscription ($29/month) - ad-free + 10% course discount
   isPremiumViewer: boolean("is_premium_viewer").default(false),
   premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
-  // Pro Creator subscription ($99/month) - can sell courses
+  // Pro Creator subscription ($99/month or $897/year) - enhanced features
   isProCreator: boolean("is_pro_creator").default(false),
   proCreatorEndsAt: timestamp("pro_creator_ends_at"),
+  proCreatorPlan: varchar("pro_creator_plan"), // 'monthly', 'yearly', 'free_code'
   
   // Creator earnings from ads
   totalAdRevenue: integer("total_ad_revenue").default(0), // in cents
@@ -61,6 +62,17 @@ export const users = pgTable("users", {
   defaultPaymentMethod: varchar("default_payment_method"), // Default saved card ID
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Pro Creator invitation codes table
+export const proCreatorCodes = pgTable("pro_creator_codes", {
+  id: serial("id").primaryKey(),
+  code: varchar("code").notNull().unique(),
+  isUsed: boolean("is_used").default(false),
+  usedByUserId: varchar("used_by_user_id"),
+  usedAt: timestamp("used_at"),
+  expiresAt: timestamp("expires_at"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Categories table
@@ -130,7 +142,7 @@ export const videos = pgTable("videos", {
   // YouTube-style free videos + course upsells
   videoType: varchar("video_type").notNull().default("free"), // 'free' for all videos
   
-  // Course sales (Pro Creators only)
+  // Course sales (anyone can sell courses)
   isCourse: boolean("is_course").default(false),
   coursePrice: integer("course_price").default(0), // in cents
   courseDescription: text("course_description"),
@@ -583,3 +595,5 @@ export type PremiumSubscription = typeof premiumSubscriptions.$inferSelect;
 export type InsertPremiumSubscription = typeof premiumSubscriptions.$inferInsert;
 export type ProCreatorSubscription = typeof proCreatorSubscriptions.$inferSelect;
 export type InsertProCreatorSubscription = typeof proCreatorSubscriptions.$inferInsert;
+export type ProCreatorCode = typeof proCreatorCodes.$inferSelect;
+export type InsertProCreatorCode = typeof proCreatorCodes.$inferInsert;

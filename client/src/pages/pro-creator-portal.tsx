@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Crown, DollarSign, TrendingUp, Calendar, AlertCircle, CheckCircle, Upload, Settings } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Crown, DollarSign, TrendingUp, Calendar, AlertCircle, CheckCircle, Upload, Settings, Gift } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -12,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 export default function ProCreatorPortal() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
+  const [promoCode, setPromoCode] = useState("");
   
   // Check if user is Pro Creator
   const { data: proStatus, isLoading: statusLoading } = useQuery({
@@ -30,8 +32,8 @@ export default function ProCreatorPortal() {
   });
 
   const subscribeMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest("POST", "/api/pro-creator/subscribe");
+    mutationFn: async (planType: string) => {
+      return apiRequest("POST", "/api/pro-creator/subscribe", { planType });
     },
     onSuccess: () => {
       toast({
@@ -44,6 +46,27 @@ export default function ProCreatorPortal() {
       toast({
         title: "Subscription Failed",
         description: error.message || "Failed to activate Pro Creator subscription",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const redeemCodeMutation = useMutation({
+    mutationFn: async (code: string) => {
+      return apiRequest("POST", "/api/pro-creator/use-code", { code });
+    },
+    onSuccess: () => {
+      toast({
+        title: "Code Redeemed!",
+        description: "Your free 12-month Pro Creator access is now active!",
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/pro-creator/status"] });
+      setPromoCode("");
+    },
+    onError: (error) => {
+      toast({
+        title: "Invalid Code",
+        description: error.message || "Code is invalid or expired",
         variant: "destructive",
       });
     },
@@ -87,7 +110,7 @@ export default function ProCreatorPortal() {
             <Crown className="w-16 h-16 text-netflix-red mx-auto mb-4" />
             <h1 className="text-4xl font-bold text-white mb-2">Pro Creator Portal</h1>
             <p className="text-netflix-light-gray text-lg">
-              Unlock the power to sell premium courses and keep 100% of your earnings
+              Enhanced features for serious creators - Anyone can sell courses now!
             </p>
           </div>
 
@@ -147,32 +170,79 @@ export default function ProCreatorPortal() {
             </Card>
           </div>
 
-          <Card className="bg-gradient-to-r from-netflix-red to-red-700 border-none text-center">
+          <Card className="bg-netflix-gray border-netflix-border mb-8">
             <CardHeader>
-              <CardTitle className="text-white text-3xl">
-                Pro Creator Subscription
+              <CardTitle className="text-white flex items-center gap-2">
+                <Gift className="w-5 h-5 text-netflix-red" />
+                Have a Promo Code?
               </CardTitle>
-              <p className="text-red-100">
-                Start selling premium courses today
-              </p>
             </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <div className="text-5xl font-bold text-white mb-2">$99</div>
-                <div className="text-red-100">per month</div>
-              </div>
-              <Button
-                onClick={() => subscribeMutation.mutate()}
-                disabled={subscribeMutation.isPending}
-                className="bg-white text-netflix-red hover:bg-gray-100 text-lg px-8 py-3 h-auto"
-              >
-                {subscribeMutation.isPending ? "Processing..." : "Subscribe Now"}
-              </Button>
-              <p className="text-red-100 text-sm mt-4">
-                Cancel anytime • No setup fees • Instant activation
+            <CardContent className="space-y-3">
+              <p className="text-netflix-light-gray text-sm">
+                Redeem your free 12-month Pro Creator access code:
               </p>
+              <div className="flex gap-2">
+                <Input
+                  type="text"
+                  placeholder="Enter promo code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="bg-netflix-black border-netflix-border text-white"
+                />
+                <Button
+                  onClick={() => redeemCodeMutation.mutate(promoCode)}
+                  disabled={!promoCode || redeemCodeMutation.isPending}
+                  className="bg-netflix-red hover:bg-red-700"
+                >
+                  {redeemCodeMutation.isPending ? "..." : "Redeem"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <Card className="bg-netflix-gray border-netflix-border">
+              <CardHeader>
+                <CardTitle className="text-white text-center">Monthly Plan</CardTitle>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-white">$99</div>
+                  <div className="text-netflix-light-gray">per month</div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => subscribeMutation.mutate('monthly')}
+                  disabled={subscribeMutation.isPending}
+                  className="w-full bg-netflix-red hover:bg-red-700 text-white"
+                >
+                  {subscribeMutation.isPending ? 'Processing...' : 'Subscribe Monthly'}
+                </Button>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-netflix-gray border-netflix-border border-netflix-red">
+              <CardHeader>
+                <CardTitle className="text-white text-center">
+                  Yearly Plan
+                  <Badge className="ml-2 bg-netflix-red text-white">Save $291</Badge>
+                </CardTitle>
+                <div className="text-center">
+                  <div className="text-4xl font-bold text-white">$897</div>
+                  <div className="text-netflix-light-gray">per year</div>
+                  <div className="text-sm text-netflix-light-gray">$74.75/month</div>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Button 
+                  onClick={() => subscribeMutation.mutate('yearly')}
+                  disabled={subscribeMutation.isPending}
+                  className="w-full bg-netflix-red hover:bg-red-700 text-white"
+                >
+                  {subscribeMutation.isPending ? 'Processing...' : 'Subscribe Yearly'}
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </div>
     );

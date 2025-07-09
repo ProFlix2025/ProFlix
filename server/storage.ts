@@ -14,6 +14,7 @@ import {
   favorites,
   sharedVideos,
   adRevenue,
+  proCreatorCodes,
   type User,
   type UpsertUser,
   type Category,
@@ -43,6 +44,8 @@ import {
   type InsertSharedVideo,
   type AdRevenue,
   type InsertAdRevenue,
+  type ProCreatorCode,
+  type InsertProCreatorCode,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count } from "drizzle-orm";
@@ -115,6 +118,13 @@ export interface IStorage {
   }>;
   upgradeCreatorAccount(userId: string, accountType: string): Promise<User>;
   updateCreatorPaymentUrls(userId: string, paypalUrl?: string, stripeUrl?: string): Promise<User>;
+  
+  // Pro Creator code operations
+  generateProCreatorCode(expiresAt?: Date): Promise<ProCreatorCode>;
+  useProCreatorCode(code: string, userId: string): Promise<boolean>;
+  getProCreatorCode(code: string): Promise<ProCreatorCode | undefined>;
+  getAllProCreatorCodes(): Promise<ProCreatorCode[]>;
+  upgradeToProCreator(userId: string, plan: string, endsAt: Date): Promise<User>;
   
   // Favorites operations
   addToFavorites(userId: string, videoId: number): Promise<Favorite>;
@@ -806,6 +816,86 @@ export class DatabaseStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set(updateData)
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  // Pro Creator code operations
+  async generateProCreatorCode(expiresAt?: Date): Promise<ProCreatorCode> {
+    // Generate a unique 12-character code
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase() + 
+                 Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    const [newCode] = await db
+      .insert(proCreatorCodes)
+      .values({
+        code,
+        expiresAt: expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year default
+      })
+      .returning();
+    
+    return newCode;
+  }
+
+  async useProCreatorCode(code: string, userId: string): Promise<boolean> {
+    // Check if code exists and is valid
+    const [existingCode] = await db
+      .select()
+      .from(proCreatorCodes)
+      .where(eq(proCreatorCodes.code, code));
+    
+    if (!existingCode || existingCode.isUsed) {
+      return false;
+    }
+    
+    if (existingCode.expiresAt && new Date() > existingCode.expiresAt) {
+      return false;
+    }
+    
+    // Mark code as used
+    await db
+      .update(proCreatorCodes)
+      .set({ 
+        isUsed: true, 
+        usedByUserId: userId, 
+        usedAt: new Date() 
+      })
+      .where(eq(proCreatorCodes.code, code));
+    
+    // Upgrade user to Pro Creator for 12 months
+    const endsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 12 months
+    await this.upgradeToProCreator(userId, 'free_code', endsAt);
+    
+    return true;
+  }
+
+  async getProCreatorCode(code: string): Promise<ProCreatorCode | undefined> {
+    const [existingCode] = await db
+      .select()
+      .from(proCreatorCodes)
+      .where(eq(proCreatorCodes.code, code));
+    
+    return existingCode;
+  }
+
+  async getAllProCreatorCodes(): Promise<ProCreatorCode[]> {
+    return await db
+      .select()
+      .from(proCreatorCodes)
+      .orderBy(desc(proCreatorCodes.createdAt));
+  }
+
+  async upgradeToProCreator(userId: string, plan: string, endsAt: Date): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        isProCreator: true,
+        proCreatorEndsAt: endsAt,
+        proCreatorPlan: plan,
+        updatedAt: new Date(),
+      })
       .where(eq(users.id, userId))
       .returning();
     

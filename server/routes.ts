@@ -89,36 +89,101 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/pro-creator/subscribe', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+      const { planType } = req.body;
       
-      // Check if user has an approved creator application
-      const application = await storage.getCreatorApplicationByUserId(userId);
-      if (!application || application.status !== 'approved') {
-        return res.status(400).json({ 
-          message: 'You must have an approved creator application before subscribing to Pro Creator.' 
-        });
-      }
+      // Set subscription end date based on plan
+      const endsAt = new Date(Date.now() + (planType === 'yearly' ? 365 * 24 * 60 * 60 * 1000 : 30 * 24 * 60 * 60 * 1000));
       
-      // For now, simulate successful subscription
-      // In production, this would integrate with Stripe for $99/month subscription
-      const subscriptionEndDate = new Date();
-      subscriptionEndDate.setMonth(subscriptionEndDate.getMonth() + 1);
-      
-      const user = await storage.getUser(userId);
-      if (user) {
-        await storage.updateUser(userId, {
-          isProCreator: true,
-          proCreatorEndsAt: subscriptionEndDate,
-          role: 'pro_creator'
-        });
-      }
+      // Update user to Pro Creator status
+      await storage.upgradeToProCreator(userId, planType, endsAt);
       
       res.json({ 
         message: 'Pro Creator subscription activated successfully',
-        expiresAt: subscriptionEndDate 
+        expiresAt: endsAt 
       });
     } catch (error) {
       console.error('Error subscribing to Pro Creator:', error);
       res.status(500).json({ message: 'Failed to subscribe' });
+    }
+  });
+
+  // Pro Creator code routes
+  app.post('/api/pro-creator/generate-code', isAuthenticated, async (req: any, res) => {
+    try {
+      // TODO: Add admin authorization check
+      const { expiresAt } = req.body;
+      
+      const code = await storage.generateProCreatorCode(expiresAt ? new Date(expiresAt) : undefined);
+      res.json(code);
+    } catch (error) {
+      console.error('Error generating Pro Creator code:', error);
+      res.status(500).json({ message: 'Failed to generate code' });
+    }
+  });
+
+  app.post('/api/pro-creator/use-code', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { code } = req.body;
+      
+      const success = await storage.useProCreatorCode(code, userId);
+      
+      if (success) {
+        res.json({ 
+          message: 'Pro Creator code redeemed successfully! You now have 12 months of Pro Creator access.' 
+        });
+      } else {
+        res.status(400).json({ 
+          message: 'Invalid or expired code' 
+        });
+      }
+    } catch (error) {
+      console.error('Error using Pro Creator code:', error);
+      res.status(500).json({ message: 'Failed to use code' });
+    }
+  });
+
+  app.get('/api/pro-creator/codes', isAuthenticated, async (req: any, res) => {
+    try {
+      // TODO: Add admin authorization check
+      const codes = await storage.getAllProCreatorCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error('Error fetching Pro Creator codes:', error);
+      res.status(500).json({ message: 'Failed to fetch codes' });
+    }
+  });
+
+  app.get('/api/pro-creator/status', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      res.json({
+        isProCreator: user.isProCreator,
+        proCreatorEndsAt: user.proCreatorEndsAt,
+        proCreatorPlan: user.proCreatorPlan,
+        canSellCourses: true // Anyone can sell courses now
+      });
+    } catch (error) {
+      console.error('Pro Creator status error:', error);
+      res.status(500).json({ message: 'Failed to get Pro Creator status' });
+    }
+  });
+
+  // Test Pro Creator code generation
+  app.post('/api/test-code', async (req, res) => {
+    try {
+      // Generate a test Pro Creator code
+      const code = await storage.generateProCreatorCode();
+      res.json({ code });
+    } catch (error) {
+      console.error('Error generating test code:', error);
+      res.status(500).json({ message: 'Failed to generate test code' });
     }
   });
 
@@ -588,26 +653,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         tags = [];
       }
 
-      // Check if user is trying to sell a course (only Pro Creators can do this)
+      // Anyone can sell courses now
       const isCourse = req.body.isCourse === 'true';
       const coursePrice = parseInt(req.body.coursePrice) || 0;
-      
-      if (isCourse && coursePrice > 0) {
-        // Check if user is a Pro Creator
-        const user = await storage.getUser(creatorId);
-        if (!user || !user.isProCreator) {
-          return res.status(403).json({ 
-            message: 'Only Pro Creators can sell courses. Please apply for Pro Creator status and pay the $99/month subscription.' 
-          });
-        }
-        
-        // Check if Pro Creator subscription is still active
-        if (user.proCreatorEndsAt && new Date() > user.proCreatorEndsAt) {
-          return res.status(403).json({ 
-            message: 'Your Pro Creator subscription has expired. Please renew to continue selling courses.' 
-          });
-        }
-      }
 
       const videoData = {
         title: req.body.title,
