@@ -1,0 +1,116 @@
+Okay, so I'm going to be working in Repl.it still. Here's the system I want to create. I want to create it to basically be exactly like YouTube. So like, view count, shares, everything like that, and it'll be completely free. And then I'm going to be able to run ads on those videos. So I want to have the free streaming just exactly like YouTube. And then I want to be able to sell courses. So underneath the YouTube video, I want to be able to put that creator offers for sale so that you can buy courses down below. So instead of always saying like on YouTube, like, click down below to subscribe, you'll just say click down below to buy one of my premium videos. And that way, you know, upsells are really easy. I want to have that be a price. So it'll be $99 per month to have a pro creator account. Other than that, all accounts are free. All consumer accounts are free. But I do also want to have a $29 a month premium account, which will get you 10% off all of the courses that are for sale, as well as no ads. So that's basically how I'm going to run the platform. I want to roll this out and I want to get a bunch of people subscribed. And yeah, so high ticket courses, that kind of stuff, etc. And so, yep, I just want to roll this out and start getting people signed up. But I need to tell us all of this to Repl.it of what to make, because we're going to remake the app. So will you get me all this information set out and anything else you think I need in order to tell Repl.it to build a YouTube mixed with a course sales website?
+
+
+ChatGPT said:
+Updated saved memory
+Awesome, this is a solid, scalable plan. Here’s how you should explain the new ProFlix build to Replit (or a developer) so they can execute it cleanly:
+
+🛠️ ProFlix App Specification for Replit
+🎥 Overview:
+Build a YouTube-style video platform that allows:
+
+Free streaming of user-uploaded videos
+
+Monetization via ads
+
+Upselling courses under each video
+
+Creator subscriptions and viewer premium accounts
+
+👤 User Types:
+Viewer (Free)
+
+Watch all public videos (with ads)
+
+Option to purchase individual premium videos/courses
+
+Viewer (Premium) – $29/month
+
+No ads
+
+10% off all course purchases
+
+Creator (Free)
+
+Upload videos
+
+Participate in ad revenue (standard rules)
+
+Can’t sell courses
+
+Pro Creator – $99/month
+
+Full access to upload & sell courses (premium video products)
+
+Customize upsell links under each video
+
+📦 Core Features
+🖥️ Public Platform:
+Homepage feed with videos (sortable by trending, new, category)
+
+Each video has:
+
+View count
+
+Share button
+
+Like button
+
+Comment section
+
+Buy Course or See More from Creator button below
+
+📈 Analytics (for creators):
+Video views, engagement
+
+Revenue breakdown (ads & course sales)
+
+🛒 Course Sales System:
+Creators upload premium videos marked as “Courses”
+
+Price range: $10–$4,000
+
+Pro Creators keep 100% of sales (after Stripe fee)
+
+Stripe or PayPal payment integration
+
+💸 Ads System:
+Video ad slots (pre-roll or banner)
+
+Admin panel to upload or rotate ad inventory
+
+Track CPM + earnings
+
+🔐 Auth & Billing:
+Firebase/Auth.js/Auth0 for login (email + social login)
+
+Stripe for subscription and course checkout
+
+Store subscription tier in user database
+
+🗂️ Tech Stack:
+Frontend: React + Vite
+
+Backend: Node/Express + PostgreSQL (or Supabase)
+
+Video Storage: Upload to Cloudflare Stream, Mux, or S3 bucket
+
+Payments: Stripe
+
+Hosting: Replit (dev), Render (prod)
+
+✅ Suggested Milestones for Replit Build:
+Auth + Dashboard Setup
+
+Video Uploading + Playback System
+
+Course Sales Integration
+
+Subscriptions (Stripe Plans)
+
+Ad Management + View Tracking
+
+Creator Analytics Panel
+
+Public Site UI (search, explore, etc.)
+

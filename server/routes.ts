@@ -452,6 +452,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const id = parseInt(req.params.id);
       await storage.incrementVideoViews(id);
+      
+      // Track ad impressions for non-premium viewers
+      if (req.isAuthenticated() && req.user) {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        
+        if (!user?.isPremiumViewer) {
+          // Track ad impression and revenue for creators
+          const video = await storage.getVideo(id);
+          if (video) {
+            await storage.trackAdImpression(video.creatorId, id, 500); // $5 CPM
+          }
+        }
+      }
+      
       res.json({ message: 'View counted' });
     } catch (error) {
       console.error('Error incrementing views:', error);
@@ -724,6 +739,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error liking video:', error);
       res.status(500).json({ message: 'Failed to like video' });
+    }
+  });
+
+  // YouTube-style share tracking
+  app.post('/api/videos/:id/share', async (req, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      await storage.incrementVideoShares(videoId);
+      res.json({ message: 'Share recorded' });
+    } catch (error) {
+      console.error('Error recording share:', error);
+      res.status(500).json({ message: 'Failed to record share' });
+    }
+  });
+
+  // Course purchase with premium viewer discount
+  app.post('/api/videos/:id/purchase', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      const user = await storage.getUser(userId);
+      const video = await storage.getVideo(videoId);
+      
+      if (!video?.isCourse) {
+        return res.status(400).json({ message: 'This video is not a course' });
+      }
+      
+      // Apply 10% discount for premium viewers
+      let finalPrice = video.coursePrice;
+      if (user?.isPremiumViewer) {
+        finalPrice = Math.round(finalPrice * 0.9);
+      }
+      
+      // Create Stripe checkout session
+      const checkoutSession = await storage.createCourseCheckout(userId, videoId, finalPrice);
+      res.json({ checkoutUrl: checkoutSession.url });
+    } catch (error) {
+      console.error('Error creating course purchase:', error);
+      res.status(500).json({ message: 'Failed to create purchase' });
     }
   });
 

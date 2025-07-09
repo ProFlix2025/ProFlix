@@ -13,10 +13,10 @@ export default function Landing() {
             ProFlix
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-netflix-light-gray">
-            The Ultimate Creator Video Platform
+            YouTube-Style Free Video Platform
           </p>
           <p className="text-lg mb-12 text-netflix-light-gray max-w-2xl mx-auto">
-            Watch amazing content from talented creators or start your own channel. Join thousands of creators and viewers in our growing community.
+            Watch unlimited free videos with YouTube-style features. Like, share, comment, and subscribe to creators. Pro Creators can sell premium courses directly under their videos.
           </p>
           <Button 
             onClick={() => window.location.href = '/api/login'}

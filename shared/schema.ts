@@ -31,21 +31,23 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role").notNull().default("viewer"), // 'creator', 'viewer', 'admin'
-  creatorStatus: varchar("creator_status").default("none"), // 'none', 'pending', 'approved', 'rejected'
-  subscriptionTier: varchar("subscription_tier").default("free"), // 'free', 'basic', 'premium'
-  accountType: varchar("account_type").default("free"), // 'free' (5h), 'pro' ($199/month, 500h)
-  uploadHoursUsed: integer("upload_hours_used").default(0),
-  uploadHoursLimit: integer("upload_hours_limit").default(5), // 5 hours for free, 500 for pro
-  monthlyHoursUsed: integer("monthly_hours_used").default(0),
-  monthlyHoursLimit: integer("monthly_hours_limit").default(8), // 8 for free, 20 for basic, 100 for premium
+  role: varchar("role").notNull().default("viewer"), // 'creator', 'pro_creator', 'viewer', 'admin'
   
-  // Streaming subscription ($29/month)
-  isStreamingSubscriber: boolean("is_streaming_subscriber").default(false),
-  streamingTrialEndsAt: timestamp("streaming_trial_ends_at"),
-  streamingSubscriptionEndsAt: timestamp("streaming_subscription_ends_at"),
+  // Viewer Premium subscription ($29/month) - ad-free + 10% course discount
+  isPremiumViewer: boolean("is_premium_viewer").default(false),
+  premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
-  // Creator payment URLs for premium videos ($100-$4000)
+  // Pro Creator subscription ($99/month) - can sell courses
+  isProCreator: boolean("is_pro_creator").default(false),
+  proCreatorEndsAt: timestamp("pro_creator_ends_at"),
+  
+  // Creator earnings from ads
+  totalAdRevenue: integer("total_ad_revenue").default(0), // in cents
+  
+  // Course selling (Pro Creators only)
+  totalCourseRevenue: integer("total_course_revenue").default(0), // in cents
+  
+  // Creator payment URLs for course sales
   paypalPaymentUrl: varchar("paypal_payment_url"),
   stripePaymentUrl: varchar("stripe_payment_url"),
   subscriptionEndsAt: timestamp("subscription_ends_at"),
@@ -125,15 +127,20 @@ export const videos = pgTable("videos", {
   subcategoryId: integer("subcategory_id").notNull(),
   creatorId: varchar("creator_id").notNull(),
   
-  // 3-Tier Video Model
-  videoType: varchar("video_type").notNull().default("streaming"), // 'streaming', 'basic', 'premium'
+  // YouTube-style free videos + course upsells
+  videoType: varchar("video_type").notNull().default("free"), // 'free' for all videos
   
-  // Basic videos (< $99) - Platform handled
-  price: integer("price").default(0), // Price in cents for basic videos
+  // Course sales (Pro Creators only)
+  isCourse: boolean("is_course").default(false),
+  coursePrice: integer("course_price").default(0), // in cents
+  courseDescription: text("course_description"),
   
-  // Premium videos ($100-$4000) - Creator's own payment
-  externalPaymentUrl: varchar("external_payment_url"), // Creator's PayPal/Stripe link
-  externalPrice: integer("external_price"), // in cents for premium videos
+  // YouTube-style metrics
+  shareCount: integer("share_count").default(0),
+  
+  // Ad revenue tracking
+  adRevenue: integer("ad_revenue").default(0), // in cents
+  adImpressions: integer("ad_impressions").default(0),
   
   // Streaming requirements
   isDonatedToStreaming: boolean("is_donated_to_streaming").default(false), // Required donation
@@ -152,36 +159,62 @@ export const videos = pgTable("videos", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Course Purchases table - Updated for 3-tier model
+// Course Purchases table - YouTube-style with course upsells
 export const coursePurchases = pgTable("course_purchases", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   videoId: integer("video_id").notNull(),
-  purchaseType: varchar("purchase_type").notNull(), // 'basic', 'premium', 'streaming_subscription'
   priceAtPurchase: integer("price_at_purchase").notNull(), // Price in cents when purchased
   
-  // Revenue split based on video type
-  creatorEarnings: integer("creator_earnings").notNull(), // 70% basic, 100% premium, streaming based on watch time
-  platformEarnings: integer("platform_earnings").notNull(), // 30% basic, 0% premium, 30% streaming
+  // Pro Creators keep 100% of course sales
+  creatorEarnings: integer("creator_earnings").notNull(), // 100% of course sales
+  
+  // Premium viewer discount
+  discountApplied: integer("discount_applied").default(0), // 10% discount for premium viewers
   
   stripePaymentId: varchar("stripe_payment_id"),
-  paypalPaymentId: varchar("paypal_payment_id"), // For external premium payments
+  paypalPaymentId: varchar("paypal_payment_id"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Streaming royalties table - for $29/month subscription revenue distribution
-export const streamingRoyalties = pgTable("streaming_royalties", {
+// Ad revenue tracking for creators
+export const adRevenue = pgTable("ad_revenue", {
   id: serial("id").primaryKey(),
   creatorId: varchar("creator_id").notNull(),
   videoId: integer("video_id").notNull(),
-  month: varchar("month").notNull(), // YYYY-MM format
-  totalWatchTime: integer("total_watch_time").default(0), // in minutes
-  royaltyEarnings: integer("royalty_earnings").default(0), // 70% of revenue based on watch time
+  date: timestamp("date").defaultNow(),
+  impressions: integer("impressions").default(0),
+  earnings: integer("earnings").default(0), // in cents
+  cpm: integer("cpm").default(0), // cost per mille in cents
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Pro account subscriptions table - $199/month for 500h uploads
-export const proSubscriptions = pgTable("pro_subscriptions", {
+// Ads inventory table
+export const ads = pgTable("ads", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  description: text("description"),
+  imageUrl: varchar("image_url"),
+  targetUrl: varchar("target_url").notNull(),
+  isActive: boolean("is_active").default(true),
+  cpmRate: integer("cpm_rate").default(500), // $5 CPM in cents
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Premium viewer subscriptions table - $29/month for ad-free + discounts
+export const premiumSubscriptions = pgTable("premium_subscriptions", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  stripeSubscriptionId: varchar("stripe_subscription_id"),
+  status: varchar("status").default("active"), // 'active', 'cancelled', 'expired'
+  startDate: timestamp("start_date").defaultNow(),
+  endDate: timestamp("end_date"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Pro Creator subscriptions table - $99/month for course selling
+export const proCreatorSubscriptions = pgTable("pro_creator_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
   stripeSubscriptionId: varchar("stripe_subscription_id"),

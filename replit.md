@@ -1,41 +1,46 @@
-# ProFlix - 3-Tier Video Monetization Platform
+# ProFlix - YouTube-Style Free Video Platform with Course Monetization
 
 ## Overview
 
-ProFlix is a Netflix-style video platform with a sophisticated 3-tier monetization system that maximizes revenue for both creators and the platform. Creators can monetize through streaming royalties, direct sales, and premium courses while viewers access content through subscriptions or individual purchases.
+ProFlix is a YouTube-style free video platform where users can upload, watch, and share videos with view counts, likes, comments, and sharing features. The platform monetizes through ads on free content and allows Pro Creators to sell premium courses as upsells underneath their videos.
 
-### 3-Tier Video Model
+### Monetization Model
 
-**1. Streaming Videos (Subscription)**
-- $29/month unlimited access (1-month free trial)
-- All creators must donate 1 video to streaming library
-- 70% of subscription revenue distributed to creators based on watch time
-- Platform keeps 30%
+**Free Video Streaming**
+- Completely free to watch all content (like YouTube)
+- Ad-supported revenue model
+- View counts, likes, shares, comments
+- Creators earn from ad revenue share
 
-**2. Basic Videos (< $99)**
-- Direct sales through platform payment processing
-- Platform takes 30% commission
-- Creator keeps 70%
-- Also available to streaming subscribers
+**Course Sales System**
+- Pro Creators can sell premium courses ($10-$4,000)
+- Course purchase buttons appear under each video
+- Creators keep 100% of course sales (after payment processing)
+- Integration with Stripe/PayPal for payments
 
-**3. Premium Videos ($100-$4,000)**
-- High-ticket courses and bundles
-- Creators use their own PayPal/Stripe checkout links
-- Creator keeps 100% of revenue
-- Platform hosts content but takes no commission
+### User Account Tiers
 
-### Creator Account Tiers
+**Viewer (Free)**
+- Watch all videos with ads
+- Can purchase individual courses
+- Full access to platform features
 
-**Free Creators**
-- Up to 5 hours of video uploads
-- Can sell basic and premium videos
-- Must donate 1 video to streaming
-
-**Pro Creators ($199/month)**
-- Up to 500 hours of video uploads
-- Full creator dashboard and analytics
-- Advanced course building tools
+**Viewer (Premium) - $29/month**
+- Ad-free viewing experience
+- 10% discount on all course purchases
 - Priority support
+
+**Creator (Free)**
+- Upload unlimited videos
+- Participate in ad revenue sharing
+- Cannot sell courses
+- Basic analytics
+
+**Pro Creator - $99/month**
+- Upload unlimited videos
+- Full course selling capabilities
+- Advanced analytics and creator dashboard
+- Custom upsell links under videos
 
 ## System Architecture
 
@@ -172,6 +177,16 @@ Changelog:
   - Added "FREE PREVIEW" badges to video cards when creators enable preview option
   - Created comprehensive Privacy Policy page (effective January 07, 2025) and added to footer
   - Enhanced video player with preview monitoring and purchase verification functionality
+- January 08, 2025. Major Platform Redesign: Transformed to YouTube-style free platform with course monetization
+  - **Complete Model Change**: From premium course marketplace to free video platform with ads
+  - **Free Video Streaming**: All videos now free to watch with YouTube-style features (likes, shares, comments, views)
+  - **Ad-Supported Revenue**: Creators earn from ad revenue sharing on their videos
+  - **Course Upsells**: Pro Creators ($99/month) can sell premium courses ($10-$4,000) under videos
+  - **Premium Viewers**: $29/month subscription for ad-free viewing + 10% course discounts
+  - **New User Tiers**: Viewer (Free), Premium Viewer ($29/month), Creator (Free), Pro Creator ($99/month)
+  - **Database Schema Update**: Added ad revenue tracking, course sales, premium subscriptions
+  - **YouTube-Style Video Player**: New video player with ads, course upsells, and social features
+  - **Updated Landing Page**: Now describes YouTube-style functionality instead of premium platform
 
 ## User Preferences
 
