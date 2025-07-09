@@ -1,0 +1,367 @@
+So I've asked Repl.it to create an admin dashboard for me, and it's going to allow me to get a code generator to send out my codes. 99 bucks a month is the Creator Pro. I decided to let anybody become a Creator Pro as long as they have the $99 a month and sell courses. Now, I'm going to be doing $8.97 for a full year, and that is something I'm going to be sending out to thousands of creators just to incentivize them to come post on this website. And that way, I can have that major, major element there. I also haven't asked it yet, but I want to create a referral system where if they refer somebody and they sign up within the next 14 days, the person will also get an additional $8.97 credit for an extra year for somebody who signs up as a pro. And then maybe the pro gets, I don't know, a 90-day trial or something like that for the referral. So besides that, I also want to create— I also asked it to create analytics so that I understand who my top creators are and that I can remove any creator at any time and that type of stuff. And then I also asked it for, yeah, basically analytics, financials, what times of day are the most popular, what creators are the most popular. What else should I ask here?
+
+
+ChatGPT said:
+You're off to a solid start with the Creator Pro rollout, referral system, and admin dashboard. To make sure you fully leverage this opportunity and avoid future tech debt, here are 13 essential features and upgrades you should also ask Replit to build:
+
+🧩 1. Referral System Logic (Full Scope)
+Ask for a complete referral system including:
+
+Referral link or code per user
+
+Tracks signups and link clicks
+
+Auto-applies bonuses:
+
+$8.97 credit to new Creator Pro
+
+90-day extension or Stripe discount to the referrer
+
+Referral tracking in dashboard
+
+Fraud prevention (one IP, one reward)
+
+📊 2. Detailed Analytics Module
+You mentioned top creators, but also include:
+
+Creator video heatmaps (avg watch time)
+
+Conversion rate per video (views → course purchases)
+
+Revenue per creator
+
+Monthly recurring revenue (MRR)
+
+Churn rate on Creator Pro accounts
+
+Daily new users, both viewer and creator types
+
+Filter by date range
+
+🧑‍💻 3. Admin Moderation Tools
+Ask for:
+
+Suspend or delete any creator
+
+Shadowban (removes public visibility)
+
+View all course uploads by user
+
+Flagged content queue (from user reports)
+
+Email or in-app message creator directly
+
+🔐 4. Subscription Enforcement
+Ensure:
+
+Uploads and course sales disabled if a Pro account lapses
+
+Stripe webhook auto-removes Creator Pro tag on failed payment
+
+💸 5. Coupon Generator / Promo Engine
+You mentioned sending out $8.97 deals—formalize this:
+
+Admin can generate batch discount codes
+
+Choose expiry, usage limits, amount off, or override to $8.97
+
+Track which creator used which code
+
+Integrate code use with Stripe checkout
+
+📬 6. In-App Notification System
+For:
+
+“Your Creator Pro has been activated”
+
+“Your referral just signed up”
+
+“Your video hit 1,000 views”
+
+Admin announcements (e.g. policy updates)
+
+🧾 7. Financial Payout Log
+Ask Replit to include:
+
+Payouts dashboard for Pro creators
+
+Stripe Connect integration OR manual payout tracking (to start)
+
+Export CSV of creator earnings for tax season
+
+Admin override to mark as paid/unpaid
+
+📥 8. Bulk Import Tool
+Allow bulk uploading of creators/courses during early outreach:
+
+CSV import of creators (name, email, discount code applied, etc.)
+
+Bulk email invitation (SMTP or Mailgun optional later)
+
+📋 9. Creator Verification (Optional)
+Even if anyone can pay $99/month, you might want:
+
+Verified Creator badge after email/phone/ID check
+
+Filter search by verified creators
+
+🎛️ 10. Dynamic Feature Flags
+Ask for the ability to toggle features on/off without redeploying:
+
+Referral program
+
+Discounts
+
+Analytics modules
+
+Creator limiters (e.g., number of uploads)
+
+🏷️ 11. Tags + Categories
+Improve discoverability:
+
+Videos and courses can be tagged
+
+Add filters to explore by category (e.g., Fitness, Marketing, Tech)
+
+Analytics by category (e.g., “Fitness courses earn 25% more”)
+
+🔄 12. Cross-Promotion Engine
+Ask for:
+
+"Similar Courses" box on every video page
+
+Auto-suggested creators to follow
+
+Randomized featured video rotation on homepage
+
+🛠️ 13. Test Mode + Debug Tools
+For easier QA:
+
+Enable test mode where payments aren’t live
+
+Admin dashboard can view:
+
+Logs for all webhooks (Stripe, etc.)
+
+Console errors from video page
+
+User impersonation tool (view site as a specific user)
+
+Let me know and I’ll turn all this into a structured doc or admin requirements sheet you can copy/paste directly into Replit. Would you like that now?
+
+
+
+
+
+
+
+
+You said:
+It's $897 for a 12-month subscription or $99 a month. So that's the Creator Pro account.
+
+
+ChatGPT said:
+Perfect — here's how you can clarify the pricing model and structure it clearly for Replit, along with how this should integrate into your backend logic, frontend display, referral system, and Stripe billing.
+
+🧾 ProFlix Creator Pro Pricing Breakdown
+⚙️ This should be implemented in Replit’s backend and admin dashboard logic.
+
+💳 Pricing Tiers
+✅ Monthly Subscription
+$99/month
+
+Auto-renews
+
+Includes:
+
+Unlimited uploads
+
+Ability to sell high-ticket video courses
+
+Priority support
+
+Access to analytics dashboard
+
+Option to earn referral bonuses
+
+✅ Annual Plan (Discounted)
+$897/year
+
+One-time payment
+
+25%+ discount (~$75/month)
+
+Same features as monthly
+
+Only available via:
+
+Admin-issued coupon
+
+Special marketing page
+
+Referral-triggered discount window (14-day expiration)
+
+💰 Stripe Integration Requirements
+Two products in Stripe:
+
+creator_pro_monthly → $99/month
+
+creator_pro_annual → $897/year
+
+Coupons/Promo Codes:
+
+Allow discounting creator_pro_annual to $8.97 one-time via code (limit 1 per user)
+
+Support tracking code usage and referral origin
+
+Auto-upgrade user to Creator Pro on successful payment
+
+Auto-restrict access if payment fails or subscription ends
+
+🎁 Referral Bonus Logic (to add in backend)
+If user A invites user B:
+
+User B gets 14 days to redeem $8.97/yr deal
+
+If redeemed:
+
+User A receives 90 extra days of Pro (extend current sub or delay renewal)
+
+Limit 10 active referral bonuses per user to prevent abuse
+
+🧩 Frontend Display (Replit should create UI for):
+Billing page with two subscription options:
+
+$99/month button
+
+$897/year button (+ “Save 25%” badge)
+
+Redeem code section
+
+Field to enter coupon/referral code
+
+Shows applied discount or message if expired
+
+Referral page in user dashboard:
+
+Shareable referral link
+
+“You’ve earned X days of free Creator Pro” display
+
+Status of referrals (signed up, paid, activated, etc.)
+
+👤 Admin Panel Features (for Creator Pro Management)
+Search by email and:
+
+View subscription status (monthly/annual/discounted)
+
+Revoke or extend manually
+
+Issue $8.97 deal manually
+
+Export creator payment history
+
+Would you like me to generate a spec sheet, code outline, or Stripe product setup next?
+
+
+
+
+
+
+
+
+You said:
+Okay, I also need to ask for the creator's ID to verify that they're 18 plus, and also just so that I have their ID and everything. So that's something that I want to do. And then I also want to have like, you know, a little bit more information about what's in their video. Like they can't have anything like homophobic or sexist or racist or, you know, that would prevent people from, you know, disabilities for, you know, doing what they're doing, et cetera. So, you know, that kind of stuff just for some legal protection and that they are taking full liability for whatever's in their videos, that we're not liable for any of it, that they claim that they're an industry expert and that we are, you know, allowing them to come on our platform as an industry expert in order to teach and sell courses.
+
+
+ChatGPT said:
+Perfect — this is a critical compliance and liability protection layer for your platform. Here's exactly how to instruct Replit to implement it, both on the technical side and in terms of legal protection.
+
+✅ Creator Verification & Compliance Requirements for ProFlix
+🔐 These should be implemented in the Creator onboarding flow and admin panel.
+
+🪪 1. Government ID Verification (18+)
+Step in Creator Pro signup (mandatory before uploading or selling content).
+
+Fields to collect:
+
+Full legal name
+
+Date of birth
+
+Upload government-issued photo ID (passport, driver’s license, etc.)
+
+Selfie with ID (optional but ideal for fraud prevention)
+
+Store securely with limited access (use encrypted cloud storage, NOT public S3).
+
+Admin dashboard must show uploaded ID files for verification or audit.
+
+Optional: Integrate with 3rd-party age/identity verification APIs later (e.g. Stripe Identity, Persona, or IDVerify).
+
+📜 2. Legal Acknowledgement & Creator Agreement
+Replit should build a mandatory e-signature step (or checkbox with timestamp) in the Creator onboarding flow:
+
+Legal Terms Creators Must Agree To:
+✅ I certify I am at least 18 years old.
+
+✅ I am the original creator and owner of all videos I upload.
+
+✅ I agree not to post any content that:
+
+Contains racist, sexist, or homophobic language
+
+Promotes violence or illegal activities
+
+Discriminates against individuals based on disability, gender, race, or religion
+
+✅ I understand I am solely responsible for the content I publish.
+
+✅ I represent myself as an industry expert or qualified educator.
+
+✅ I acknowledge that ProFlix is not liable for the accuracy, safety, or results of my teachings.
+
+✅ I release and indemnify ProFlix from any legal claims resulting from my content.
+
+📍This agreement must be stored with:
+
+Timestamp
+
+IP address (for legal backup)
+
+Associated user ID
+
+📦 3. Video Upload Metadata & Compliance Review
+Every uploaded video must include:
+
+✅ Title
+
+✅ Description
+
+✅ Category
+
+✅ Tags (at least 3)
+
+✅ Checkbox: “This video complies with ProFlix community standards.”
+
+✅ Optional: “Mark as sensitive content” (flagged for manual admin review)
+
+Admin panel should show upload queue and allow flagging or removal.
+
+🧠 Bonus: Suggested Admin Dashboard Features
+Flag videos for review (community or auto-detection in the future)
+
+Ban or suspend users who violate content rules
+
+View ID verification status
+
+Search/filter users by:
+
+Verified
+
+ID submitted
+
+Active Creator Pro
+
+Reported
+

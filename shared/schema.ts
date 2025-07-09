@@ -60,6 +60,20 @@ export const users = pgTable("users", {
   purchasePin: varchar("purchase_pin", { length: 6 }), // 6-digit PIN for quick purchases
   stripeCustomerId: varchar("stripe_customer_id"), // Stripe customer ID for saved cards
   defaultPaymentMethod: varchar("default_payment_method"), // Default saved card ID
+  
+  // ID Verification fields (18+ compliance)
+  isIdVerified: boolean("is_id_verified").default(false),
+  idVerificationStatus: varchar("id_verification_status").default("pending"), // pending, approved, rejected
+  idDocumentUrl: varchar("id_document_url"),
+  idSelfieUrl: varchar("id_selfie_url"),
+  legalName: varchar("legal_name"),
+  dateOfBirth: varchar("date_of_birth"), // Store as string for privacy
+  
+  // Legal Agreement (Creator Terms)
+  hasSignedCreatorAgreement: boolean("has_signed_creator_agreement").default(false),
+  creatorAgreementSignedAt: timestamp("creator_agreement_signed_at"),
+  creatorAgreementIpAddress: varchar("creator_agreement_ip_address"),
+  
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

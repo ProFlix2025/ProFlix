@@ -127,13 +127,22 @@ export default function AdminDashboard() {
               </p>
             </div>
           </div>
-          <Button 
-            onClick={() => window.location.href = '/admin/codes'}
-            className="bg-netflix-red hover:bg-red-700"
-          >
-            <Settings className="w-4 h-4 mr-2" />
-            Code Generator
-          </Button>
+          <div className="flex gap-2">
+            <Button 
+              onClick={() => window.location.href = '/admin/verifications'}
+              className="bg-blue-600 hover:bg-blue-700"
+            >
+              <CheckCircle className="w-4 h-4 mr-2" />
+              Verifications
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/admin/codes'}
+              className="bg-netflix-red hover:bg-red-700"
+            >
+              <Settings className="w-4 h-4 mr-2" />
+              Code Generator
+            </Button>
+          </div>
         </div>
 
         <Tabs defaultValue="analytics" className="w-full">

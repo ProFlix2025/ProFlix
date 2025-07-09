@@ -1048,6 +1048,61 @@ export class DatabaseStorage implements IStorage {
       throw error;
     }
   }
+
+  // Creator verification operations
+  async submitCreatorVerification(
+    userId: string,
+    data: {
+      legalName: string;
+      dateOfBirth: string;
+      signatureName: string;
+      idDocumentUrl: string;
+      idSelfieUrl?: string;
+      ipAddress: string;
+    }
+  ): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        legalName: data.legalName,
+        dateOfBirth: data.dateOfBirth,
+        idDocumentUrl: data.idDocumentUrl,
+        idSelfieUrl: data.idSelfieUrl,
+        hasSignedCreatorAgreement: true,
+        creatorAgreementSignedAt: new Date(),
+        creatorAgreementIpAddress: data.ipAddress,
+        idVerificationStatus: "pending",
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async updateIdVerificationStatus(
+    userId: string,
+    status: "pending" | "approved" | "rejected"
+  ): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        idVerificationStatus: status,
+        isIdVerified: status === "approved",
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async getPendingVerifications(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(eq(users.idVerificationStatus, "pending"));
+  }
 }
 
 export const storage = new DatabaseStorage();

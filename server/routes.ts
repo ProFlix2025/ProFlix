@@ -299,6 +299,115 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator verification routes
+  app.post('/api/creator/verify', isAuthenticated, upload.fields([
+    { name: 'idDocument', maxCount: 1 },
+    { name: 'idSelfie', maxCount: 1 }
+  ]), async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { 
+        legalName, 
+        dateOfBirth, 
+        signatureName,
+        ageConfirmation,
+        contentOwnership,
+        nondiscrimination,
+        responsibilityWaiver,
+        indemnificationClause
+      } = req.body;
+
+      // Validate required fields
+      if (!legalName || !dateOfBirth || !signatureName) {
+        return res.status(400).json({ error: 'Missing required fields' });
+      }
+
+      // Validate legal agreements
+      if (!ageConfirmation || !contentOwnership || !nondiscrimination || 
+          !responsibilityWaiver || !indemnificationClause) {
+        return res.status(400).json({ error: 'All legal agreements must be accepted' });
+      }
+
+      // Validate files
+      if (!req.files?.idDocument?.[0]) {
+        return res.status(400).json({ error: 'ID document is required' });
+      }
+
+      const idDocumentUrl = `/uploads/${req.files.idDocument[0].filename}`;
+      const idSelfieUrl = req.files.idSelfie?.[0] ? `/uploads/${req.files.idSelfie[0].filename}` : undefined;
+
+      // Calculate age
+      const birthDate = new Date(dateOfBirth);
+      const today = new Date();
+      let age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+      
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        return res.status(400).json({ error: 'You must be at least 18 years old to become a creator' });
+      }
+
+      const user = await storage.submitCreatorVerification(userId, {
+        legalName,
+        dateOfBirth,
+        signatureName,
+        idDocumentUrl,
+        idSelfieUrl,
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+      });
+
+      res.json({ 
+        message: 'Verification submitted successfully',
+        status: 'pending',
+        user: {
+          id: user.id,
+          legalName: user.legalName,
+          idVerificationStatus: user.idVerificationStatus,
+          hasSignedCreatorAgreement: user.hasSignedCreatorAgreement,
+        }
+      });
+    } catch (error) {
+      console.error('Error submitting creator verification:', error);
+      res.status(500).json({ error: 'Failed to submit verification' });
+    }
+  });
+
+  // Admin verification management
+  app.get('/api/admin/verifications', async (req, res) => {
+    try {
+      const pendingVerifications = await storage.getPendingVerifications();
+      res.json(pendingVerifications);
+    } catch (error) {
+      console.error('Error fetching pending verifications:', error);
+      res.status(500).json({ message: 'Failed to fetch pending verifications' });
+    }
+  });
+
+  app.post('/api/admin/verifications/:userId/approve', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const user = await storage.updateIdVerificationStatus(userId, 'approved');
+      res.json({ message: 'Verification approved', user });
+    } catch (error) {
+      console.error('Error approving verification:', error);
+      res.status(500).json({ message: 'Failed to approve verification' });
+    }
+  });
+
+  app.post('/api/admin/verifications/:userId/reject', async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const user = await storage.updateIdVerificationStatus(userId, 'rejected');
+      res.json({ message: 'Verification rejected', user });
+    } catch (error) {
+      console.error('Error rejecting verification:', error);
+      res.status(500).json({ message: 'Failed to reject verification' });
+    }
+  });
+
   // Course purchase routes
   app.post('/api/courses/:videoId/purchase', isAuthenticated, async (req: any, res) => {
     try {
