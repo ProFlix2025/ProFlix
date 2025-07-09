@@ -308,24 +308,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { 
         legalName, 
+        email,
+        residentialAddress,
         dateOfBirth, 
         signatureName,
+        socialMediaLinks,
+        publishedArticles,
+        teachingQualifications,
+        professionalExperience,
         ageConfirmation,
         contentOwnership,
         nondiscrimination,
         responsibilityWaiver,
-        indemnificationClause
+        indemnificationClause,
+        comprehensiveAgreement
       } = req.body;
 
       // Validate required fields
-      if (!legalName || !dateOfBirth || !signatureName) {
-        return res.status(400).json({ error: 'Missing required fields' });
+      if (!legalName || !email || !residentialAddress || !dateOfBirth || !signatureName ||
+          !socialMediaLinks || !teachingQualifications || !professionalExperience) {
+        return res.status(400).json({ error: 'All required fields must be completed including teaching qualifications' });
       }
 
       // Validate legal agreements
       if (!ageConfirmation || !contentOwnership || !nondiscrimination || 
-          !responsibilityWaiver || !indemnificationClause) {
-        return res.status(400).json({ error: 'All legal agreements must be accepted' });
+          !responsibilityWaiver || !indemnificationClause || !comprehensiveAgreement) {
+        return res.status(400).json({ error: 'All legal agreements must be accepted including comprehensive agreement' });
       }
 
       // Validate files
@@ -333,8 +341,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: 'ID document is required' });
       }
 
+      if (!req.files?.idSelfie?.[0]) {
+        return res.status(400).json({ error: 'Selfie with ID is required' });
+      }
+
       const idDocumentUrl = `/uploads/${req.files.idDocument[0].filename}`;
-      const idSelfieUrl = req.files.idSelfie?.[0] ? `/uploads/${req.files.idSelfie[0].filename}` : undefined;
+      const idSelfieUrl = `/uploads/${req.files.idSelfie[0].filename}`;
 
       // Calculate age
       const birthDate = new Date(dateOfBirth);
@@ -352,8 +364,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const user = await storage.submitCreatorVerification(userId, {
         legalName,
+        email,
+        residentialAddress,
         dateOfBirth,
         signatureName,
+        socialMediaLinks,
+        publishedArticles,
+        teachingQualifications,
+        professionalExperience,
         idDocumentUrl,
         idSelfieUrl,
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
@@ -541,6 +559,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: 'Database schema initialization failed',
         error: error.message
       });
+    }
+  });
+
+  // Video reporting routes
+  app.post("/api/report-video", async (req, res) => {
+    try {
+      const reportData = {
+        ...req.body,
+        reporterIp: req.ip || req.connection.remoteAddress || 'unknown',
+        reporterUserAgent: req.get('User-Agent') || 'unknown',
+      };
+      
+      const report = await storage.createVideoReport(reportData);
+      
+      // Log security event
+      await storage.logSecurityEvent({
+        userId: req.user?.id || null,
+        action: 'video_report',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        details: JSON.stringify({ videoId: reportData.videoId, reportType: reportData.reportType }),
+        success: true,
+      });
+      
+      res.json(report);
+    } catch (error) {
+      console.error("Error creating video report:", error);
+      res.status(500).json({ message: "Failed to create video report" });
+    }
+  });
+
+  // Admin routes for video reports
+  app.get("/api/admin/reports", async (req, res) => {
+    try {
+      const reports = await storage.getAllVideoReports();
+      res.json(reports);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  app.post("/api/admin/reports/:reportId/approve", async (req, res) => {
+    try {
+      const { reportId } = req.params;
+      await storage.updateVideoReportStatus(reportId, "approved", req.user?.id || 'admin');
+      
+      // Log admin action
+      await storage.logSecurityEvent({
+        userId: req.user?.id || 'admin',
+        action: 'approve_report',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        details: JSON.stringify({ reportId }),
+        success: true,
+      });
+      
+      res.json({ message: "Report approved successfully" });
+    } catch (error) {
+      console.error("Error approving report:", error);
+      res.status(500).json({ message: "Failed to approve report" });
+    }
+  });
+
+  app.post("/api/admin/reports/:reportId/reject", async (req, res) => {
+    try {
+      const { reportId } = req.params;
+      await storage.updateVideoReportStatus(reportId, "rejected", req.user?.id || 'admin');
+      
+      // Log admin action
+      await storage.logSecurityEvent({
+        userId: req.user?.id || 'admin',
+        action: 'reject_report',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        details: JSON.stringify({ reportId }),
+        success: true,
+      });
+      
+      res.json({ message: "Report rejected successfully" });
+    } catch (error) {
+      console.error("Error rejecting report:", error);
+      res.status(500).json({ message: "Failed to reject report" });
     }
   });
 

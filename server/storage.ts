@@ -15,6 +15,9 @@ import {
   sharedVideos,
   adRevenue,
   proCreatorCodes,
+  videoReports,
+  rateLimits,
+  securityLogs,
   type User,
   type UpsertUser,
   type Category,
@@ -46,6 +49,12 @@ import {
   type InsertAdRevenue,
   type ProCreatorCode,
   type InsertProCreatorCode,
+  type VideoReport,
+  type InsertVideoReport,
+  type RateLimit,
+  type InsertRateLimit,
+  type SecurityLog,
+  type InsertSecurityLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count } from "drizzle-orm";
@@ -167,6 +176,18 @@ export interface IStorage {
   addToWatchHistory(userId: string, videoId: number, watchTime?: number): Promise<WatchHistory>;
   getWatchHistory(userId: string, limit?: number): Promise<Video[]>;
   clearWatchHistory(userId: string): Promise<void>;
+  
+  // Security and reporting operations
+  createVideoReport(reportData: InsertVideoReport): Promise<VideoReport>;
+  getAllVideoReports(): Promise<VideoReport[]>;
+  updateVideoReportStatus(reportId: string, status: string, reviewedBy: string): Promise<void>;
+  logSecurityEvent(eventData: InsertSecurityLog): Promise<void>;
+  checkRateLimit(identifier: string, action: string, maxAttempts: number, windowMinutes: number): Promise<boolean>;
+  
+  // Creator verification operations
+  submitCreatorVerification(userId: string, data: any): Promise<User>;
+  getPendingVerifications(): Promise<User[]>;
+  updateIdVerificationStatus(userId: string, status: string): Promise<User>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1054,10 +1075,16 @@ export class DatabaseStorage implements IStorage {
     userId: string,
     data: {
       legalName: string;
+      email: string;
+      residentialAddress: string;
       dateOfBirth: string;
       signatureName: string;
+      socialMediaLinks: string;
+      publishedArticles?: string;
+      teachingQualifications: string;
+      professionalExperience: string;
       idDocumentUrl: string;
-      idSelfieUrl?: string;
+      idSelfieUrl: string;
       ipAddress: string;
     }
   ): Promise<User> {
@@ -1065,7 +1092,13 @@ export class DatabaseStorage implements IStorage {
       .update(users)
       .set({
         legalName: data.legalName,
+        email: data.email,
+        residentialAddress: data.residentialAddress,
         dateOfBirth: data.dateOfBirth,
+        socialMediaLinks: data.socialMediaLinks,
+        publishedArticles: data.publishedArticles,
+        teachingQualifications: data.teachingQualifications,
+        professionalExperience: data.professionalExperience,
         idDocumentUrl: data.idDocumentUrl,
         idSelfieUrl: data.idSelfieUrl,
         hasSignedCreatorAgreement: true,
@@ -1102,6 +1135,83 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(users)
       .where(eq(users.idVerificationStatus, "pending"));
+  }
+
+  // Security and reporting operations
+  async createVideoReport(reportData: InsertVideoReport): Promise<VideoReport> {
+    const [report] = await db
+      .insert(videoReports)
+      .values(reportData)
+      .returning();
+    return report;
+  }
+
+  async getAllVideoReports(): Promise<VideoReport[]> {
+    return await db
+      .select()
+      .from(videoReports)
+      .orderBy(desc(videoReports.createdAt));
+  }
+
+  async updateVideoReportStatus(
+    reportId: string,
+    status: string,
+    reviewedBy: string
+  ): Promise<void> {
+    await db
+      .update(videoReports)
+      .set({
+        status,
+        reviewedBy,
+        reviewedAt: new Date(),
+      })
+      .where(eq(videoReports.id, parseInt(reportId)));
+  }
+
+  async logSecurityEvent(eventData: InsertSecurityLog): Promise<void> {
+    await db.insert(securityLogs).values(eventData);
+  }
+
+  async checkRateLimit(
+    identifier: string,
+    action: string,
+    maxAttempts: number,
+    windowMinutes: number
+  ): Promise<boolean> {
+    const windowStart = new Date(Date.now() - windowMinutes * 60 * 1000);
+    
+    const [existingLimit] = await db
+      .select()
+      .from(rateLimits)
+      .where(
+        and(
+          eq(rateLimits.identifier, identifier),
+          eq(rateLimits.action, action),
+          sql`${rateLimits.windowStart} > ${windowStart}`
+        )
+      );
+
+    if (existingLimit) {
+      if (existingLimit.attempts >= maxAttempts) {
+        return false; // Rate limit exceeded
+      }
+      
+      // Update attempt count
+      await db
+        .update(rateLimits)
+        .set({ attempts: existingLimit.attempts + 1 })
+        .where(eq(rateLimits.id, existingLimit.id));
+    } else {
+      // Create new rate limit record
+      await db.insert(rateLimits).values({
+        identifier,
+        action,
+        attempts: 1,
+        windowStart: new Date(),
+      });
+    }
+
+    return true; // Within rate limit
   }
 }
 

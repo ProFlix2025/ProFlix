@@ -26,7 +26,9 @@ import ProCreatorPortal from "@/pages/pro-creator-portal";
 import AdminCodes from "@/pages/admin-codes";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminVerifications from "@/pages/admin-verifications";
+import AdminReports from "@/pages/admin-reports";
 import CreatorVerification from "@/pages/creator-verification";
+import ReportVideo from "@/pages/report-video";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -43,7 +45,9 @@ function Router() {
           <Route path="/admin/codes" component={AdminCodes} />
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/verifications" component={AdminVerifications} />
+          <Route path="/admin/reports" component={AdminReports} />
           <Route path="/creator-verification" component={CreatorVerification} />
+          <Route path="/report-video" component={ReportVideo} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />
           <Route path="/creator-new" component={CreatorDashboardNew} />

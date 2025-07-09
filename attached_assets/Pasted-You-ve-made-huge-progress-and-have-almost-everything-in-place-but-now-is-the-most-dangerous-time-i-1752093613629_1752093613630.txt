@@ -1,0 +1,122 @@
+You’ve made huge progress and have almost everything in place — but now is the most dangerous time in a build: when it looks complete but still has hidden risks that could break in production.
+
+Here’s a clear list of potential problems you should watch for — and exactly what to do to prevent them:
+
+⚠️ 1. Legal & Compliance Oversight
+🚩 Problem:
+Your platform is now collecting ID data and allowing public course sales. Without legal structure, you're exposed to liability and privacy violations (especially in EU/CA states with GDPR/CCPA laws).
+
+✅ Fix:
+Draft and link these legal docs before launch:
+
+✅ Privacy Policy
+
+✅ Terms of Use (clearly disclaims liability)
+
+✅ Creator Agreement (signed digitally)
+
+Add a checkbox + timestamp consent to the Creator Verification form
+
+If storing IDs, use secure cloud storage with encryption (e.g., AWS S3 w/ private ACL)
+
+⚠️ 2. Security & Abuse Prevention
+🚩 Problem:
+If anyone can upload, malicious users might:
+
+Upload pirated content or illegal material
+
+Spam videos to game the system
+
+Sell fake or misleading courses
+
+✅ Fix:
+Add manual approval for new Creator Pro accounts (optional)
+
+Add a “Report Video” feature for users
+
+Limit video upload rate (e.g., max 3/day)
+
+Log IP address & user agent during uploads and course purchases
+
+⚠️ 3. Storage & Bandwidth Overload
+🚩 Problem:
+Hosting user-uploaded videos yourself (not on YouTube/CDN) could crash the app or run up Render/storage costs quickly.
+
+✅ Fix:
+Offload video uploads to:
+
+🟢 Mux (best choice for monetized video platforms)
+
+🟡 Vimeo Pro
+
+🔴 At minimum: AWS S3 + Cloudfront
+
+Ensure all uploads are streamed (not downloaded)
+
+⚠️ 4. Payment System Fraud or Failure
+🚩 Problem:
+Without webhook validation, Stripe payments may fail silently or get spoofed.
+
+✅ Fix:
+Add Stripe webhook validation (/api/webhooks/stripe)
+
+Log all payment success/failures
+
+Cancel Pro access if payment fails
+
+Mark Stripe IDs in the database per user
+
+⚠️ 5. Scaling Risks
+🚩 Problem:
+If you go viral or onboard 500+ creators quickly:
+
+DB queries might become slow
+
+Static hosting or Render instance might time out or go over memory
+
+✅ Fix:
+Add indexing to the users, videos, and sales tables
+
+Use a logging system (e.g. Logtail or LogRocket)
+
+Enable lazy loading and pagination in admin pages
+
+Auto-backup your DB weekly via Render settings
+
+⚠️ 6. No Email Verification or Login Limits
+🚩 Problem:
+Anyone can create fake accounts with disposable emails or brute-force login
+
+✅ Fix:
+Add email verification during signup
+
+Add rate-limiting or captcha to login/signup forms
+
+Add admin ability to ban emails/IPs
+
+⚠️ 7. Lack of Unit Tests or Deployment Tests
+🚩 Problem:
+You have no automated test coverage. One change could silently break something (e.g. code gen, Stripe, creator uploads).
+
+✅ Fix:
+Add one test file for:
+
+Creator Pro purchase
+
+Course upload
+
+Admin removal
+
+Use something like Vitest or Jest for quick test coverage
+
+🛡️ Final Suggestions:
+Create a staging subdomain (staging.proflix.app) before fully going live.
+
+Write an onboarding guide for your future VA/moderator team to review videos, verify IDs, and approve new creators.
+
+Test the full funnel from:
+
+Visiting as a guest → watching video
+
+Upgrading to Creator Pro → uploading video → buying course
+

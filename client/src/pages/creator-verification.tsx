@@ -30,15 +30,23 @@ export default function CreatorVerification() {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     legalName: "",
+    email: "",
+    residentialAddress: "",
     dateOfBirth: "",
     idDocument: null as File | null,
     idSelfie: null as File | null,
+    // Teaching qualifications verification
+    socialMediaLinks: "",
+    publishedArticles: "",
+    teachingQualifications: "",
+    professionalExperience: "",
     // Legal agreement checkboxes
     ageConfirmation: false,
     contentOwnership: false,
     nondiscrimination: false,
     responsibilityWaiver: false,
     indemnificationClause: false,
+    comprehensiveAgreement: false, // New comprehensive legal agreement
     signatureName: "",
     ipAddress: "",
   });
@@ -80,20 +88,23 @@ export default function CreatorVerification() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.legalName || !formData.dateOfBirth || !formData.idDocument || !formData.signatureName) {
+    if (!formData.legalName || !formData.email || !formData.residentialAddress || 
+        !formData.dateOfBirth || !formData.idDocument || !formData.idSelfie || 
+        !formData.socialMediaLinks || !formData.teachingQualifications || 
+        !formData.professionalExperience || !formData.signatureName) {
       toast({
         title: "Missing Information",
-        description: "Please fill in all required fields",
+        description: "Please fill in all required fields including teaching qualifications and social media verification",
         variant: "destructive",
       });
       return;
     }
 
     if (!formData.ageConfirmation || !formData.contentOwnership || !formData.nondiscrimination || 
-        !formData.responsibilityWaiver || !formData.indemnificationClause) {
+        !formData.responsibilityWaiver || !formData.indemnificationClause || !formData.comprehensiveAgreement) {
       toast({
         title: "Legal Agreement Required",
-        description: "Please agree to all terms and conditions",
+        description: "Please agree to all terms and conditions including the comprehensive agreement",
         variant: "destructive",
       });
       return;
@@ -101,12 +112,18 @@ export default function CreatorVerification() {
 
     const submitData = new FormData();
     submitData.append("legalName", formData.legalName);
+    submitData.append("email", formData.email);
+    submitData.append("residentialAddress", formData.residentialAddress);
     submitData.append("dateOfBirth", formData.dateOfBirth);
     submitData.append("signatureName", formData.signatureName);
     submitData.append("idDocument", formData.idDocument);
-    if (formData.idSelfie) {
-      submitData.append("idSelfie", formData.idSelfie);
-    }
+    submitData.append("idSelfie", formData.idSelfie);
+    
+    // Teaching qualifications
+    submitData.append("socialMediaLinks", formData.socialMediaLinks);
+    submitData.append("publishedArticles", formData.publishedArticles);
+    submitData.append("teachingQualifications", formData.teachingQualifications);
+    submitData.append("professionalExperience", formData.professionalExperience);
     
     // Add legal agreement confirmations
     submitData.append("ageConfirmation", formData.ageConfirmation.toString());
@@ -114,11 +131,12 @@ export default function CreatorVerification() {
     submitData.append("nondiscrimination", formData.nondiscrimination.toString());
     submitData.append("responsibilityWaiver", formData.responsibilityWaiver.toString());
     submitData.append("indemnificationClause", formData.indemnificationClause.toString());
+    submitData.append("comprehensiveAgreement", formData.comprehensiveAgreement.toString());
 
     submitMutation.mutate(submitData);
   };
 
-  const progress = (step / 3) * 100;
+  const progress = (step / 4) * 100;
 
   return (
     <div className="min-h-screen bg-netflix-black p-4">
@@ -164,6 +182,36 @@ export default function CreatorVerification() {
                 </div>
 
                 <div>
+                  <Label htmlFor="email" className="text-netflix-light-gray">
+                    Email Address *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="Enter your email address"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="residentialAddress" className="text-netflix-light-gray">
+                    Residential Address *
+                  </Label>
+                  <Textarea
+                    id="residentialAddress"
+                    value={formData.residentialAddress}
+                    onChange={(e) => setFormData(prev => ({ ...prev, residentialAddress: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="Enter your full residential address"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
                   <Label htmlFor="dateOfBirth" className="text-netflix-light-gray">
                     Date of Birth *
                   </Label>
@@ -203,7 +251,7 @@ export default function CreatorVerification() {
 
                 <div>
                   <Label className="text-netflix-light-gray">
-                    Selfie with ID (Optional but Recommended)
+                    Selfie with ID (Required) *
                   </Label>
                   <div className="mt-2 p-4 border-2 border-dashed border-netflix-border rounded-lg">
                     <input
@@ -217,7 +265,7 @@ export default function CreatorVerification() {
                       <div className="text-center">
                         <Camera className="w-8 h-8 text-netflix-light-gray mx-auto mb-2" />
                         <p className="text-netflix-light-gray">
-                          {formData.idSelfie ? formData.idSelfie.name : "Upload selfie holding your ID"}
+                          {formData.idSelfie ? formData.idSelfie.name : "Upload selfie holding your ID (Required for verification)"}
                         </p>
                       </div>
                     </label>
@@ -227,10 +275,10 @@ export default function CreatorVerification() {
 
               <Button 
                 onClick={() => setStep(2)}
-                disabled={!formData.legalName || !formData.dateOfBirth || !formData.idDocument}
+                disabled={!formData.legalName || !formData.email || !formData.residentialAddress || !formData.dateOfBirth || !formData.idDocument || !formData.idSelfie}
                 className="w-full bg-netflix-red hover:bg-red-700"
               >
-                Next: Legal Agreement
+                Next: Teaching Qualifications
               </Button>
             </CardContent>
           </Card>
@@ -240,8 +288,102 @@ export default function CreatorVerification() {
           <Card className="bg-netflix-gray border-netflix-border">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-netflix-red" />
+                Step 2: Teaching Qualifications
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <Alert className="border-netflix-red bg-netflix-red/10">
+                <AlertTriangle className="w-4 h-4 text-netflix-red" />
+                <AlertDescription className="text-white">
+                  <strong>Qualification Verification:</strong> We only allow qualified teachers to sell courses. Please provide proof of your expertise.
+                </AlertDescription>
+              </Alert>
+
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="socialMediaLinks" className="text-netflix-light-gray">
+                    Social Media Links (Required) *
+                  </Label>
+                  <Textarea
+                    id="socialMediaLinks"
+                    value={formData.socialMediaLinks}
+                    onChange={(e) => setFormData(prev => ({ ...prev, socialMediaLinks: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="List your professional social media profiles (LinkedIn, Twitter, etc.)"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="publishedArticles" className="text-netflix-light-gray">
+                    Published Articles/Content (Optional)
+                  </Label>
+                  <Textarea
+                    id="publishedArticles"
+                    value={formData.publishedArticles}
+                    onChange={(e) => setFormData(prev => ({ ...prev, publishedArticles: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="Links to published articles, blog posts, or content that demonstrates your expertise"
+                    rows={3}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="teachingQualifications" className="text-netflix-light-gray">
+                    Teaching Qualifications (Required) *
+                  </Label>
+                  <Textarea
+                    id="teachingQualifications"
+                    value={formData.teachingQualifications}
+                    onChange={(e) => setFormData(prev => ({ ...prev, teachingQualifications: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="List your degrees, certifications, awards, or other qualifications that prove you're qualified to teach"
+                    rows={4}
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="professionalExperience" className="text-netflix-light-gray">
+                    Professional Experience (Required) *
+                  </Label>
+                  <Textarea
+                    id="professionalExperience"
+                    value={formData.professionalExperience}
+                    onChange={(e) => setFormData(prev => ({ ...prev, professionalExperience: e.target.value }))}
+                    className="bg-netflix-black border-netflix-border text-white"
+                    placeholder="Describe your professional experience in your field, including years of experience, companies worked for, projects completed, etc."
+                    rows={4}
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <Button 
+                  onClick={() => setStep(1)}
+                  variant="outline"
+                  className="border-netflix-border text-netflix-light-gray hover:bg-netflix-black"
+                >
+                  Back
+                </Button>
+                <Button 
+                  onClick={() => setStep(3)}
+                  disabled={!formData.socialMediaLinks || !formData.teachingQualifications || !formData.professionalExperience}
+                  className="bg-netflix-red hover:bg-red-700"
+                >
+                  Next: Legal Agreement
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {step === 3 && (
+          <Card className="bg-netflix-gray border-netflix-border">
+            <CardHeader>
+              <CardTitle className="text-white flex items-center gap-2">
                 <Scale className="w-5 h-5 text-netflix-red" />
-                Step 2: Creator Agreement
+                Step 3: Creator Agreement
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -308,20 +450,31 @@ export default function CreatorVerification() {
                     I release and indemnify ProFlix from any legal claims resulting from my content and agree to hold ProFlix harmless from any damages.
                   </Label>
                 </div>
+
+                <div className="flex items-start gap-3 p-4 border border-netflix-red rounded-lg bg-netflix-red/5">
+                  <Checkbox
+                    id="comprehensiveAgreement"
+                    checked={formData.comprehensiveAgreement}
+                    onCheckedChange={(checked) => setFormData(prev => ({ ...prev, comprehensiveAgreement: checked as boolean }))}
+                  />
+                  <Label htmlFor="comprehensiveAgreement" className="text-white text-sm font-medium">
+                    <strong>Comprehensive Creator Agreement:</strong> I confirm that I am at least 18 years old and the legal owner of all content I upload. I agree that I am solely responsible for the accuracy, legality, and ethical standards of my courses. I certify that my content is designed to benefit my professional industry and will not contain hate speech, discriminatory claims, or harmful misinformation. I understand that ProFlix reserves the right to remove any creator or course that violates these standards.
+                  </Label>
+                </div>
               </div>
 
               <div className="flex gap-4">
                 <Button 
-                  onClick={() => setStep(1)}
+                  onClick={() => setStep(2)}
                   variant="outline"
                   className="border-netflix-border text-netflix-light-gray hover:bg-netflix-black"
                 >
                   Back
                 </Button>
                 <Button 
-                  onClick={() => setStep(3)}
+                  onClick={() => setStep(4)}
                   disabled={!formData.ageConfirmation || !formData.contentOwnership || !formData.nondiscrimination || 
-                           !formData.responsibilityWaiver || !formData.indemnificationClause}
+                           !formData.responsibilityWaiver || !formData.indemnificationClause || !formData.comprehensiveAgreement}
                   className="bg-netflix-red hover:bg-red-700"
                 >
                   Next: Review & Submit
@@ -331,12 +484,12 @@ export default function CreatorVerification() {
           </Card>
         )}
 
-        {step === 3 && (
+        {step === 4 && (
           <Card className="bg-netflix-gray border-netflix-border">
             <CardHeader>
               <CardTitle className="text-white flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-netflix-red" />
-                Step 3: Review & Submit
+                Step 4: Review & Submit
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -344,6 +497,17 @@ export default function CreatorVerification() {
                 <div>
                   <Label className="text-netflix-light-gray">Legal Name</Label>
                   <p className="text-white">{formData.legalName}</p>
+                </div>
+                <div>
+                  <Label className="text-netflix-light-gray">Email</Label>
+                  <p className="text-white">{formData.email}</p>
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-netflix-light-gray">Residential Address</Label>
+                  <p className="text-white">{formData.residentialAddress}</p>
                 </div>
                 <div>
                   <Label className="text-netflix-light-gray">Date of Birth</Label>
@@ -360,6 +524,27 @@ export default function CreatorVerification() {
                   <Label className="text-netflix-light-gray">Selfie with ID</Label>
                   <p className="text-white">{formData.idSelfie?.name || "Not provided"}</p>
                 </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <Label className="text-netflix-light-gray">Social Media Links</Label>
+                  <p className="text-white text-sm">{formData.socialMediaLinks}</p>
+                </div>
+                <div>
+                  <Label className="text-netflix-light-gray">Teaching Qualifications</Label>
+                  <p className="text-white text-sm">{formData.teachingQualifications}</p>
+                </div>
+                <div>
+                  <Label className="text-netflix-light-gray">Professional Experience</Label>
+                  <p className="text-white text-sm">{formData.professionalExperience}</p>
+                </div>
+                {formData.publishedArticles && (
+                  <div>
+                    <Label className="text-netflix-light-gray">Published Articles</Label>
+                    <p className="text-white text-sm">{formData.publishedArticles}</p>
+                  </div>
+                )}
               </div>
 
               <div>

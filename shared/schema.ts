@@ -67,7 +67,14 @@ export const users = pgTable("users", {
   idDocumentUrl: varchar("id_document_url"),
   idSelfieUrl: varchar("id_selfie_url"),
   legalName: varchar("legal_name"),
+  residentialAddress: text("residential_address"),
   dateOfBirth: varchar("date_of_birth"), // Store as string for privacy
+  
+  // Teaching Qualifications (Required for course sales)
+  socialMediaLinks: text("social_media_links"),
+  publishedArticles: text("published_articles"),
+  teachingQualifications: text("teaching_qualifications"),
+  professionalExperience: text("professional_experience"),
   
   // Legal Agreement (Creator Terms)
   hasSignedCreatorAgreement: boolean("has_signed_creator_agreement").default(false),
@@ -334,6 +341,47 @@ export const sharedVideos = pgTable("shared_videos", {
   index("idx_shared_videos_share_token").on(table.shareToken),
 ]);
 
+// Video reports table for content moderation
+export const videoReports = pgTable("video_reports", {
+  id: serial("id").primaryKey(),
+  videoId: varchar("video_id").notNull(),
+  videoTitle: varchar("video_title"),
+  videoUrl: varchar("video_url"),
+  reportType: varchar("report_type").notNull(), // copyright, hate-speech, inappropriate, spam, fraud, other
+  description: text("description").notNull(),
+  reporterName: varchar("reporter_name"),
+  reporterEmail: varchar("reporter_email"),
+  reporterIp: varchar("reporter_ip").notNull(),
+  reporterUserAgent: varchar("reporter_user_agent"),
+  status: varchar("status").default("pending"), // pending, approved, rejected
+  adminNotes: text("admin_notes"),
+  reviewedBy: varchar("reviewed_by"),
+  reviewedAt: timestamp("reviewed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Rate limiting table for security
+export const rateLimits = pgTable("rate_limits", {
+  id: serial("id").primaryKey(),
+  identifier: varchar("identifier").notNull(), // IP address or user ID
+  action: varchar("action").notNull(), // login, signup, video_upload, etc.
+  attempts: integer("attempts").default(1),
+  windowStart: timestamp("window_start").defaultNow(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+// Security logs table for tracking actions
+export const securityLogs = pgTable("security_logs", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id"),
+  action: varchar("action").notNull(), // login, logout, purchase, video_upload, etc.
+  ipAddress: varchar("ip_address").notNull(),
+  userAgent: varchar("user_agent"),
+  details: text("details"), // JSON string with additional details
+  success: boolean("success").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ many }) => ({
   subcategories: many(subcategories),
@@ -576,6 +624,19 @@ export const insertSharedVideoSchema = createInsertSchema(sharedVideos).omit({
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
+
+// Video report types
+export type VideoReport = typeof videoReports.$inferSelect;
+export type InsertVideoReport = typeof videoReports.$inferInsert;
+export const insertVideoReportSchema = createInsertSchema(videoReports);
+
+// Rate limiting types
+export type RateLimit = typeof rateLimits.$inferSelect;
+export type InsertRateLimit = typeof rateLimits.$inferInsert;
+
+// Security log types
+export type SecurityLog = typeof securityLogs.$inferSelect;
+export type InsertSecurityLog = typeof securityLogs.$inferInsert;
 export type Category = typeof categories.$inferSelect;
 export type InsertCategory = z.infer<typeof insertCategorySchema>;
 export type Subcategory = typeof subcategories.$inferSelect;
