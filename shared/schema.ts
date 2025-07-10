@@ -119,37 +119,7 @@ export const subcategories = pgTable("subcategories", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// Creator Applications table
-export const creatorApplications = pgTable("creator_applications", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull(),
-  fullName: varchar("full_name").notNull(),
-  stageName: varchar("stage_name"),
-  email: varchar("email").notNull(),
-  phoneNumber: varchar("phone_number"),
-  city: varchar("city"),
-  country: varchar("country"),
-  socialLinks: text("social_links"), // JSON string of social media links
-  courseTitle: varchar("course_title").notNull(),
-  professionalBackground: text("professional_background").notNull(),
-  hasSoldCourses: boolean("has_sold_courses").default(false),
-  previousSales: varchar("previous_sales"),
-  priceRange: varchar("price_range").notNull(), // 'under_100', '100_250', '250_500', '500_1000'
-  contentReadiness: varchar("content_readiness").notNull(), // 'ready', 'partial', 'not_ready'
-  whyTopCreator: text("why_top_creator").notNull(),
-  hasAudience: boolean("has_audience").default(false),
-  audienceDetails: text("audience_details"),
-  freePreview: varchar("free_preview").notNull(), // 'yes', 'maybe', 'no'
-  supportNeeds: text("support_needs"),
-  agreedToTerms: boolean("agreed_to_terms").default(false),
-  agreedToRevenue: boolean("agreed_to_revenue").default(false),
-  agreedToContent: boolean("agreed_to_content").default(false),
-  signatureName: varchar("signature_name").notNull(),
-  status: varchar("status").default("pending"), // 'pending', 'approved', 'rejected'
-  adminNotes: text("admin_notes"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
+
 
 // Videos table - 3-Tier Model (Streaming, Basic, Premium)
 export const videos = pgTable("videos", {
@@ -439,16 +409,11 @@ export const usersRelations = relations(users, ({ many }) => ({
   comments: many(comments),
   playlists: many(playlists),
   watchHistory: many(watchHistory),
-  creatorApplications: many(creatorApplications),
+
   coursePurchases: many(coursePurchases),
 }));
 
-export const creatorApplicationsRelations = relations(creatorApplications, ({ one }) => ({
-  user: one(users, {
-    fields: [creatorApplications.userId],
-    references: [users.id],
-  }),
-}));
+
 
 export const coursePurchasesRelations = relations(coursePurchases, ({ one }) => ({
   user: one(users, {
@@ -604,25 +569,7 @@ export const insertVideoLikeSchema = createInsertSchema(videoLikes).omit({
   createdAt: true,
 });
 
-export const insertCreatorApplicationSchema = createInsertSchema(creatorApplications).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  status: true,
-  adminNotes: true,
-}).extend({
-  priceRange: z.enum(["under_100", "100_250", "250_500", "500_1000"]),
-  contentReadiness: z.enum(["ready", "partial", "not_ready"]),
-  freePreview: z.enum(["yes", "maybe", "no"]),
-  socialLinks: z.string().optional(),
-  phoneNumber: z.string().optional(),
-  city: z.string().optional(),
-  country: z.string().optional(),
-  stageName: z.string().optional(),
-  previousSales: z.string().optional(),
-  audienceDetails: z.string().optional(),
-  supportNeeds: z.string().optional(),
-});
+
 
 export const insertCoursePurchaseSchema = createInsertSchema(coursePurchases).omit({
   id: true,
@@ -672,8 +619,7 @@ export type VideoLike = typeof videoLikes.$inferSelect;
 export type InsertVideoLike = z.infer<typeof insertVideoLikeSchema>;
 export type PlaylistVideo = typeof playlistVideos.$inferSelect;
 export type WatchHistory = typeof watchHistory.$inferSelect;
-export type CreatorApplication = typeof creatorApplications.$inferSelect;
-export type InsertCreatorApplication = z.infer<typeof insertCreatorApplicationSchema>;
+
 export type CoursePurchase = typeof coursePurchases.$inferSelect;
 export type InsertCoursePurchase = z.infer<typeof insertCoursePurchaseSchema>;
 export type Favorite = typeof favorites.$inferSelect;
