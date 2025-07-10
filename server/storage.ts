@@ -303,7 +303,7 @@ export class DatabaseStorage implements IStorage {
       )
       .orderBy(
         // Sort by performance metrics for established creators
-        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0) + COALESCE(${videos.shares}, 0)) DESC`
+        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0) + COALESCE(${videos.shareCount}, 0)) DESC`
       )
       .limit(40);
     
