@@ -62,6 +62,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(null);
   });
 
+  // Database migration endpoint - add missing columns
+  app.post('/api/admin/migrate-database', async (req, res) => {
+    try {
+      await storage.addMissingColumns();
+      res.json({ message: 'Database migration completed' });
+    } catch (error) {
+      console.error('Database migration error:', error);
+      res.status(500).json({ message: 'Migration failed' });
+    }
+  });
+
   // Pro Creator Portal routes
   app.get('/api/pro-creator/status', isAuthenticated, async (req: any, res) => {
     try {
