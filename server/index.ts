@@ -97,7 +97,7 @@ app.use((req, res, next) => {
           const existingCategories = await storage.getCategories();
           if (existingCategories.length === 0) {
             console.log('📋 Setting up categories...');
-            await setupCategories();
+            await storage.initializeCategories();
             console.log('✅ Categories initialized');
           } else {
             console.log('✅ Categories already exist');

@@ -1,0 +1,70 @@
+
+
+All logs
+Search
+Search
+
+Live tail
+CDT
+
+Menu
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 2035 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-DbsGLi18.css   69.64 kB │ gzip:  12.01 kB
+../dist/public/assets/index-VHi4vJxd.js   932.72 kB │ gzip: 249.00 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.44s
+  dist/index.js  131.1kb
+⚡ Done in 8ms
+==> Uploading build...
+==> Uploaded in 4.7s. Compression took 2.5s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+5:27:49 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Database schema initialized successfully
+✅ Database schema created
+📋 Setting up categories...
+⚠️ Database auto-setup error: setupCategories is not defined
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+✅ Database schema initialized successfully
+✅ Database schema created
+📋 Setting up categories...
+⚠️ Database auto-setup error: setupCategories is not defined
