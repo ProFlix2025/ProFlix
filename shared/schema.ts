@@ -106,6 +106,7 @@ export const categories = pgTable("categories", {
   name: varchar("name").notNull(),
   slug: varchar("slug").notNull().unique(),
   description: text("description"),
+  emoji: varchar("emoji", { length: 2 }), // Store emoji character
   createdAt: timestamp("created_at").defaultNow(),
 });
 

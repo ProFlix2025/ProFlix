@@ -138,7 +138,10 @@ export default function Navigation() {
             {Array.isArray(categories) && categories.map((category: any) => (
               <DropdownMenuItem key={category.id} asChild>
                 <Link href={`/category/${category.slug}`} className="text-white hover:bg-netflix-gray">
-                  {category.name}
+                  <div className="flex items-center space-x-2">
+                    <span className="text-lg">{category.emoji || '📂'}</span>
+                    <span>{category.name}</span>
+                  </div>
                 </Link>
               </DropdownMenuItem>
             ))}

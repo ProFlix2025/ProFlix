@@ -118,9 +118,12 @@ export default function Categories() {
                   <Card className="bg-netflix-gray border-netflix-border hover:border-netflix-red transition-all duration-300 hover:scale-105 cursor-pointer group">
                     <CardHeader className="pb-3">
                       <div className="flex items-center justify-between">
-                        <CardTitle className="text-xl text-white group-hover:text-netflix-red transition-colors">
-                          {category.name}
-                        </CardTitle>
+                        <div className="flex items-center space-x-3">
+                          <span className="text-3xl">{category.emoji || '📂'}</span>
+                          <CardTitle className="text-xl text-white group-hover:text-netflix-red transition-colors">
+                            {category.name}
+                          </CardTitle>
+                        </div>
                         <ArrowRight className="w-5 h-5 text-netflix-light-gray group-hover:text-netflix-red transition-colors" />
                       </div>
                     </CardHeader>
@@ -165,9 +168,12 @@ export default function Categories() {
                 <Card className="bg-netflix-gray border-netflix-border hover:border-netflix-red transition-all duration-300 hover:scale-105 cursor-pointer group h-full">
                   <CardHeader className="pb-3">
                     <div className="flex items-center justify-between">
-                      <CardTitle className="text-lg text-white group-hover:text-netflix-red transition-colors">
-                        {category.name}
-                      </CardTitle>
+                      <div className="flex items-center space-x-3">
+                        <span className="text-2xl">{category.emoji || '📂'}</span>
+                        <CardTitle className="text-lg text-white group-hover:text-netflix-red transition-colors">
+                          {category.name}
+                        </CardTitle>
+                      </div>
                       <Play className="w-5 h-5 text-netflix-light-gray group-hover:text-netflix-red transition-colors" />
                     </div>
                   </CardHeader>
@@ -199,6 +205,7 @@ export default function Categories() {
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="flex items-center gap-4 mb-2">
+                          <span className="text-2xl">{category.emoji || '📂'}</span>
                           <h3 className="text-xl font-semibold text-white group-hover:text-netflix-red transition-colors">
                             {category.name}
                           </h3>
