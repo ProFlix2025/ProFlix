@@ -3,6 +3,7 @@ import express from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./simpleAuth";
+import { requireAdminAuth, adminLogin, adminLogout, adminStatus } from "./adminAuth";
 import { insertVideoSchema, updateVideoSchema, insertCreatorApplicationSchema } from "@shared/schema";
 import { z } from "zod";
 import multer from "multer";
@@ -242,8 +243,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin authentication routes
+  app.post('/api/admin/login', adminLogin);
+  app.post('/api/admin/logout', adminLogout);
+  app.get('/api/admin/status', adminStatus);
+
   // Admin endpoint to generate Pro Creator codes
-  app.post('/api/admin/generate-codes', async (req, res) => {
+  app.post('/api/admin/generate-codes', requireAdminAuth, async (req, res) => {
     try {
       const { count = 1, expiresInDays = 365 } = req.body;
       const codes = [];
@@ -268,7 +274,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to list all codes
-  app.get('/api/admin/codes', async (req, res) => {
+  app.get('/api/admin/codes', requireAdminAuth, async (req, res) => {
     try {
       const codes = await storage.getAllProCreatorCodes();
       res.json(codes);
@@ -279,7 +285,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Initialize ProFlix Academy system account
-  app.post('/api/admin/init-academy', async (req, res) => {
+  app.post('/api/admin/init-academy', requireAdminAuth, async (req, res) => {
     try {
       await storage.createProFlixAcademy();
       res.json({ message: 'ProFlix Academy initialized successfully' });
@@ -290,7 +296,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ProFlix Academy content management
-  app.get('/api/admin/academy-videos', async (req, res) => {
+  app.get('/api/admin/academy-videos', requireAdminAuth, async (req, res) => {
     try {
       const videos = await storage.getAcademyVideos();
       res.json(videos);
@@ -300,7 +306,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/admin/academy-stats', async (req, res) => {
+  app.get('/api/admin/academy-stats', requireAdminAuth, async (req, res) => {
     try {
       const stats = await storage.getAcademyStats();
       res.json(stats);
@@ -310,7 +316,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/admin/academy-videos', upload.fields([
+  app.post('/api/admin/academy-videos', requireAdminAuth, upload.fields([
     { name: 'video', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 }
   ]), async (req, res) => {
@@ -336,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete('/api/admin/academy-videos/:id', async (req, res) => {
+  app.delete('/api/admin/academy-videos/:id', requireAdminAuth, async (req, res) => {
     try {
       const videoId = parseInt(req.params.id);
       await storage.deleteAcademyVideo(videoId);
@@ -348,7 +354,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin analytics endpoint
-  app.get('/api/admin/analytics', async (req, res) => {
+  app.get('/api/admin/analytics', requireAdminAuth, async (req, res) => {
     try {
       const analytics = await storage.getAdminAnalytics();
       res.json(analytics);
@@ -359,7 +365,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin creators management
-  app.get('/api/admin/creators', async (req, res) => {
+  app.get('/api/admin/creators', requireAdminAuth, async (req, res) => {
     try {
       const creators = await storage.getAllCreatorsWithStats();
       res.json(creators);
@@ -370,7 +376,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Remove creator
-  app.delete('/api/admin/creators/:id', async (req, res) => {
+  app.delete('/api/admin/creators/:id', requireAdminAuth, async (req, res) => {
     try {
       const creatorId = req.params.id;
       await storage.removeCreator(creatorId);
@@ -382,7 +388,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Suspend creator
-  app.post('/api/admin/creators/:id/suspend', async (req, res) => {
+  app.post('/api/admin/creators/:id/suspend', requireAdminAuth, async (req, res) => {
     try {
       const creatorId = req.params.id;
       await storage.suspendCreator(creatorId);

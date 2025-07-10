@@ -390,6 +390,16 @@ export const securityLogs = pgTable("security_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Admin security logs table for admin authentication tracking
+export const adminSecurityLogs = pgTable("admin_security_logs", {
+  id: serial("id").primaryKey(),
+  eventType: varchar("event_type", { length: 50 }).notNull(),
+  ipAddress: varchar("ip_address", { length: 45 }),
+  userAgent: text("user_agent"),
+  details: jsonb("details"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const categoriesRelations = relations(categories, ({ many }) => ({
   subcategories: many(subcategories),

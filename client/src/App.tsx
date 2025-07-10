@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import AdminAuthGuard from "@/components/AdminAuthGuard";
 import Footer from "@/components/Footer";
 
 import Home from "@/pages/home";
@@ -22,6 +23,7 @@ import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
 import Premium from "@/pages/premium";
 import ProCreatorPortal from "@/pages/pro-creator-portal";
+import AdminLogin from "@/pages/admin-login";
 import AdminCodes from "@/pages/admin-codes";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminVerifications from "@/pages/admin-verifications";
@@ -42,11 +44,32 @@ function Router() {
           <Route path="/" component={Home} />
           <Route path="/premium" component={Premium} />
           <Route path="/pro-creator-portal" component={ProCreatorPortal} />
-          <Route path="/admin/codes" component={AdminCodes} />
-          <Route path="/admin/dashboard" component={AdminDashboard} />
-          <Route path="/admin/verifications" component={AdminVerifications} />
-          <Route path="/admin/reports" component={AdminReports} />
-          <Route path="/admin/content" component={AdminContent} />
+          <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin/codes">
+            <AdminAuthGuard>
+              <AdminCodes />
+            </AdminAuthGuard>
+          </Route>
+          <Route path="/admin/dashboard">
+            <AdminAuthGuard>
+              <AdminDashboard />
+            </AdminAuthGuard>
+          </Route>
+          <Route path="/admin/verifications">
+            <AdminAuthGuard>
+              <AdminVerifications />
+            </AdminAuthGuard>
+          </Route>
+          <Route path="/admin/reports">
+            <AdminAuthGuard>
+              <AdminReports />
+            </AdminAuthGuard>
+          </Route>
+          <Route path="/admin/content">
+            <AdminAuthGuard>
+              <AdminContent />
+            </AdminAuthGuard>
+          </Route>
           <Route path="/creator-verification" component={CreatorVerification} />
           <Route path="/report-video" component={ReportVideo} />
           <Route path="/search" component={SearchPage} />

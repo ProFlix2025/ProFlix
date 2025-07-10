@@ -15,6 +15,22 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Cookie parser for admin sessions
+app.use((req, res, next) => {
+  const cookies = req.headers.cookie;
+  if (cookies) {
+    const parsed: { [key: string]: string } = {};
+    cookies.split(';').forEach(cookie => {
+      const [key, value] = cookie.trim().split('=');
+      if (key && value) {
+        parsed[key] = decodeURIComponent(value);
+      }
+    });
+    (req as any).cookies = parsed;
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const requestPath = req.path;
