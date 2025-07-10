@@ -20,7 +20,6 @@ import DMCAPolicy from "@/pages/dmca-policy";
 import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
-import Apply from "@/pages/apply";
 import Premium from "@/pages/premium";
 import ProCreatorPortal from "@/pages/pro-creator-portal";
 import AdminCodes from "@/pages/admin-codes";
@@ -41,7 +40,6 @@ function Router() {
       <div className="flex-grow">
         <Switch>
           <Route path="/" component={Home} />
-          <Route path="/apply" component={Apply} />
           <Route path="/premium" component={Premium} />
           <Route path="/pro-creator-portal" component={ProCreatorPortal} />
           <Route path="/admin/codes" component={AdminCodes} />

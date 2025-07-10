@@ -282,12 +282,12 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(videos.isPublished, true),
-          sql`${videos.createdAt} >= ${thirtyDaysAgo}`
+          sql`${videos.createdAt} >= ${thirtyDaysAgo.toISOString()}`
         )
       )
       .orderBy(
         // Prioritize by engagement rate (likes + views), then by recency
-        sql`(${videos.likes} + ${videos.views}) DESC, ${videos.createdAt} DESC`
+        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0)) DESC, ${videos.createdAt} DESC`
       )
       .limit(60);
     
@@ -298,12 +298,12 @@ export class DatabaseStorage implements IStorage {
       .where(
         and(
           eq(videos.isPublished, true),
-          sql`${videos.createdAt} < ${thirtyDaysAgo}`
+          sql`${videos.createdAt} < ${thirtyDaysAgo.toISOString()}`
         )
       )
       .orderBy(
         // Sort by performance metrics for established creators
-        sql`(${videos.likes} + ${videos.views} + ${videos.shares}) DESC`
+        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0) + COALESCE(${videos.shares}, 0)) DESC`
       )
       .limit(40);
     
