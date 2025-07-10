@@ -1180,11 +1180,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'This video is not a course' });
       }
       
-      // Apply 10% discount for premium viewers
+      // Course price remains full price for all users
       let finalPrice = video.coursePrice;
-      if (user?.isPremiumViewer) {
-        finalPrice = Math.round(finalPrice * 0.9);
-      }
       
       // Create Stripe checkout session
       const checkoutSession = await storage.createCourseCheckout(userId, videoId, finalPrice);

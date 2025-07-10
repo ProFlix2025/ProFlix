@@ -203,7 +203,7 @@ export const coursePurchases = pgTable("course_purchases", {
   creatorEarnings: integer("creator_earnings").notNull(), // 100% of course sales
   
   // Premium viewer discount
-  discountApplied: integer("discount_applied").default(0), // 10% discount for premium viewers
+  discountApplied: integer("discount_applied").default(0), // Reserved for future promotions
   
   stripePaymentId: varchar("stripe_payment_id"),
   paypalPaymentId: varchar("paypal_payment_id"),

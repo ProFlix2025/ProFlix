@@ -50,9 +50,9 @@ export default function Premium() {
       description: "Watch all videos without interruptions"
     },
     {
-      icon: <DollarSign className="w-5 h-5" />,
-      title: "10% Course Discount",
-      description: "Save on all premium course purchases"
+      icon: <Clock className="w-5 h-5" />,
+      title: "Unlimited Viewing",
+      description: "Watch as many videos as you want"
     },
     {
       icon: <Heart className="w-5 h-5" />,
@@ -75,7 +75,7 @@ export default function Premium() {
         "Watch all videos with ads",
         "Like and share videos",
         "Basic support",
-        "Purchase courses at full price"
+        "Purchase courses"
       ],
       popular: false,
       cta: "Current Plan"
@@ -86,7 +86,7 @@ export default function Premium() {
       period: "month",
       features: [
         "Ad-free viewing experience",
-        "10% discount on all courses",
+        "Unlimited video watching",
         "Priority support",
         "Early access to new features"
       ],
@@ -228,9 +228,9 @@ export default function Premium() {
             
             <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-2">How much can I save on courses?</h3>
+                <h3 className="font-semibold mb-2">What's included with Premium?</h3>
                 <p className="text-gray-400">
-                  Premium members get 10% off all course purchases. On a $200 course, that's $20 in savings - almost covering a month of premium!
+                  Premium members get ad-free viewing, unlimited video access, priority support, and early access to new features. Focus on learning without distractions!
                 </p>
               </CardContent>
             </Card>

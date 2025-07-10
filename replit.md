@@ -27,7 +27,7 @@ ProFlix is a YouTube-style free video platform where users can upload, watch, an
 
 **Viewer (Premium) - $29/month**
 - Ad-free viewing experience
-- 10% discount on all course purchases
+- Unlimited video watching
 - Priority support
 
 **Creator (Free)**
