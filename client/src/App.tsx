@@ -33,6 +33,7 @@ import CreatorVerification from "@/pages/creator-verification";
 import CreatorTiers from "@/pages/creator-tiers";
 import ReportVideo from "@/pages/report-video";
 import AllCategories from "@/pages/all-categories";
+import Categories from "@/pages/categories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -73,6 +74,7 @@ function Router() {
           </Route>
           <Route path="/creator-verification" component={CreatorVerification} />
           <Route path="/creator-tiers" component={CreatorTiers} />
+          <Route path="/categories" component={Categories} />
           <Route path="/report-video" component={ReportVideo} />
           <Route path="/search" component={SearchPage} />
           <Route path="/creator" component={CreatorDashboard} />

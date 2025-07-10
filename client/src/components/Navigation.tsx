@@ -5,8 +5,8 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star, ChevronDown } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
@@ -117,12 +117,24 @@ export default function Navigation() {
         
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="text-white hover:text-netflix-red text-lg">
-              <Grid3X3 className="w-5 h-5 mr-2" />
-              Categories
-            </Button>
+            <Link href="/categories" className="text-white hover:text-netflix-red transition-colors">
+              <div className="flex items-center space-x-2">
+                <Grid3X3 className="w-5 h-5" />
+                <span className="text-lg">Categories</span>
+                <ChevronDown className="w-4 h-4" />
+              </div>
+            </Link>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-netflix-black border-netflix-border max-h-96 overflow-y-auto">
+            <DropdownMenuItem asChild>
+              <Link href="/categories" className="w-full">
+                <div className="flex items-center space-x-2 text-netflix-red hover:text-white font-semibold">
+                  <Grid3X3 className="w-4 h-4" />
+                  <span>All Categories</span>
+                </div>
+              </Link>
+            </DropdownMenuItem>
+            <div className="h-px bg-netflix-border my-1" />
             {Array.isArray(categories) && categories.map((category: any) => (
               <DropdownMenuItem key={category.id} asChild>
                 <Link href={`/category/${category.slug}`} className="text-white hover:bg-netflix-gray">
