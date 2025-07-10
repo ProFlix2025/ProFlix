@@ -50,9 +50,9 @@ export default function Premium() {
       description: "Watch all videos without interruptions"
     },
     {
-      icon: <Clock className="w-5 h-5" />,
-      title: "Unlimited Viewing",
-      description: "Watch as many videos as you want"
+      icon: <DollarSign className="w-5 h-5" />,
+      title: "Course Discounts",
+      description: "Get discounts on courses when creators offer them"
     },
     {
       icon: <Heart className="w-5 h-5" />,
@@ -86,7 +86,7 @@ export default function Premium() {
       period: "month",
       features: [
         "Ad-free viewing experience",
-        "Unlimited video watching",
+        "Course discounts from participating creators",
         "Priority support",
         "Early access to new features"
       ],
@@ -228,9 +228,9 @@ export default function Premium() {
             
             <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-2">What's included with Premium?</h3>
+                <h3 className="font-semibold mb-2">How do course discounts work?</h3>
                 <p className="text-gray-400">
-                  Premium members get ad-free viewing, unlimited video access, priority support, and early access to new features. Focus on learning without distractions!
+                  Many creators offer exclusive discounts to premium members as a way to thank you for supporting the platform. When available, you'll see the discount automatically applied at checkout!
                 </p>
               </CardContent>
             </Card>

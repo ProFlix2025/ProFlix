@@ -168,6 +168,9 @@ export const videos = pgTable("videos", {
   coursePrice: integer("course_price").default(0), // in cents
   courseDescription: text("course_description"),
   
+  // Creator-controlled premium discount
+  offersPremiumDiscount: boolean("offers_premium_discount").default(false),
+  
   // YouTube-style metrics
   shareCount: integer("share_count").default(0),
   
@@ -202,8 +205,8 @@ export const coursePurchases = pgTable("course_purchases", {
   // Pro Creators keep 100% of course sales
   creatorEarnings: integer("creator_earnings").notNull(), // 100% of course sales
   
-  // Premium viewer discount
-  discountApplied: integer("discount_applied").default(0), // Reserved for future promotions
+  // Creator-controlled premium discount
+  discountApplied: integer("discount_applied").default(0), // Applied discount amount in cents
   
   stripePaymentId: varchar("stripe_payment_id"),
   paypalPaymentId: varchar("paypal_payment_id"),

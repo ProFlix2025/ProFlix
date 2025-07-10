@@ -952,6 +952,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         isCourse: isCourse,
         coursePrice: coursePrice,
         courseDescription: req.body.courseDescription || null,
+        offersPremiumDiscount: req.body.offersPremiumDiscount === 'true',
         tags,
         language: req.body.language || 'en',
         isPublished: req.body.isPublished === 'true',
@@ -1180,8 +1181,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'This video is not a course' });
       }
       
-      // Course price remains full price for all users
+      // Apply creator-controlled discount for premium members
       let finalPrice = video.coursePrice;
+      let discountApplied = 0;
+      
+      if (user?.isPremiumViewer && video.offersPremiumDiscount) {
+        // 10% discount when creator chooses to offer it
+        discountApplied = Math.round(finalPrice * 0.1);
+        finalPrice = finalPrice - discountApplied;
+      }
       
       // Create Stripe checkout session
       const checkoutSession = await storage.createCourseCheckout(userId, videoId, finalPrice);

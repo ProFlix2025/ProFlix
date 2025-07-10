@@ -86,6 +86,7 @@ const uploadSchema = z.object({
   language: z.string().default("en"),
   isPublished: z.boolean().default(false),
   offerFreePreview: z.boolean().default(false),
+  offersPremiumDiscount: z.boolean().default(false),
 });
 
 export default function CreatorDashboard() {
@@ -151,6 +152,7 @@ export default function CreatorDashboard() {
       language: "en",
       isPublished: false,
       offerFreePreview: false,
+      offersPremiumDiscount: false,
     },
   });
 
@@ -246,11 +248,15 @@ export default function CreatorDashboard() {
         formData.append(key, JSON.stringify(tagsArray));
       } else if (key === 'price') {
         // Convert price from dollars to cents
-        formData.append(key, String(Math.round(Number(value) * 100)));
+        formData.append('coursePrice', String(Math.round(Number(value) * 100)));
       } else {
         formData.append(key, String(value));
       }
     });
+    
+    // Add course information
+    formData.append('isCourse', 'true');
+    formData.append('courseDescription', values.description);
 
     uploadMutation.mutate(formData);
   };
@@ -514,6 +520,27 @@ export default function CreatorDashboard() {
                         )}
                       />
                     </div>
+
+                    <FormField
+                      control={form.control}
+                      name="offersPremiumDiscount"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-row items-center justify-between rounded-lg border border-netflix-border p-4">
+                          <div className="space-y-0.5">
+                            <FormLabel>Offer Premium Member Discount?</FormLabel>
+                            <p className="text-sm text-netflix-light-gray">
+                              Give premium members 10% off to help sell more courses
+                            </p>
+                          </div>
+                          <FormControl>
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
 
                     <div className="flex gap-4">
                       <Button 
