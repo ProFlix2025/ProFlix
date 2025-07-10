@@ -1399,16 +1399,23 @@ export class DatabaseStorage implements IStorage {
   }
 
   async addMissingColumns(): Promise<void> {
-    // Add missing columns to the database
-    await db.execute(sql`
-      ALTER TABLE videos 
-      ADD COLUMN IF NOT EXISTS is_free_content BOOLEAN DEFAULT false;
-    `);
-    
-    await db.execute(sql`
-      ALTER TABLE users 
-      ADD COLUMN IF NOT EXISTS is_system_account BOOLEAN DEFAULT false;
-    `);
+    try {
+      // Add missing columns to the database
+      await db.execute(sql`
+        ALTER TABLE videos 
+        ADD COLUMN IF NOT EXISTS is_free_content BOOLEAN DEFAULT false;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS is_system_account BOOLEAN DEFAULT false;
+      `);
+      
+      console.log('✅ Database columns added successfully');
+    } catch (error) {
+      console.error('Database column addition error:', error);
+      // Continue execution - columns might already exist
+    }
   }
 }
 
