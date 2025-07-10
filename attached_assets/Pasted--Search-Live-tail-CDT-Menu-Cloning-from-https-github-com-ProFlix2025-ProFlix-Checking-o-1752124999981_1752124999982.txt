@@ -1,0 +1,91 @@
+
+Search
+
+Live tail
+CDT
+
+Menu
+
+==> Cloning from https://github.com/ProFlix2025/ProFlix
+==> Checking out commit 84cc6249ecbdfe0bc1b3b3f971f523a2b9ea41d6 in branch main
+==> Downloading cache...
+==> Transferred 200MB in 8s. Extraction took 3s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install && npm run db:push && npm run build'...
+up to date, audited 406 packages in 859ms
+59 packages are looking for funding
+  run `npm fund` for details
+2 moderate severity vulnerabilities
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 2035 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-DbsGLi18.css   69.64 kB │ gzip:  12.01 kB
+../dist/public/assets/index-VHi4vJxd.js   932.72 kB │ gzip: 249.00 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.43s
+  dist/index.js  131.1kb
+⚡ Done in 8ms
+==> Uploading build...
+==> Uploaded in 4.8s. Compression took 2.1s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+5:21:18 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+❌ Database initialization failed: TypeError: Invalid URL
+    at new URL (node:internal/url:818:25)
+    at Object.parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:431:121)
+    at parse (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:752:66)
+⚠️ Database schema creation failed
+    at new ConnectionParameters (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:769:49)
+    at new Client (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:991:1)
+    at new NeonClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1308:193)
+    at Un.newClient (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1115:52)
+    at Un.connect (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1115:1)
+    at Un.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1139:1)
+    at Un.query (file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1352:96) {
+  code: 'ERR_INVALID_URL',
+  input: "psql%20'postgresql://neondb_owner:npg_pER4a7qJwZQG@ep-soft-sea-adzrs31i-pooler.c-2.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require'"
+}
+Error: getaddrinfo ENOTFOUND base
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
+Error: getaddrinfo ENOTFOUND base
+    at /opt/render/project/src/node_modules/pg-pool/index.js:45:11
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async PGStore._asyncQuery (/opt/render/project/src/node_modules/connect-pg-simple/index.js:322:21)
