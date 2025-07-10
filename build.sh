@@ -5,9 +5,9 @@ echo "🚀 Building ProFlix for production..."
 echo "📦 Installing dependencies..."
 npm ci
 
-# Run database schema push
+# Run database schema push with updated syntax
 echo "🗄️  Pushing database schema..."
-npm run db:push
+npx drizzle-kit push
 
 # Build the project
 echo "🔨 Building application..."

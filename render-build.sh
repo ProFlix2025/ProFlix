@@ -1,4 +1,4 @@
 #!/bin/bash
 npm install
-npm run db:push
+npx drizzle-kit push
 npm run build 
