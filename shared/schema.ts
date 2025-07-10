@@ -38,10 +38,13 @@ export const users = pgTable("users", {
   isPremiumViewer: boolean("is_premium_viewer").default(false),
   premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
-  // Pro Creator subscription ($99/month or $897/year) - enhanced features
+  // Pro Creator subscription - enhanced features with tiers
   isProCreator: boolean("is_pro_creator").default(false),
+  proCreatorTier: varchar("pro_creator_tier").default("free"), // 'free', 'standard', 'plus', 'enterprise'
   proCreatorEndsAt: timestamp("pro_creator_ends_at"),
   proCreatorPlan: varchar("pro_creator_plan"), // 'monthly', 'yearly', 'free_code'
+  courseLimit: integer("course_limit").default(1), // free=1, standard=20, plus=100, enterprise=unlimited
+  currentCourseCount: integer("current_course_count").default(0),
   
   // Creator earnings from ads
   totalAdRevenue: integer("total_ad_revenue").default(0), // in cents

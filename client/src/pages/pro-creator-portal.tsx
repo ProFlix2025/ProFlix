@@ -85,28 +85,45 @@ export default function ProCreatorPortal() {
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-netflix-dark-gray p-4 rounded-lg border-2 border-green-500">
+                <h3 className="text-white font-semibold mb-2">Free Pro Creator</h3>
+                <p className="text-green-400 text-2xl font-bold">$0/month</p>
+                <p className="text-green-400 text-sm">Perfect to get started!</p>
+                <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
+                  <li>• Unlimited video uploads</li>
+                  <li>• 1 course max (100% profit)</li>
+                  <li>• Basic analytics</li>
+                  <li>• Community support</li>
+                </ul>
+              </div>
               <div className="bg-netflix-dark-gray p-4 rounded-lg">
-                <h3 className="text-white font-semibold mb-2">Monthly Plan</h3>
+                <h3 className="text-white font-semibold mb-2">Standard Pro Creator</h3>
                 <p className="text-netflix-red text-2xl font-bold">$99/month</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
                   <li>• Unlimited video uploads</li>
-                  <li>• Course selling capabilities</li>
+                  <li>• Up to 20 courses (100% profit)</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
                 </ul>
               </div>
               <div className="bg-netflix-dark-gray p-4 rounded-lg border-2 border-netflix-red">
-                <h3 className="text-white font-semibold mb-2">Yearly Plan</h3>
-                <p className="text-netflix-red text-2xl font-bold">$897/year</p>
-                <p className="text-green-400 text-sm">Save $291!</p>
+                <h3 className="text-white font-semibold mb-2">Pro Plus Creator</h3>
+                <p className="text-netflix-red text-2xl font-bold">$297/month</p>
+                <p className="text-green-400 text-sm">Most Popular!</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
-                  <li>• Everything in Monthly</li>
-                  <li>• 25% discount</li>
-                  <li>• Priority features</li>
-                  <li>• Enhanced support</li>
+                  <li>• Unlimited video uploads</li>
+                  <li>• Up to 100 courses (100% profit)</li>
+                  <li>• Premium analytics</li>
+                  <li>• VIP support</li>
                 </ul>
               </div>
+            </div>
+            
+            <div className="bg-netflix-dark-gray p-4 rounded-lg text-center">
+              <h3 className="text-white font-semibold mb-2">Enterprise Creator</h3>
+              <p className="text-netflix-light-gray">Need more than 100 courses? Custom pricing available.</p>
+              <p className="text-netflix-red font-semibold">Contact us for enterprise solutions</p>
             </div>
             
             <div className="bg-netflix-dark-gray p-4 rounded-lg">
@@ -139,14 +156,43 @@ export default function ProCreatorPortal() {
             </div>
             
             <div className="text-center space-y-4">
-              <Button
-                onClick={() => window.location.href = "/api/login"}
-                className="bg-netflix-red hover:bg-red-700 w-full"
-              >
-                Sign In to Apply
-              </Button>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+                <Button
+                  onClick={() => {
+                    // Auto-approve free tier applications
+                    fetch('/api/pro-creator/apply', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ 
+                        email: 'temp@example.com', 
+                        fullName: 'Free Creator',
+                        planType: 'free' 
+                      })
+                    }).then(() => {
+                      window.location.href = "/api/login";
+                    });
+                  }}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  Start Free
+                </Button>
+                <Button
+                  onClick={() => window.location.href = "/api/login"}
+                  className="bg-netflix-red hover:bg-red-700"
+                >
+                  Apply Standard
+                </Button>
+                <Button
+                  onClick={() => window.location.href = "/api/login"}
+                  className="bg-red-800 hover:bg-red-900"
+                >
+                  Apply Pro Plus
+                </Button>
+              </div>
               <p className="text-netflix-light-gray text-sm">
-                No account? Signing in will create one automatically.
+                <strong className="text-green-400">Free tier:</strong> Instant approval, 1 course max
+                <br />
+                <strong className="text-netflix-red">Paid tiers:</strong> Application review required
                 <br />
                 <strong className="text-white">Free-for-all platform</strong> - anyone can apply!
               </p>

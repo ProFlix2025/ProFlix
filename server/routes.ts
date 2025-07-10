@@ -159,13 +159,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: 'Email and full name are required' });
       }
       
-      // Store application in database for admin review
+      // Auto-approve for free tier, create user account immediately
+      let user;
+      
+      if (planType === 'free') {
+        // Create user account with free Pro Creator tier
+        user = await storage.createUserWithProCreator({
+          email,
+          firstName: fullName.split(' ')[0] || fullName,
+          lastName: fullName.split(' ').slice(1).join(' ') || '',
+          proCreatorTier: 'free',
+          courseLimit: 1,
+          isProCreator: true
+        });
+        
+        return res.json({
+          success: true,
+          message: 'Free Pro Creator account created! You can now sign in and start uploading content.',
+          tier: 'free',
+          courseLimit: 1,
+          autoApproved: true
+        });
+      }
+      
+      // Store paid tier applications for admin review
       const application = await storage.createProCreatorApplication({
         email,
         fullName,
         experience: experience || 'Not specified',
         category: category || 'General',
-        planType: planType || 'monthly',
+        planType: planType || 'standard',
         status: 'pending', // Admin will review and approve
         appliedAt: new Date()
       });
@@ -173,7 +196,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         success: true,
         message: 'Application submitted successfully! Our team will review and contact you soon.',
-        applicationId: application.id
+        applicationId: application.id,
+        tier: planType,
+        requiresReview: true
       });
     } catch (error) {
       console.error('Error submitting Pro Creator application:', error);
