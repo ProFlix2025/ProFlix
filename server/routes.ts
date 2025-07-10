@@ -53,6 +53,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
+  // Manual setup route to initialize database data
+  app.get('/setup', async (req, res) => {
+    try {
+      console.log('🔄 Manual setup triggered...');
+      
+      // Initialize categories if empty
+      const existingCategories = await storage.getCategories();
+      if (existingCategories.length === 0) {
+        console.log('📋 Setting up categories...');
+        await storage.initializeCategories();
+        console.log('✅ Categories initialized');
+      } else {
+        console.log('✅ Categories already exist:', existingCategories.length);
+      }
+      
+      // Initialize ProFlix Academy if needed
+      try {
+        await storage.createProFlixAcademy();
+        console.log('✅ ProFlix Academy initialized');
+      } catch (error) {
+        console.log('✅ ProFlix Academy already exists');
+      }
+      
+      const categoryCount = await storage.getCategories();
+      res.json({ 
+        success: true, 
+        message: 'Setup completed successfully',
+        categoriesCount: categoryCount.length,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('Setup error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Setup failed: ' + error.message 
+      });
+    }
+  });
+
   // Auth middleware - only sets up routes, doesn't force authentication
   await setupAuth(app);
 

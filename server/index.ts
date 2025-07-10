@@ -99,8 +99,16 @@ app.use((req, res, next) => {
             console.log('📋 Setting up categories...');
             await storage.initializeCategories();
             console.log('✅ Categories initialized');
+            
+            // Also initialize ProFlix Academy
+            try {
+              await storage.createProFlixAcademy();
+              console.log('✅ ProFlix Academy initialized');
+            } catch (error) {
+              console.log('✅ ProFlix Academy already exists or error:', error.message);
+            }
           } else {
-            console.log('✅ Categories already exist');
+            console.log('✅ Categories already exist:', existingCategories.length);
           }
           
           console.log('✅ Production database fully initialized');
