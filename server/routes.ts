@@ -921,11 +921,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Video routes
   app.get('/api/videos', async (req, res) => {
     try {
-      const videos = await storage.getVideos();
+      const videos = await storage.getViralFeed();
       res.json(videos);
     } catch (error) {
-      console.error('Error fetching videos:', error);
-      res.status(500).json({ message: 'Failed to fetch videos' });
+      console.error('Error fetching viral feed:', error);
+      res.status(500).json({ message: 'Failed to fetch viral feed' });
     }
   });
 

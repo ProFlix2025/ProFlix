@@ -118,40 +118,70 @@ export default function Home() {
             )}
           </TabsList>
 
-          <TabsContent value="home" className="mt-8 space-y-12">
-            {/* Browse by Category */}
-            <div>
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold">Browse by Category</h3>
+          <TabsContent value="home" className="mt-8">
+            {/* Viral Feed - Instagram/TikTok Style */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-2xl font-bold">Discover</h3>
                 <Link href="/all-categories">
                   <Button variant="outline" className="border-netflix-red text-netflix-red hover:bg-netflix-red hover:text-white">
-                    View All Categories
+                    Browse Categories
                   </Button>
                 </Link>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {Array.isArray(categories) && categories.slice(0, 8).map((category: any) => (
-                  <Link key={category.id} href={`/category/${category.slug}`}>
-                    <Button 
-                      variant="outline" 
-                      className="w-full h-16 text-left justify-start border-netflix-gray hover:border-netflix-red"
-                    >
-                      {category.name}
-                    </Button>
+              
+              {/* Instagram-style Grid Feed */}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                {Array.isArray(videos) && videos.map((video: any) => (
+                  <Link key={video.id} href={`/video/${video.id}`}>
+                    <div className="relative group cursor-pointer">
+                      {/* Thumbnail */}
+                      <div className="aspect-square relative overflow-hidden rounded-lg bg-netflix-gray">
+                        {video.thumbnailUrl ? (
+                          <img 
+                            src={video.thumbnailUrl} 
+                            alt={video.title}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-netflix-dark-gray flex items-center justify-center">
+                            <Play className="w-8 h-8 text-netflix-red" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay on hover */}
+                        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-opacity duration-300 flex items-center justify-center">
+                          <Play className="w-8 h-8 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        </div>
+                      </div>
+                      
+                      {/* Title below thumbnail */}
+                      <div className="mt-2">
+                        <h4 className="text-white text-sm font-medium line-clamp-2 leading-tight">
+                          {video.title}
+                        </h4>
+                      </div>
+                    </div>
                   </Link>
                 ))}
               </div>
+              
+              {/* Empty state for no videos */}
+              {Array.isArray(videos) && videos.length === 0 && (
+                <div className="text-center py-16">
+                  <Play className="w-16 h-16 text-netflix-light-gray mx-auto mb-4" />
+                  <h3 className="text-2xl font-semibold mb-2">No Content Yet</h3>
+                  <p className="text-netflix-light-gray mb-6">
+                    Be the first to upload and go viral! New creators get priority placement.
+                  </p>
+                  <Link href="/creator-new">
+                    <Button className="bg-netflix-red hover:bg-red-700">
+                      Upload Your First Video
+                    </Button>
+                  </Link>
+                </div>
+              )}
             </div>
-
-            {/* Featured Content */}
-            {Array.isArray(categories) && categories.map((category: any) => (
-              <VideoGrid
-                key={category.id}
-                title={category.name}
-                categoryId={category.id}
-                viewAllLink={`/category/${category.slug}`}
-              />
-            ))}
           </TabsContent>
 
           <TabsContent value="trending" className="mt-8">

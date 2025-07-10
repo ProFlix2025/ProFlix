@@ -93,6 +93,7 @@ export interface IStorage {
   
   // Video operations
   getVideos(): Promise<Video[]>;
+  getViralFeed(): Promise<Video[]>;
   getVideosByCategory(categoryId: number): Promise<Video[]>;
   getVideosBySubcategory(subcategoryId: number): Promise<Video[]>;
   getVideosByCreator(creatorId: string): Promise<Video[]>;
@@ -265,6 +266,57 @@ export class DatabaseStorage implements IStorage {
   // Video operations
   async getVideos(): Promise<Video[]> {
     return await db.select().from(videos).where(eq(videos.isPublished, true)).orderBy(desc(videos.createdAt));
+  }
+
+  async getViralFeed(): Promise<Video[]> {
+    // Viral feed algorithm: Push new creators to the top, mix with legendary creators
+    // Strategy: 60% new creators (last 30 days), 40% established creators
+    
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    // Get new creators (uploaded in last 30 days)
+    const newCreatorVideos = await db
+      .select()
+      .from(videos)
+      .where(
+        and(
+          eq(videos.isPublished, true),
+          sql`${videos.createdAt} >= ${thirtyDaysAgo}`
+        )
+      )
+      .orderBy(
+        // Prioritize by engagement rate (likes + views), then by recency
+        sql`(${videos.likes} + ${videos.views}) DESC, ${videos.createdAt} DESC`
+      )
+      .limit(60);
+    
+    // Get established creators (older than 30 days, high performers)
+    const establishedVideos = await db
+      .select()
+      .from(videos)
+      .where(
+        and(
+          eq(videos.isPublished, true),
+          sql`${videos.createdAt} < ${thirtyDaysAgo}`
+        )
+      )
+      .orderBy(
+        // Sort by performance metrics for established creators
+        sql`(${videos.likes} + ${videos.views} + ${videos.shares}) DESC`
+      )
+      .limit(40);
+    
+    // Combine and shuffle for viral effect
+    const allVideos = [...newCreatorVideos, ...establishedVideos];
+    
+    // Shuffle algorithm to mix new and established creators
+    for (let i = allVideos.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [allVideos[i], allVideos[j]] = [allVideos[j], allVideos[i]];
+    }
+    
+    return allVideos;
   }
 
   async getVideosByCategory(categoryId: number): Promise<Video[]> {
