@@ -27,6 +27,7 @@ import AdminCodes from "@/pages/admin-codes";
 import AdminDashboard from "@/pages/admin-dashboard";
 import AdminVerifications from "@/pages/admin-verifications";
 import AdminReports from "@/pages/admin-reports";
+import AdminContent from "@/pages/admin-content";
 import CreatorVerification from "@/pages/creator-verification";
 import ReportVideo from "@/pages/report-video";
 import NotFound from "@/pages/not-found";
@@ -46,6 +47,7 @@ function Router() {
           <Route path="/admin/dashboard" component={AdminDashboard} />
           <Route path="/admin/verifications" component={AdminVerifications} />
           <Route path="/admin/reports" component={AdminReports} />
+          <Route path="/admin/content" component={AdminContent} />
           <Route path="/creator-verification" component={CreatorVerification} />
           <Route path="/report-video" component={ReportVideo} />
           <Route path="/search" component={SearchPage} />

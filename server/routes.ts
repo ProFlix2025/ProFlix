@@ -211,6 +211,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Initialize ProFlix Academy system account
+  app.post('/api/admin/init-academy', async (req, res) => {
+    try {
+      await storage.createProFlixAcademy();
+      res.json({ message: 'ProFlix Academy initialized successfully' });
+    } catch (error) {
+      console.error('Error initializing ProFlix Academy:', error);
+      res.status(500).json({ message: 'Failed to initialize ProFlix Academy' });
+    }
+  });
+
+  // ProFlix Academy content management
+  app.get('/api/admin/academy-videos', async (req, res) => {
+    try {
+      const videos = await storage.getAcademyVideos();
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching academy videos:', error);
+      res.status(500).json({ message: 'Failed to fetch academy videos' });
+    }
+  });
+
+  app.get('/api/admin/academy-stats', async (req, res) => {
+    try {
+      const stats = await storage.getAcademyStats();
+      res.json(stats);
+    } catch (error) {
+      console.error('Error fetching academy stats:', error);
+      res.status(500).json({ message: 'Failed to fetch academy stats' });
+    }
+  });
+
+  app.post('/api/admin/academy-videos', upload.fields([
+    { name: 'video', maxCount: 1 },
+    { name: 'thumbnail', maxCount: 1 }
+  ]), async (req, res) => {
+    try {
+      const videoData = {
+        ...req.body,
+        videoFile: req.files?.video?.[0],
+        thumbnailFile: req.files?.thumbnail?.[0],
+        coursePrice: req.body.coursePrice ? Math.round(parseFloat(req.body.coursePrice) * 100) : 0,
+        isCourse: req.body.isCourse === 'true',
+        isFreeContent: req.body.isFreeContent === 'true',
+        offersPremiumDiscount: req.body.offersPremiumDiscount === 'true',
+        categoryId: parseInt(req.body.categoryId),
+        subcategoryId: parseInt(req.body.subcategoryId),
+        tags: req.body.tags ? req.body.tags.split(',').map((tag: string) => tag.trim()) : [],
+      };
+      
+      const video = await storage.createAcademyVideo(videoData);
+      res.json(video);
+    } catch (error) {
+      console.error('Error creating academy video:', error);
+      res.status(500).json({ message: 'Failed to create academy video' });
+    }
+  });
+
+  app.delete('/api/admin/academy-videos/:id', async (req, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      await storage.deleteAcademyVideo(videoId);
+      res.json({ message: 'Academy video deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting academy video:', error);
+      res.status(500).json({ message: 'Failed to delete academy video' });
+    }
+  });
+
   // Admin analytics endpoint
   app.get('/api/admin/analytics', async (req, res) => {
     try {

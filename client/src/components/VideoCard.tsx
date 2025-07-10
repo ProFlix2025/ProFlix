@@ -15,7 +15,9 @@ interface VideoCardProps {
     shareCount?: number;
     coursePrice?: number;
     isCourse?: boolean;
+    isFreeContent?: boolean;
     offerFreePreview?: boolean;
+    offersPremiumDiscount?: boolean;
     category?: { name: string };
     subcategory?: { name: string };
     creator?: { 
@@ -25,12 +27,17 @@ interface VideoCardProps {
       isProCreator?: boolean;
     };
   };
+  userIsPremium?: boolean;
 }
 
-export default function VideoCard({ video }: VideoCardProps) {
+export default function VideoCard({ video, userIsPremium }: VideoCardProps) {
   const creatorName = video.creator?.firstName 
     ? `${video.creator.firstName} ${video.creator.lastName || ''}`.trim()
     : video.creator?.email || 'Unknown Creator';
+  
+  const originalPrice = video.coursePrice || 0;
+  const hasDiscount = video.offersPremiumDiscount && userIsPremium;
+  const discountedPrice = hasDiscount ? Math.round(originalPrice * 0.9) : originalPrice;
 
   return (
     <Link href={`/video/${video.id}`}>
@@ -67,10 +74,27 @@ export default function VideoCard({ video }: VideoCardProps) {
                 PRO
               </div>
             )}
-            {video.isCourse && video.coursePrice && (
+            {video.isCourse && video.isFreeContent && (
+              <div className="absolute bottom-2 left-2 bg-green-600 text-white text-xs px-2 py-1 rounded font-semibold flex items-center gap-1">
+                <span>FREE</span>
+              </div>
+            )}
+            {video.isCourse && video.coursePrice && !video.isFreeContent && (
               <div className="absolute bottom-2 left-2 bg-yellow-600 text-white text-xs px-2 py-1 rounded font-semibold flex items-center gap-1">
                 <DollarSign className="w-3 h-3" />
-                ${(video.coursePrice / 100).toFixed(0)}
+                {hasDiscount ? (
+                  <div className="flex items-center gap-1">
+                    <span className="line-through opacity-75">${(originalPrice / 100).toFixed(0)}</span>
+                    <span>${(discountedPrice / 100).toFixed(0)}</span>
+                  </div>
+                ) : (
+                  <span>${(originalPrice / 100).toFixed(0)}</span>
+                )}
+              </div>
+            )}
+            {video.isCourse && video.offersPremiumDiscount && (
+              <div className="absolute top-2 left-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-xs px-2 py-1 rounded font-semibold flex items-center gap-1">
+                💎 Premium Members Save 10%
               </div>
             )}
           </div>

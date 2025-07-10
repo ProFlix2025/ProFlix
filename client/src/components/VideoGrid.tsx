@@ -57,7 +57,11 @@ export default function VideoGrid({ title, categoryId, subcategoryId, viewAllLin
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {videos.slice(0, 6).map((video: any) => (
-          <VideoCard key={video.id} video={video} />
+          <VideoCard 
+            key={video.id} 
+            video={video} 
+            userIsPremium={user?.isPremiumViewer || false}
+          />
         ))}
       </div>
     </div>

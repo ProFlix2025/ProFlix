@@ -9,7 +9,7 @@ import { Play, Plus, TrendingUp, History, Heart, Home as HomeIcon } from "lucide
 import { Link } from "wouter";
 
 export default function Home() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
 
   const { data: videos = [], isLoading } = useQuery({
     queryKey: ['/api/videos'],

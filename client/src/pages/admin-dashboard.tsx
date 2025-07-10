@@ -16,7 +16,8 @@ import {
   AlertTriangle,
   Ban,
   CheckCircle,
-  Crown
+  Crown,
+  BookOpen
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -128,6 +129,13 @@ export default function AdminDashboard() {
             </div>
           </div>
           <div className="flex gap-2">
+            <Button 
+              onClick={() => window.location.href = '/admin/content'}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              <BookOpen className="w-4 h-4 mr-2" />
+              Academy Content
+            </Button>
             <Button 
               onClick={() => window.location.href = '/admin/verifications'}
               className="bg-blue-600 hover:bg-blue-700"

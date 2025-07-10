@@ -188,6 +188,13 @@ export interface IStorage {
   submitCreatorVerification(userId: string, data: any): Promise<User>;
   getPendingVerifications(): Promise<User[]>;
   updateIdVerificationStatus(userId: string, status: string): Promise<User>;
+  
+  // ProFlix Academy operations
+  createProFlixAcademy(): Promise<User>;
+  getAcademyVideos(): Promise<Video[]>;
+  getAcademyStats(): Promise<any>;
+  createAcademyVideo(data: any): Promise<Video>;
+  deleteAcademyVideo(videoId: number): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1212,6 +1219,183 @@ export class DatabaseStorage implements IStorage {
     }
 
     return true; // Within rate limit
+  }
+
+  // ProFlix Academy operations
+  async createProFlixAcademy(): Promise<User> {
+    const academyUser = {
+      id: 'proflix-academy',
+      email: 'academy@proflix.com',
+      firstName: 'ProFlix',
+      lastName: 'Academy',
+      profileImageUrl: '/uploads/academy-avatar.png',
+      isSystemAccount: true,
+      role: 'creator',
+      channelName: 'ProFlix Academy',
+      channelDescription: 'Official ProFlix Academy - Learn with our expert instructors',
+    };
+    
+    return await this.upsertUser(academyUser);
+  }
+
+  async getAcademyVideos(): Promise<Video[]> {
+    const academyVideos = await db
+      .select({
+        id: videos.id,
+        title: videos.title,
+        description: videos.description,
+        videoUrl: videos.videoUrl,
+        thumbnailUrl: videos.thumbnailUrl,
+        duration: videos.duration,
+        categoryId: videos.categoryId,
+        subcategoryId: videos.subcategoryId,
+        creatorId: videos.creatorId,
+        isCourse: videos.isCourse,
+        coursePrice: videos.coursePrice,
+        courseDescription: videos.courseDescription,
+        isFreeContent: videos.isFreeContent,
+        offersPremiumDiscount: videos.offersPremiumDiscount,
+        views: videos.views,
+        likes: videos.likes,
+        isPublished: videos.isPublished,
+        createdAt: videos.createdAt,
+        category: {
+          id: categories.id,
+          name: categories.name,
+          slug: categories.slug,
+        },
+        subcategory: {
+          id: subcategories.id,
+          name: subcategories.name,
+          slug: subcategories.slug,
+        },
+      })
+      .from(videos)
+      .leftJoin(categories, eq(videos.categoryId, categories.id))
+      .leftJoin(subcategories, eq(videos.subcategoryId, subcategories.id))
+      .where(eq(videos.creatorId, 'proflix-academy'))
+      .orderBy(desc(videos.createdAt));
+    
+    return academyVideos;
+  }
+
+  async getAcademyStats(): Promise<any> {
+    const totalVideos = await db
+      .select({ count: count() })
+      .from(videos)
+      .where(eq(videos.creatorId, 'proflix-academy'));
+    
+    const totalCourses = await db
+      .select({ count: count() })
+      .from(videos)
+      .where(and(eq(videos.creatorId, 'proflix-academy'), eq(videos.isCourse, true)));
+    
+    const freeContent = await db
+      .select({ count: count() })
+      .from(videos)
+      .where(and(eq(videos.creatorId, 'proflix-academy'), eq(videos.isFreeContent, true)));
+    
+    const totalViews = await db
+      .select({ total: sql<number>`COALESCE(SUM(${videos.views}), 0)` })
+      .from(videos)
+      .where(eq(videos.creatorId, 'proflix-academy'));
+    
+    return {
+      totalVideos: totalVideos[0]?.count || 0,
+      totalCourses: totalCourses[0]?.count || 0,
+      freeContent: freeContent[0]?.count || 0,
+      totalViews: totalViews[0]?.total || 0,
+    };
+  }
+
+  async createAcademyVideo(data: any): Promise<Video> {
+    const { videoFile, thumbnailFile, tags, ...videoData } = data;
+    
+    // Handle file uploads
+    let videoUrl = '';
+    let thumbnailUrl = '';
+    
+    if (videoFile) {
+      const videoPath = `/uploads/academy-videos/${Date.now()}-${videoFile.originalname}`;
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Ensure directory exists
+      const uploadsDir = path.dirname(`./server/public${videoPath}`);
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Save video file
+      fs.writeFileSync(`./server/public${videoPath}`, videoFile.buffer);
+      videoUrl = videoPath;
+    }
+    
+    if (thumbnailFile) {
+      const thumbnailPath = `/uploads/academy-thumbnails/${Date.now()}-${thumbnailFile.originalname}`;
+      const fs = require('fs');
+      const path = require('path');
+      
+      // Ensure directory exists
+      const uploadsDir = path.dirname(`./server/public${thumbnailPath}`);
+      if (!fs.existsSync(uploadsDir)) {
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      
+      // Save thumbnail file
+      fs.writeFileSync(`./server/public${thumbnailPath}`, thumbnailFile.buffer);
+      thumbnailUrl = thumbnailPath;
+    }
+    
+    const insertData = {
+      ...videoData,
+      creatorId: 'proflix-academy',
+      videoUrl,
+      thumbnailUrl,
+      tags: tags || [],
+      isPublished: true,
+      videoType: 'free',
+    };
+    
+    const [video] = await db
+      .insert(videos)
+      .values(insertData)
+      .returning();
+    
+    return video;
+  }
+
+  async deleteAcademyVideo(videoId: number): Promise<void> {
+    // First get the video to check if it belongs to ProFlix Academy
+    const video = await db
+      .select()
+      .from(videos)
+      .where(and(eq(videos.id, videoId), eq(videos.creatorId, 'proflix-academy')))
+      .limit(1);
+    
+    if (video.length === 0) {
+      throw new Error('Academy video not found');
+    }
+    
+    // Delete the video file and thumbnail if they exist
+    if (video[0].videoUrl) {
+      const fs = require('fs');
+      const videoPath = `./server/public${video[0].videoUrl}`;
+      if (fs.existsSync(videoPath)) {
+        fs.unlinkSync(videoPath);
+      }
+    }
+    
+    if (video[0].thumbnailUrl) {
+      const fs = require('fs');
+      const thumbnailPath = `./server/public${video[0].thumbnailUrl}`;
+      if (fs.existsSync(thumbnailPath)) {
+        fs.unlinkSync(thumbnailPath);
+      }
+    }
+    
+    // Delete the video record
+    await db.delete(videos).where(eq(videos.id, videoId));
   }
 }
 

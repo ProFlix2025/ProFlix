@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import Navigation from "@/components/Navigation";
 import VideoCard from "@/components/VideoCard";
 import { Button } from "@/components/ui/button";
@@ -11,6 +12,7 @@ export default function CategoryView() {
   const params = useParams();
   const categorySlug = params.slug;
   const [selectedSubcategory, setSelectedSubcategory] = useState<number | null>(null);
+  const { user } = useAuth();
 
   const { data: category } = useQuery({
     queryKey: [`/api/categories/${categorySlug}`],
@@ -84,7 +86,11 @@ export default function CategoryView() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
           {videos && videos.length > 0 ? (
             videos.map((video: any) => (
-              <VideoCard key={video.id} video={video} />
+              <VideoCard 
+                key={video.id} 
+                video={video} 
+                userIsPremium={user?.isPremiumViewer || false}
+              />
             ))
           ) : (
             <div className="col-span-full">
