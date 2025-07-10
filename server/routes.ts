@@ -572,6 +572,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator upgrade endpoint
+  app.post("/api/creator/upgrade", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { tier } = req.body;
+
+      if (!userId) {
+        return res.status(401).json({ error: "User not authenticated" });
+      }
+
+      // Update user's creator tier
+      await storage.updateUserCreatorTier(userId, tier);
+
+      res.json({ 
+        success: true, 
+        message: `Successfully upgraded to ${tier} creator tier`,
+        tier 
+      });
+    } catch (error) {
+      console.error("Error upgrading creator tier:", error);
+      res.status(500).json({ error: "Failed to upgrade creator tier" });
+    }
+  });
+
   app.post('/api/stripe/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
     try {
       const sig = req.headers['stripe-signature'];

@@ -140,6 +140,13 @@ export default function Navigation() {
           </div>
         </Link>
 
+        <Link href="/creator-tiers" className="text-white hover:text-netflix-red transition-colors">
+          <div className="flex items-center space-x-2">
+            <Video className="w-5 h-5" />
+            <span className="text-lg">Creator</span>
+          </div>
+        </Link>
+
 
 
         {isAuthenticated && (

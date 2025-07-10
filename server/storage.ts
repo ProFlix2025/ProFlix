@@ -65,6 +65,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateUser(userId: string, updates: Partial<UpsertUser>): Promise<User>;
   updateUserChannel(userId: string, channelData: { channelName?: string; channelDescription?: string }): Promise<User>;
+  updateUserCreatorTier(userId: string, tier: string): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
   
 
@@ -832,6 +833,19 @@ export class DatabaseStorage implements IStorage {
       .set({
         accountType,
         uploadHoursLimit: uploadLimit,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return user;
+  }
+
+  async updateUserCreatorTier(userId: string, tier: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        accountType: tier,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId))

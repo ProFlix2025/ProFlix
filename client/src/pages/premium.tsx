@@ -93,19 +93,7 @@ export default function Premium() {
       popular: true,
       cta: "Upgrade Now"
     },
-    {
-      name: "Pro Creator",
-      price: "$99", 
-      period: "month",
-      features: [
-        "Everything in Premium",
-        "Sell premium courses",
-        "Advanced analytics",
-        "Custom course pages"
-      ],
-      popular: false,
-      cta: "Become Pro Creator"
-    }
+
   ];
 
   return (
@@ -149,7 +137,7 @@ export default function Premium() {
         </div>
 
         {/* Pricing Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
           {plans.map((plan, index) => (
             <Card 
               key={index} 
@@ -237,9 +225,9 @@ export default function Premium() {
             
             <Card className="bg-gray-900 border-gray-800">
               <CardContent className="p-6">
-                <h3 className="font-semibold mb-2">What's the difference between Premium and Pro Creator?</h3>
+                <h3 className="font-semibold mb-2">How do I become a creator?</h3>
                 <p className="text-gray-400">
-                  Premium is for viewers who want ad-free experience and course discounts. Pro Creator is for content creators who want to sell their own courses.
+                  Anyone can become a creator on ProFlix! Check out our Creator page to see the different tiers and start uploading videos today.
                 </p>
               </CardContent>
             </Card>
