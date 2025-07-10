@@ -72,21 +72,85 @@ export default function ProCreatorPortal() {
     },
   });
 
+  // Show public application form if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-netflix-black flex items-center justify-center p-4">
-        <Card className="w-full max-w-md bg-netflix-gray border-netflix-border">
+        <Card className="w-full max-w-2xl bg-netflix-gray border-netflix-border">
           <CardHeader className="text-center">
             <Crown className="w-12 h-12 text-netflix-red mx-auto mb-4" />
-            <CardTitle className="text-white">Pro Creator Portal</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="text-netflix-light-gray mb-4">
-              Please sign in to access the Pro Creator portal.
+            <CardTitle className="text-white text-2xl">Become a Pro Creator</CardTitle>
+            <p className="text-netflix-light-gray mt-2">
+              Join our free-for-all platform! Anyone can apply to become a Pro Creator and start monetizing their content.
             </p>
-            <Button onClick={() => window.location.href = "/api/login"} className="bg-netflix-red hover:bg-red-700">
-              Sign In
-            </Button>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-netflix-dark-gray p-4 rounded-lg">
+                <h3 className="text-white font-semibold mb-2">Monthly Plan</h3>
+                <p className="text-netflix-red text-2xl font-bold">$99/month</p>
+                <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
+                  <li>• Unlimited video uploads</li>
+                  <li>• Course selling capabilities</li>
+                  <li>• Advanced analytics</li>
+                  <li>• Priority support</li>
+                </ul>
+              </div>
+              <div className="bg-netflix-dark-gray p-4 rounded-lg border-2 border-netflix-red">
+                <h3 className="text-white font-semibold mb-2">Yearly Plan</h3>
+                <p className="text-netflix-red text-2xl font-bold">$897/year</p>
+                <p className="text-green-400 text-sm">Save $291!</p>
+                <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
+                  <li>• Everything in Monthly</li>
+                  <li>• 25% discount</li>
+                  <li>• Priority features</li>
+                  <li>• Enhanced support</li>
+                </ul>
+              </div>
+            </div>
+            
+            <div className="bg-netflix-dark-gray p-4 rounded-lg">
+              <h3 className="text-white font-semibold mb-2 flex items-center">
+                <Gift className="w-5 h-5 mr-2 text-netflix-red" />
+                Have a Promo Code?
+              </h3>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Enter your invitation code"
+                  value={promoCode}
+                  onChange={(e) => setPromoCode(e.target.value)}
+                  className="bg-netflix-black border-netflix-border text-white"
+                />
+                <Button
+                  onClick={() => {
+                    if (promoCode.trim()) {
+                      // For now, just show success message - user will need to sign in to redeem
+                      toast({
+                        title: "Code Saved",
+                        description: "Sign in to redeem your promo code and get free access!",
+                      });
+                    }
+                  }}
+                  className="bg-netflix-red hover:bg-red-700"
+                >
+                  Save Code
+                </Button>
+              </div>
+            </div>
+            
+            <div className="text-center space-y-4">
+              <Button
+                onClick={() => window.location.href = "/api/login"}
+                className="bg-netflix-red hover:bg-red-700 w-full"
+              >
+                Sign In to Apply
+              </Button>
+              <p className="text-netflix-light-gray text-sm">
+                No account? Signing in will create one automatically.
+                <br />
+                <strong className="text-white">Free-for-all platform</strong> - anyone can apply!
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

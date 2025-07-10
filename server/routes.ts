@@ -115,9 +115,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Pro Creator Portal routes
-  app.get('/api/pro-creator/status', isAuthenticated, async (req: any, res) => {
+  // Pro Creator Portal routes - Public access for application
+  app.get('/api/pro-creator/status', async (req: any, res) => {
     try {
+      // Allow public access - return basic info without requiring auth
+      if (!req.user) {
+        return res.json({
+          isProCreator: false,
+          canApply: true,
+          requiresAuth: true,
+          message: 'Sign in to apply for Pro Creator status'
+        });
+      }
+      
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
       
@@ -131,11 +141,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({
         isProCreator,
         proCreatorEndsAt: user.proCreatorEndsAt,
-        hasApplication: !!user.role // Check if user has applied
+        hasApplication: !!user.role,
+        canApply: true // Free-for-all platform
       });
     } catch (error) {
       console.error('Error checking Pro Creator status:', error);
       res.status(500).json({ message: 'Failed to check status' });
+    }
+  });
+
+  // Pro Creator application - Public endpoint for free-for-all access
+  app.post('/api/pro-creator/apply', async (req, res) => {
+    try {
+      const { email, fullName, experience, category, planType } = req.body;
+      
+      if (!email || !fullName) {
+        return res.status(400).json({ message: 'Email and full name are required' });
+      }
+      
+      // Store application in database for admin review
+      const application = await storage.createProCreatorApplication({
+        email,
+        fullName,
+        experience: experience || 'Not specified',
+        category: category || 'General',
+        planType: planType || 'monthly',
+        status: 'pending', // Admin will review and approve
+        appliedAt: new Date()
+      });
+      
+      res.json({
+        success: true,
+        message: 'Application submitted successfully! Our team will review and contact you soon.',
+        applicationId: application.id
+      });
+    } catch (error) {
+      console.error('Error submitting Pro Creator application:', error);
+      res.status(500).json({ message: 'Failed to submit application' });
     }
   });
 
