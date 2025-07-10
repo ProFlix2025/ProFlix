@@ -72,24 +72,24 @@ export default function ProCreatorPortal() {
     },
   });
 
-  // Show public application form if not authenticated
+  // Show public pricing info if not authenticated
   if (!isAuthenticated) {
     return (
       <div className="min-h-screen bg-netflix-black flex items-center justify-center p-4">
         <Card className="w-full max-w-2xl bg-netflix-gray border-netflix-border">
           <CardHeader className="text-center">
             <Crown className="w-12 h-12 text-netflix-red mx-auto mb-4" />
-            <CardTitle className="text-white text-2xl">Become a Pro Creator</CardTitle>
+            <CardTitle className="text-white text-2xl">ProFlix Creator Portal</CardTitle>
             <p className="text-netflix-light-gray mt-2">
-              Join our free-for-all platform! Anyone can apply to become a Pro Creator and start monetizing their content.
+              Everyone can upload videos and sell courses! Sign in to get started.
             </p>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-netflix-dark-gray p-4 rounded-lg border-2 border-green-500">
-                <h3 className="text-white font-semibold mb-2">Free Pro Creator</h3>
+                <h3 className="text-white font-semibold mb-2">Free Creator</h3>
                 <p className="text-green-400 text-2xl font-bold">$0/month</p>
-                <p className="text-green-400 text-sm">Perfect to get started!</p>
+                <p className="text-green-400 text-sm">Everyone starts here!</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
                   <li>• Unlimited video uploads</li>
                   <li>• 1 course max (100% profit)</li>
@@ -98,7 +98,7 @@ export default function ProCreatorPortal() {
                 </ul>
               </div>
               <div className="bg-netflix-dark-gray p-4 rounded-lg">
-                <h3 className="text-white font-semibold mb-2">Standard Pro Creator</h3>
+                <h3 className="text-white font-semibold mb-2">Pro Creator</h3>
                 <p className="text-netflix-red text-2xl font-bold">$99/month</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
                   <li>• Unlimited video uploads</li>
@@ -126,75 +126,17 @@ export default function ProCreatorPortal() {
               <p className="text-netflix-red font-semibold">Contact us for enterprise solutions</p>
             </div>
             
-            <div className="bg-netflix-dark-gray p-4 rounded-lg">
-              <h3 className="text-white font-semibold mb-2 flex items-center">
-                <Gift className="w-5 h-5 mr-2 text-netflix-red" />
-                Have a Promo Code?
-              </h3>
-              <div className="flex gap-2">
-                <Input
-                  placeholder="Enter your invitation code"
-                  value={promoCode}
-                  onChange={(e) => setPromoCode(e.target.value)}
-                  className="bg-netflix-black border-netflix-border text-white"
-                />
-                <Button
-                  onClick={() => {
-                    if (promoCode.trim()) {
-                      // For now, just show success message - user will need to sign in to redeem
-                      toast({
-                        title: "Code Saved",
-                        description: "Sign in to redeem your promo code and get free access!",
-                      });
-                    }
-                  }}
-                  className="bg-netflix-red hover:bg-red-700"
-                >
-                  Save Code
-                </Button>
-              </div>
-            </div>
-            
             <div className="text-center space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
-                <Button
-                  onClick={() => {
-                    // Auto-approve free tier applications
-                    fetch('/api/pro-creator/apply', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ 
-                        email: 'temp@example.com', 
-                        fullName: 'Free Creator',
-                        planType: 'free' 
-                      })
-                    }).then(() => {
-                      window.location.href = "/api/login";
-                    });
-                  }}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  Start Free
-                </Button>
-                <Button
-                  onClick={() => window.location.href = "/api/login"}
-                  className="bg-netflix-red hover:bg-red-700"
-                >
-                  Apply Standard
-                </Button>
-                <Button
-                  onClick={() => window.location.href = "/api/login"}
-                  className="bg-red-800 hover:bg-red-900"
-                >
-                  Apply Pro Plus
-                </Button>
-              </div>
+              <Button
+                onClick={() => window.location.href = "/api/login"}
+                className="bg-netflix-red hover:bg-red-700 w-full"
+              >
+                Sign In to Start Creating
+              </Button>
               <p className="text-netflix-light-gray text-sm">
-                <strong className="text-green-400">Free tier:</strong> Instant approval, 1 course max
+                <strong className="text-white">YouTube-style platform</strong> - anyone can upload videos and sell courses!
                 <br />
-                <strong className="text-netflix-red">Paid tiers:</strong> Application review required
-                <br />
-                <strong className="text-white">Free-for-all platform</strong> - anyone can apply!
+                No approval required - just sign in and start creating.
               </p>
             </div>
           </CardContent>

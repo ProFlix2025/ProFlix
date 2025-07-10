@@ -30,6 +30,7 @@ import AdminReports from "@/pages/admin-reports";
 import AdminContent from "@/pages/admin-content";
 import CreatorVerification from "@/pages/creator-verification";
 import ReportVideo from "@/pages/report-video";
+import AllCategories from "@/pages/all-categories";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -59,6 +60,7 @@ function Router() {
           <Route path="/dmca-policy" component={DMCAPolicy} />
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
+          <Route path="/all-categories" component={AllCategories} />
           <Route path="/category/:slug" component={CategoryView} />
           <Route path="/video/:id" component={VideoPlayerNew} />
           <Route component={NotFound} />

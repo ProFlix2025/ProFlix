@@ -150,61 +150,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Pro Creator application - Public endpoint for free-for-all access
-  app.post('/api/pro-creator/apply', async (req, res) => {
-    try {
-      const { email, fullName, experience, category, planType } = req.body;
-      
-      if (!email || !fullName) {
-        return res.status(400).json({ message: 'Email and full name are required' });
-      }
-      
-      // Auto-approve for free tier, create user account immediately
-      let user;
-      
-      if (planType === 'free') {
-        // Create user account with free Pro Creator tier
-        user = await storage.createUserWithProCreator({
-          email,
-          firstName: fullName.split(' ')[0] || fullName,
-          lastName: fullName.split(' ').slice(1).join(' ') || '',
-          proCreatorTier: 'free',
-          courseLimit: 1,
-          isProCreator: true
-        });
-        
-        return res.json({
-          success: true,
-          message: 'Free Pro Creator account created! You can now sign in and start uploading content.',
-          tier: 'free',
-          courseLimit: 1,
-          autoApproved: true
-        });
-      }
-      
-      // Store paid tier applications for admin review
-      const application = await storage.createProCreatorApplication({
-        email,
-        fullName,
-        experience: experience || 'Not specified',
-        category: category || 'General',
-        planType: planType || 'standard',
-        status: 'pending', // Admin will review and approve
-        appliedAt: new Date()
-      });
-      
-      res.json({
-        success: true,
-        message: 'Application submitted successfully! Our team will review and contact you soon.',
-        applicationId: application.id,
-        tier: planType,
-        requiresReview: true
-      });
-    } catch (error) {
-      console.error('Error submitting Pro Creator application:', error);
-      res.status(500).json({ message: 'Failed to submit application' });
-    }
-  });
+  // Everyone can create and upload - no application needed
+  // Users automatically get free tier on first login
 
   app.post('/api/pro-creator/subscribe', isAuthenticated, async (req: any, res) => {
     try {
