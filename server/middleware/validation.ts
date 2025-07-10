@@ -4,16 +4,24 @@ import { Request, Response, NextFunction } from "express";
 export function validateEnvironment() {
   const required = [
     'DATABASE_URL',
-    'SESSION_SECRET',
+    'SESSION_SECRET'
+  ];
+
+  const optional = [
     'STRIPE_SECRET_KEY',
-    'PAYPAL_CLIENT_ID',
-    'PAYPAL_CLIENT_SECRET'
+    'VITE_STRIPE_PUBLIC_KEY'
   ];
 
   const missing = required.filter(key => !process.env[key]);
   
   if (missing.length > 0) {
     throw new Error(`Missing required environment variables: ${missing.join(', ')}`);
+  }
+
+  // Log warnings for optional variables
+  const missingOptional = optional.filter(key => !process.env[key]);
+  if (missingOptional.length > 0) {
+    console.warn(`⚠️  Optional environment variables not set: ${missingOptional.join(', ')}`);
   }
 }
 

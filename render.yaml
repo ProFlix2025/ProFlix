@@ -3,7 +3,7 @@ services:
     name: proflix
     env: node
     branch: main
-    buildCommand: npm install && npm run db:push && npm run build
+    buildCommand: ./build.sh
     startCommand: npm run start
     autoDeploy: true
     envVars:
@@ -14,4 +14,6 @@ services:
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: VITE_STRIPE_PUBLIC_KEY
-        sync: false 
+        sync: false
+      - key: NODE_ENV
+        value: production 

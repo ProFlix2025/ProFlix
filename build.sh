@@ -1,15 +1,16 @@
 #!/bin/bash
+echo "🚀 Building ProFlix for production..."
 
-# Build script for ProFlix deployment
-echo "Building ProFlix for Render deployment..."
+# Install dependencies
+echo "📦 Installing dependencies..."
+npm ci
 
-# Run the Vite build (creates dist/public/)
-vite build
+# Run database schema push
+echo "🗄️  Pushing database schema..."
+npm run db:push
 
-# Build the server (creates dist/index.js)
-esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+# Build the project
+echo "🔨 Building application..."
+npm run build
 
-echo "Build complete!"
-echo "Frontend built to: dist/public/"
-echo "Server built to: dist/index.js"
-echo "Ready for Render deployment with 'node dist/index.js'"
+echo "✅ Build completed successfully!"
