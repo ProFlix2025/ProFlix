@@ -2473,6 +2473,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Pro Creator Code System
+  app.post('/api/pro-creator/generate-code', requireAdminAuth, async (req, res) => {
+    try {
+      console.log('🎫 Admin generating Pro Creator code...');
+      const { count = 1, expiresAt } = req.body;
+      
+      const codes = [];
+      for (let i = 0; i < count; i++) {
+        const code = await storage.generateProCreatorCode(expiresAt);
+        codes.push(code);
+      }
+      
+      if (codes.length === 1) {
+        console.log(`✅ Generated Pro Creator code: ${codes[0].code}`);
+        res.json(codes[0]);
+      } else {
+        console.log(`✅ Generated ${codes.length} Pro Creator codes`);
+        res.json(codes);
+      }
+    } catch (error) {
+      console.error('❌ Error generating Pro Creator code:', error);
+      res.status(500).json({ message: 'Failed to generate Pro Creator code' });
+    }
+  });
+
+  app.post('/api/pro-creator/use-code', async (req, res) => {
+    try {
+      const { code, userId } = req.body;
+      
+      if (!code || !userId) {
+        return res.status(400).json({ message: 'Code and user ID are required' });
+      }
+      
+      console.log(`🎫 User ${userId} attempting to use Pro Creator code: ${code}`);
+      
+      const success = await storage.useProCreatorCode(code, userId);
+      
+      if (success) {
+        console.log(`✅ Pro Creator code used successfully: ${code}`);
+        res.json({ 
+          success: true, 
+          message: 'Pro Creator code applied successfully! You now have 12 months of free Pro Creator access.' 
+        });
+      } else {
+        console.log(`❌ Invalid or expired Pro Creator code: ${code}`);
+        res.status(400).json({ 
+          success: false, 
+          message: 'Invalid or expired Pro Creator code' 
+        });
+      }
+    } catch (error) {
+      console.error('❌ Error using Pro Creator code:', error);
+      res.status(500).json({ message: 'Failed to use Pro Creator code' });
+    }
+  });
+
+  app.get('/api/pro-creator/codes', requireAdminAuth, async (req, res) => {
+    try {
+      const codes = await storage.getAllProCreatorCodes();
+      res.json(codes);
+    } catch (error) {
+      console.error('❌ Error fetching Pro Creator codes:', error);
+      res.status(500).json({ message: 'Failed to fetch Pro Creator codes' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

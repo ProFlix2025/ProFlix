@@ -1994,6 +1994,62 @@ export class DatabaseStorage implements IStorage {
       topCategories
     };
   }
+
+  // Pro Creator Code System
+  async generateProCreatorCode(expiresAt?: Date): Promise<ProCreatorCode> {
+    // Generate a unique 12-character code
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase() + 
+                 Math.random().toString(36).substring(2, 8).toUpperCase();
+    
+    const [newCode] = await db
+      .insert(proCreatorCodes)
+      .values({
+        code,
+        expiresAt: expiresAt || new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year default
+      })
+      .returning();
+    
+    return newCode;
+  }
+
+  async useProCreatorCode(code: string, userId: string): Promise<boolean> {
+    // Check if code exists and is valid
+    const [existingCode] = await db
+      .select()
+      .from(proCreatorCodes)
+      .where(eq(proCreatorCodes.code, code));
+    
+    if (!existingCode || existingCode.isUsed) {
+      return false;
+    }
+    
+    if (existingCode.expiresAt && new Date() > existingCode.expiresAt) {
+      return false;
+    }
+    
+    // Mark code as used
+    await db
+      .update(proCreatorCodes)
+      .set({ 
+        isUsed: true, 
+        usedByUserId: userId, 
+        usedAt: new Date() 
+      })
+      .where(eq(proCreatorCodes.code, code));
+    
+    // Upgrade user to Pro Creator for 12 months
+    const endsAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000); // 12 months
+    await this.upgradeToProCreator(userId, 'free_code', endsAt);
+    
+    return true;
+  }
+
+  async getAllProCreatorCodes(): Promise<ProCreatorCode[]> {
+    return await db
+      .select()
+      .from(proCreatorCodes)
+      .orderBy(desc(proCreatorCodes.createdAt));
+  }
 }
 
 export const storage = new DatabaseStorage();
