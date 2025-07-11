@@ -522,47 +522,50 @@ export class DatabaseStorage implements IStorage {
       
       // Update categories with emojis
       console.log('🔄 Adding emojis to categories...');
-      const categoryEmojis = [
-        ['Art & Creativity', '🎨'],
-        ['Business & Finance', '💼'],
-        ['Education & Learning', '📚'],
-        ['Entertainment', '🎬'],
-        ['Fashion & Style', '👗'],
-        ['Film & Media', '🎥'],
-        ['Fitness & Health', '💪'],
-        ['Food & Cooking', '🍳'],
-        ['Gaming', '🎮'],
-        ['Home & DIY', '🏠'],
-        ['Lifestyle', '✨'],
-        ['Music & Audio', '🎵'],
-        ['News & Politics', '📰'],
-        ['Pets & Animals', '🐾'],
-        ['Science & Technology', '🔬'],
-        ['Sports & Recreation', '⚽'],
-        ['Travel & Adventure', '✈️'],
-        ['Automotive', '🚗'],
-        ['Beauty & Skincare', '💄'],
-        ['Comedy', '😂'],
-        ['Dance', '💃'],
-        ['Digital Marketing', '📱'],
-        ['Environment', '🌱'],
-        ['History', '📜'],
-        ['Languages', '🗣️'],
-        ['Mental Health', '🧠'],
-        ['Photography', '📸'],
-        ['Real Estate', '🏘️'],
-        ['Relationships', '💕'],
-        ['Spirituality', '🧘'],
-        ['Parenting', '👶']
-      ];
+      const categoryEmojis = {
+        'Art': '🎨',
+        'Fitness': '💪',
+        'Entrepreneurship': '💼',
+        'Beauty': '💄',
+        'Construction': '🏗️',
+        'Music': '🎵',
+        'Film & Media': '🎥',
+        'Food': '🍳',
+        'Sports': '⚽',
+        'Dating & Lifestyle': '💕',
+        'Tech & Programming': '💻',
+        'Finance & Investing': '💰',
+        'Marketing & Sales': '📈',
+        'Health & Wellness': '🧘',
+        'Photography & Content Creation': '📸',
+        'Fashion & Style': '👗',
+        'Parenting & Relationships': '👶',
+        'Home & DIY': '🏠',
+        'Gaming & Esports': '🎮',
+        'Language & Culture': '🗣️',
+        'Spirituality & Mindset': '🧠',
+        'Automotive & Mechanics': '🚗',
+        'Pets & Animal Care': '🐾',
+        'Event Planning & Hospitality': '🎉',
+        'Voice & Communication': '🎤',
+        'Career & Job Skills': '💼',
+        'Travel & Expat Life': '✈️',
+        'Sales & Negotiation': '🤝',
+        'AI & Automation': '🤖',
+        'Education for Creators': '📚'
+      };
       
-      for (const [name, emoji] of categoryEmojis) {
+      let updated = 0;
+      for (const [name, emoji] of Object.entries(categoryEmojis)) {
         try {
-          await db.execute(sql`UPDATE categories SET emoji = ${emoji} WHERE name = ${name} AND (emoji IS NULL OR emoji = '');`);
+          const result = await db.execute(sql`UPDATE categories SET emoji = ${emoji} WHERE name = ${name};`);
+          if (result.rowCount > 0) updated++;
         } catch (error) {
           console.log(`⚠️ Error updating emoji for ${name}:`, error.message);
         }
       }
+      
+      console.log(`✅ Updated ${updated} categories with emojis`);
       
       console.log('✅ Database migration completed successfully');
     } catch (error) {
@@ -1625,70 +1628,7 @@ export class DatabaseStorage implements IStorage {
     await db.delete(videos).where(eq(videos.id, videoId));
   }
 
-  async addMissingColumns(): Promise<void> {
-    try {
-      // Add missing columns to the database
-      await db.execute(sql`
-        ALTER TABLE videos 
-        ADD COLUMN IF NOT EXISTS is_free_content BOOLEAN DEFAULT false;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS is_system_account BOOLEAN DEFAULT false;
-      `);
-      
-      // Add customer retention columns
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS previous_pro_creator_tier VARCHAR;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS downgraded_at TIMESTAMP;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS downgraded_reason VARCHAR;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS reactivation_attempts INTEGER DEFAULT 0;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS last_reactivation_email TIMESTAMP;
-      `);
-      
-      // Add video hour limit columns
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 5;
-      `);
-      
-      await db.execute(sql`
-        ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;
-      `);
-      
-      // Update existing free creators to have 5 hours of video content limit
-      await db.execute(sql`
-        UPDATE users 
-        SET video_hour_limit = 5 
-        WHERE (pro_creator_tier = 'free' OR pro_creator_tier IS NULL) 
-        AND (video_hour_limit IS NULL OR video_hour_limit = 0);
-      `);
-      
-      console.log('✅ Database columns added successfully');
-    } catch (error) {
-      console.error('Database column addition error:', error);
-      // Continue execution - columns might already exist
-    }
-  }
+
 
   // Customer retention methods
   async downgradeProCreator(userId: string, reason: string): Promise<User> {

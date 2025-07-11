@@ -145,6 +145,63 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add emojis to categories via GET request
+  app.get('/api/admin/add-emojis', async (req, res) => {
+    try {
+      const { sql } = await import('drizzle-orm');
+      const { db } = await import('./db');
+      
+      // Map of category names to emojis
+      const categoryEmojis = {
+        'Art': '🎨',
+        'Fitness': '💪',
+        'Entrepreneurship': '💼',
+        'Beauty': '💄',
+        'Construction': '🏗️',
+        'Music': '🎵',
+        'Film & Media': '🎥',
+        'Food': '🍳',
+        'Sports': '⚽',
+        'Dating & Lifestyle': '💕',
+        'Tech & Programming': '💻',
+        'Finance & Investing': '💰',
+        'Marketing & Sales': '📈',
+        'Health & Wellness': '🧘',
+        'Photography & Content Creation': '📸',
+        'Fashion & Style': '👗',
+        'Parenting & Relationships': '👶',
+        'Home & DIY': '🏠',
+        'Gaming & Esports': '🎮',
+        'Language & Culture': '🗣️',
+        'Spirituality & Mindset': '🧠',
+        'Automotive & Mechanics': '🚗',
+        'Pets & Animal Care': '🐾',
+        'Event Planning & Hospitality': '🎉',
+        'Voice & Communication': '🎤',
+        'Career & Job Skills': '💼',
+        'Travel & Expat Life': '✈️',
+        'Sales & Negotiation': '🤝',
+        'AI & Automation': '🤖',
+        'Education for Creators': '📚'
+      };
+      
+      let updated = 0;
+      for (const [name, emoji] of Object.entries(categoryEmojis)) {
+        const result = await db.execute(sql`
+          UPDATE categories 
+          SET emoji = ${emoji} 
+          WHERE name = ${name};
+        `);
+        if (result.rowCount > 0) updated++;
+      }
+      
+      res.json({ message: `Updated ${updated} categories with emojis` });
+    } catch (error) {
+      console.error('Emoji update error:', error);
+      res.status(500).json({ message: 'Failed to update emojis', error: error.message });
+    }
+  });
+
   // Check database schema for debugging
   app.get('/api/admin/check-schema', async (req, res) => {
     try {
