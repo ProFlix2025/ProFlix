@@ -289,6 +289,10 @@ Preferred communication style: Simple, everyday language.
 - ✅ Added video hour tracking columns to database schema (videoHourLimit, currentVideoHours)
 - ✅ Enhanced customer retention system to track video content hours usage
 - ✅ Updated all pricing displays in creator-tiers.tsx and pro-creator-portal.tsx
+- ✅ **Enhanced Free Creator Tier**: Now allows up to 5 hours of course content with 100% profit retention
+- ✅ Updated database default video hour limit from 0 to 5 hours for free creators
+- ✅ Enhanced migration script to update existing free creators to 5-hour limit
+- ✅ Updated UI descriptions to highlight "sell courses up to 5 hours and keep 100% profit"
 
 ## Pro Creator Code System (January 09, 2025)
 - ✅ Added `proCreatorCodes` table to database schema

@@ -1465,12 +1465,20 @@ export class DatabaseStorage implements IStorage {
       // Add video hour limit columns
       await db.execute(sql`
         ALTER TABLE users 
-        ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 0;
+        ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 5;
       `);
       
       await db.execute(sql`
         ALTER TABLE users 
         ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;
+      `);
+      
+      // Update existing free creators to have 5 hours of video content limit
+      await db.execute(sql`
+        UPDATE users 
+        SET video_hour_limit = 5 
+        WHERE (pro_creator_tier = 'free' OR pro_creator_tier IS NULL) 
+        AND (video_hour_limit IS NULL OR video_hour_limit = 0);
       `);
       
       console.log('✅ Database columns added successfully');
@@ -1511,7 +1519,7 @@ export class DatabaseStorage implements IStorage {
     };
     
     const tierHourLimits = {
-      'free': 0, // Unlimited but can't sell courses
+      'free': 5, // 5 hours of course content for free creators
       'pro': 50, // 50 hours for Pro Creator
       'enterprise': 500 // 500 hours for Enterprise Creator
     };

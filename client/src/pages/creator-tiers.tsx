@@ -20,18 +20,20 @@ const creatorTiers = [
     features: [
       "Upload unlimited videos",
       "YouTube-style ad revenue sharing",
+      "Sell courses up to 5 hours content",
+      "Keep 100% of course sales revenue",
       "Basic analytics dashboard",
       "Community features (likes, comments, shares)",
       "Standard video player",
       "Basic creator profile"
     ],
     limitations: [
-      "Cannot sell courses",
+      "5-hour limit on course content",
       "No premium features",
       "Standard support only"
     ],
     cta: "Start Creating",
-    description: "Perfect for content creators who want to build their audience"
+    description: "Perfect for new creators - sell courses up to 5 hours and keep 100% profit!"
   },
   {
     id: "pro",

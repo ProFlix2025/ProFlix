@@ -45,7 +45,7 @@ export const users = pgTable("users", {
   proCreatorPlan: varchar("pro_creator_plan"), // 'monthly', 'yearly', 'free_code'
   courseLimit: integer("course_limit").default(1), // free=1, standard=20, plus=100, enterprise=unlimited
   currentCourseCount: integer("current_course_count").default(0),
-  videoHourLimit: integer("video_hour_limit").default(0), // free=unlimited, pro=50, enterprise=500
+  videoHourLimit: integer("video_hour_limit").default(5), // free=5 hours course content, pro=50, enterprise=500
   currentVideoHours: integer("current_video_hours").default(0),
   
   // Customer retention tracking

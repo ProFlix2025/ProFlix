@@ -92,7 +92,8 @@ export default function ProCreatorPortal() {
                 <p className="text-green-400 text-sm">Everyone starts here!</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
                   <li>• Unlimited video uploads</li>
-                  <li>• 1 course max (100% profit)</li>
+                  <li>• Up to 5 hours course content</li>
+                  <li>• 100% course profit retention</li>
                   <li>• Basic analytics</li>
                   <li>• Community support</li>
                 </ul>
