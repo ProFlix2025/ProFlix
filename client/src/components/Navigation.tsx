@@ -134,6 +134,14 @@ export default function Navigation() {
                 </div>
               </Link>
             </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href="/subcategories" className="w-full">
+                <div className="flex items-center space-x-2 text-netflix-red hover:text-white font-semibold">
+                  <Folder className="w-4 h-4" />
+                  <span>All Subcategories</span>
+                </div>
+              </Link>
+            </DropdownMenuItem>
             <div className="h-px bg-netflix-border my-1" />
             {Array.isArray(categories) && categories.map((category: any) => (
               <DropdownMenuItem key={category.id} asChild>
