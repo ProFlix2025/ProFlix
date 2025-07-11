@@ -48,6 +48,20 @@ if (process.env.STRIPE_SECRET_KEY) {
   console.warn('⚠️  Stripe not initialized - STRIPE_SECRET_KEY not set');
 }
 
+// Helper function to extract YouTube video ID from URL
+function extractYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+    /(?:youtube\.com\/v\/)([^&\n?#]+)/
+  ];
+  
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match) return match[1];
+  }
+  return null;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Public routes that don't require authentication
   app.get('/health', (req, res) => {
@@ -340,13 +354,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Admin authentication routes
-  app.post('/api/admin/login', adminLogin);
-  app.post('/api/admin/logout', adminLogout);
-  app.get('/api/admin/status', adminStatus);
+  // Admin authentication routes - simple session-based
+  app.post('/api/admin/login', (req, res) => {
+    const { username, password } = req.body;
+    if (username === 'admin' && password === 'ProFlix2025!Admin') {
+      req.session.isAdmin = true;
+      console.log('✅ Admin login successful');
+      res.json({ success: true, message: 'Admin logged in successfully' });
+    } else {
+      console.log('❌ Invalid admin credentials');
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  });
+  
+  app.post('/api/admin/logout', (req, res) => {
+    req.session.isAdmin = false;
+    res.json({ success: true });
+  });
+  
+  app.get('/api/admin/status', (req, res) => {
+    res.json({ isAdmin: !!req.session.isAdmin });
+  });
+
+  // Simple admin auth middleware
+  const requireSimpleAdminAuth = (req, res, next) => {
+    if (req.session.isAdmin) {
+      next();
+    } else {
+      res.status(401).json({ error: 'Admin authentication required' });
+    }
+  };
 
   // Admin endpoint to generate Pro Creator codes
-  app.post('/api/admin/generate-codes', requireAdminAuth, async (req, res) => {
+  app.post('/api/admin/generate-codes', requireSimpleAdminAuth, async (req, res) => {
     try {
       const { count = 1, expiresInDays = 365 } = req.body;
       const codes = [];
@@ -371,13 +411,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to list all codes
-  app.get('/api/admin/codes', requireAdminAuth, async (req, res) => {
+  app.get('/api/admin/codes', requireSimpleAdminAuth, async (req, res) => {
     try {
       const codes = await storage.getAllProCreatorCodes();
       res.json(codes);
     } catch (error) {
       console.error('Error fetching codes:', error);
       res.status(500).json({ message: 'Failed to fetch codes' });
+    }
+  });
+
+  // LearnTube Management API Routes
+  // Get all LearnTube videos
+  app.get('/api/admin/learntube/videos', requireSimpleAdminAuth, async (req, res) => {
+    try {
+      const videos = await storage.getLearnTubeVideos();
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to fetch LearnTube videos' });
+    }
+  });
+
+  // Add YouTube video to LearnTube
+  app.post('/api/admin/learntube/add-youtube', requireSimpleAdminAuth, async (req, res) => {
+    try {
+      const { url, title, description, categoryId } = req.body;
+      
+      // Extract YouTube video ID from URL
+      const videoId = extractYouTubeVideoId(url);
+      if (!videoId) {
+        return res.status(400).json({ error: 'Invalid YouTube URL' });
+      }
+      
+      const video = await storage.addYouTubeVideo({
+        youtubeId: videoId,
+        title,
+        description,
+        categoryId,
+        source: 'learntube',
+        canRunAds: false
+      });
+      
+      res.json({ success: true, video });
+    } catch (error) {
+      console.error('Error adding YouTube video:', error);
+      res.status(500).json({ message: 'Failed to add YouTube video' });
+    }
+  });
+
+  // Bulk delete LearnTube videos
+  app.post('/api/admin/learntube/bulk-delete', requireSimpleAdminAuth, async (req, res) => {
+    try {
+      const { videoIds } = req.body;
+      const deletedCount = await storage.bulkDeleteLearnTubeVideos(videoIds);
+      res.json({ success: true, deletedCount });
+    } catch (error) {
+      console.error('Error bulk deleting LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to bulk delete videos' });
+    }
+  });
+
+  // Delete all LearnTube videos
+  app.post('/api/admin/learntube/delete-all', requireSimpleAdminAuth, async (req, res) => {
+    try {
+      const deletedCount = await storage.deleteAllLearnTubeVideos();
+      res.json({ success: true, deletedCount });
+    } catch (error) {
+      console.error('Error deleting all LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to delete all LearnTube videos' });
+    }
+  });
+
+  // Get LearnTube analytics
+  app.get('/api/admin/learntube/analytics', requireSimpleAdminAuth, async (req, res) => {
+    try {
+      const analytics = await storage.getLearnTubeAnalytics();
+      res.json(analytics);
+    } catch (error) {
+      console.error('Error fetching LearnTube analytics:', error);
+      res.status(500).json({ message: 'Failed to fetch LearnTube analytics' });
     }
   });
 

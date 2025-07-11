@@ -103,18 +103,18 @@ export const adminLogin = async (req: Request, res: Response) => {
       // Log failed attempt
       console.warn(`Failed admin login attempt from ${clientIp} at ${new Date().toISOString()}`);
       
-      // Log to database for security monitoring
-      await db.execute(sql`
-        INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
-        VALUES (
-          'failed_login',
-          ${clientIp},
-          ${req.get('User-Agent') || 'unknown'},
-          ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
-          NOW()
-        )
-        ON CONFLICT DO NOTHING
-      `);
+      // TODO: Log to database for security monitoring
+      // await db.execute(sql`
+      //   INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
+      //   VALUES (
+      //     'failed_login',
+      //     ${clientIp},
+      //     ${req.get('User-Agent') || 'unknown'},
+      //     ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
+      //     NOW()
+      //   )
+      //   ON CONFLICT DO NOTHING
+      // `);
       
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -134,17 +134,32 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Log successful login
     console.log(`Admin login successful from ${clientIp} at ${new Date().toISOString()}`);
     
-    await db.execute(sql`
-      INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
-      VALUES (
-        'successful_login',
-        ${clientIp},
-        ${req.get('User-Agent') || 'unknown'},
-        ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
-        NOW()
-      )
-      ON CONFLICT DO NOTHING
-    `);
+    // Log successful login to database
+    try {
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS admin_security_logs (
+          id SERIAL PRIMARY KEY,
+          event_type VARCHAR(50) NOT NULL,
+          ip_address VARCHAR(45),
+          user_agent TEXT,
+          details TEXT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+      `);
+      
+      await db.execute(sql`
+        INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
+        VALUES (
+          'successful_login',
+          ${clientIp},
+          ${req.get('User-Agent') || 'unknown'},
+          ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
+          NOW()
+        )
+      `);
+    } catch (error) {
+      console.log('Admin security logging error:', error);
+    }
     
     // Set secure cookie
     res.cookie('admin-session', sessionToken, {

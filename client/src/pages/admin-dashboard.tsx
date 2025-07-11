@@ -18,7 +18,8 @@ import {
   CheckCircle,
   Crown,
   BookOpen,
-  RotateCcw
+  RotateCcw,
+  Youtube
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

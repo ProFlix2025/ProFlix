@@ -1,381 +1,474 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Trash2, Plus, Youtube, Play, Eye, ExternalLink } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
-import type { Video, Category } from '@shared/schema';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Trash2, Youtube, Plus, BarChart3, RefreshCw, AlertTriangle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+
+interface LearnTubeVideo {
+  id: number;
+  title: string;
+  description: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  categoryId: number;
+  subcategoryId: number;
+  youtubeId: string;
+  views: number;
+  likes: number;
+  createdAt: string;
+  source: string;
+  canRunAds: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+interface Analytics {
+  totalVideos: number;
+  totalViews: number;
+  avgViewsPerVideo: number;
+  topCategories: Array<{ name: string; count: number }>;
+}
 
 export default function LearnTubeAdmin() {
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
-  
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [formData, setFormData] = useState({
+  const [selectedVideos, setSelectedVideos] = useState<number[]>([]);
+  const [newVideo, setNewVideo] = useState({
+    url: '',
     title: '',
     description: '',
-    youtubeId: '',
-    categoryId: '',
-    durationMinutes: 0,
-    thumbnailUrl: '',
+    categoryId: ''
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Fetch LearnTube videos
+  const { data: videos, isLoading: videosLoading } = useQuery({
+    queryKey: ['admin', 'learntube', 'videos'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/learntube/videos');
+      return response.json();
+    }
   });
 
-  // Get all categories
-  const { data: categories = [] } = useQuery<Category[]>({
-    queryKey: ['/api/categories'],
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    }
   });
 
-  // Get all LearnTube videos
-  const { data: learnTubeVideos = [], isLoading } = useQuery<Video[]>({
-    queryKey: ['/api/admin/learntube/videos'],
+  // Fetch analytics
+  const { data: analytics } = useQuery({
+    queryKey: ['admin', 'learntube', 'analytics'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/learntube/analytics');
+      return response.json();
+    }
   });
 
   // Add YouTube video mutation
   const addVideoMutation = useMutation({
-    mutationFn: async (data: typeof formData) => {
-      if (!data.youtubeId || !data.title || !data.categoryId) {
-        throw new Error('YouTube ID, title, and category are required');
-      }
-      
-      return apiRequest('POST', '/api/admin/learntube/add', {
-        ...data,
-        thumbnailUrl: data.thumbnailUrl || `https://img.youtube.com/vi/${data.youtubeId}/maxresdefault.jpg`,
-      });
+    mutationFn: async (videoData: typeof newVideo) => {
+      const response = await apiRequest('POST', '/api/admin/learntube/add-youtube', videoData);
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: 'Success',
-        description: 'YouTube video added to LearnTube successfully',
+        description: 'YouTube video added successfully',
       });
+      setNewVideo({ url: '', title: '', description: '', categoryId: '' });
       setShowAddForm(false);
-      setFormData({
-        title: '',
-        description: '',
-        youtubeId: '',
-        categoryId: '',
-        durationMinutes: 0,
-        thumbnailUrl: '',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/learntube/videos'] });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to add YouTube video',
         variant: 'destructive',
       });
-    },
+    }
   });
 
-  // Delete single video mutation
-  const deleteVideoMutation = useMutation({
-    mutationFn: async (videoId: number) => {
-      return apiRequest('DELETE', `/api/admin/learntube/delete/${videoId}`);
-    },
-    onSuccess: () => {
-      toast({
-        title: 'Success',
-        description: 'LearnTube video deleted successfully',
-      });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/learntube/videos'] });
-    },
-    onError: (error) => {
-      toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
-      });
-    },
-  });
-
-  // Bulk delete all LearnTube content
+  // Bulk delete mutation
   const bulkDeleteMutation = useMutation({
-    mutationFn: async () => {
-      return apiRequest('DELETE', '/api/admin/learntube/bulk-delete');
+    mutationFn: async (videoIds: number[]) => {
+      const response = await apiRequest('POST', '/api/admin/learntube/bulk-delete', { videoIds });
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
-        title: 'LEARNTUBE CLEANUP COMPLETE',
-        description: `Successfully deleted ${data.deleted} YouTube videos and all related data`,
+        title: 'Success',
+        description: `Deleted ${data.deletedCount} videos successfully`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/learntube/videos'] });
+      setSelectedVideos([]);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
     },
-    onError: (error) => {
+    onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.message,
+        description: error.message || 'Failed to delete videos',
         variant: 'destructive',
       });
-    },
+    }
   });
 
-  const extractYouTubeId = (url: string) => {
-    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
-    return match ? match[1] : url;
+  // Delete all mutation
+  const deleteAllMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest('POST', '/api/admin/learntube/delete-all');
+      return response.json();
+    },
+    onSuccess: (data) => {
+      toast({
+        title: 'Success',
+        description: `Deleted ${data.deletedCount} videos successfully`,
+      });
+      setSelectedVideos([]);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete all videos',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const handleAddVideo = () => {
+    if (!newVideo.url || !newVideo.title || !newVideo.categoryId) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+    addVideoMutation.mutate(newVideo);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const cleanYouTubeId = extractYouTubeId(formData.youtubeId);
-    addVideoMutation.mutate({
-      ...formData,
-      youtubeId: cleanYouTubeId,
-    });
+  const handleVideoSelect = (videoId: number) => {
+    setSelectedVideos(prev => 
+      prev.includes(videoId) 
+        ? prev.filter(id => id !== videoId)
+        : [...prev, videoId]
+    );
+  };
+
+  const handleSelectAll = () => {
+    if (selectedVideos.length === videos?.length) {
+      setSelectedVideos([]);
+    } else {
+      setSelectedVideos(videos?.map((v: LearnTubeVideo) => v.id) || []);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedVideos.length === 0) {
+      toast({
+        title: 'Error',
+        description: 'Please select videos to delete',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedVideos.length} videos?`);
+    if (confirmed) {
+      bulkDeleteMutation.mutate(selectedVideos);
+    }
+  };
+
+  const handleDeleteAll = () => {
+    const confirmed = window.confirm('Are you sure you want to delete ALL LearnTube videos? This action cannot be undone.');
+    if (confirmed) {
+      deleteAllMutation.mutate();
+    }
+  };
+
+  const extractVideoId = (url: string) => {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+    return match ? match[1] : null;
+  };
+
+  const getCategoryName = (categoryId: number) => {
+    const category = categories?.find((c: Category) => c.id === categoryId);
+    return category?.name || 'Unknown';
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold flex items-center gap-2">
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
             <Youtube className="w-8 h-8 text-red-500" />
-            LearnTube Admin
-          </h1>
-          <p className="text-gray-600 mt-2">
-            Manage YouTube educational content. All LearnTube videos are ad-free and easily removable.
-          </p>
+            <h1 className="text-3xl font-bold">LearnTube Admin</h1>
+          </div>
+          <div className="flex items-center gap-4">
+            <Button
+              onClick={() => setShowAddForm(!showAddForm)}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add YouTube Video
+            </Button>
+            <Button
+              onClick={() => queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] })}
+              variant="outline"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Refresh
+            </Button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Button
-            onClick={() => setShowAddForm(!showAddForm)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Add YouTube Video
-          </Button>
-        </div>
-      </div>
 
-      {/* Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Total LearnTube Videos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-blue-600">{learnTubeVideos.length}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Content Source</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-semibold text-red-600">YouTube Educational</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-lg">Ad Status</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="text-xl font-semibold text-green-600">Ad-Free Content</div>
-          </CardContent>
-        </Card>
-      </div>
+        {/* Analytics Cards */}
+        {analytics && (
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-300">Total Videos</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{analytics.totalVideos}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-300">Total Views</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{analytics.totalViews.toLocaleString()}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-300">Avg Views/Video</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-white">{analytics.avgViewsPerVideo}</div>
+              </CardContent>
+            </Card>
+            <Card className="bg-gray-800 border-gray-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-gray-300">Top Category</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-lg font-bold text-white">
+                  {analytics.topCategories[0]?.name || 'None'}
+                </div>
+                <div className="text-sm text-gray-400">
+                  {analytics.topCategories[0]?.count || 0} videos
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
 
-      {/* Add Video Form */}
-      {showAddForm && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Add YouTube Video to LearnTube</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Video Title</Label>
-                  <Input
-                    id="title"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    placeholder="Enter video title"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="youtubeId">YouTube URL or ID</Label>
-                  <Input
-                    id="youtubeId"
-                    value={formData.youtubeId}
-                    onChange={(e) => setFormData({ ...formData, youtubeId: e.target.value })}
-                    placeholder="https://youtube.com/watch?v=... or video ID"
-                    required
-                  />
-                </div>
-              </div>
-              
+        {/* Add Video Form */}
+        {showAddForm && (
+          <Card className="bg-gray-800 border-gray-700 mb-8">
+            <CardHeader>
+              <CardTitle>Add YouTube Video</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="description">Description</Label>
+                <label className="block text-sm font-medium mb-2">YouTube URL *</label>
+                <Input
+                  type="url"
+                  placeholder="https://www.youtube.com/watch?v=..."
+                  value={newVideo.url}
+                  onChange={(e) => setNewVideo(prev => ({ ...prev, url: e.target.value }))}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Title *</label>
+                <Input
+                  type="text"
+                  placeholder="Enter video title"
+                  value={newVideo.title}
+                  onChange={(e) => setNewVideo(prev => ({ ...prev, title: e.target.value }))}
+                  className="bg-gray-700 border-gray-600 text-white"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Description</label>
                 <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                   placeholder="Enter video description"
+                  value={newVideo.description}
+                  onChange={(e) => setNewVideo(prev => ({ ...prev, description: e.target.value }))}
+                  className="bg-gray-700 border-gray-600 text-white"
                   rows={3}
                 />
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="category">Category</Label>
-                  <Select
-                    value={formData.categoryId}
-                    onValueChange={(value) => setFormData({ ...formData, categoryId: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((category) => (
-                        <SelectItem key={category.id} value={category.id.toString()}>
-                          {category.emoji} {category.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div>
-                  <Label htmlFor="duration">Duration (minutes)</Label>
-                  <Input
-                    id="duration"
-                    type="number"
-                    value={formData.durationMinutes}
-                    onChange={(e) => setFormData({ ...formData, durationMinutes: parseInt(e.target.value) || 0 })}
-                    placeholder="Duration in minutes"
-                    min="0"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium mb-2">Category *</label>
+                <Select value={newVideo.categoryId} onValueChange={(value) => setNewVideo(prev => ({ ...prev, categoryId: value }))}>
+                  <SelectTrigger className="bg-gray-700 border-gray-600 text-white">
+                    <SelectValue placeholder="Select category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((category: Category) => (
+                      <SelectItem key={category.id} value={category.id.toString()}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-              
-              <div className="flex gap-2">
-                <Button type="submit" disabled={addVideoMutation.isPending}>
+              <div className="flex gap-4">
+                <Button
+                  onClick={handleAddVideo}
+                  disabled={addVideoMutation.isPending}
+                  className="bg-red-600 hover:bg-red-700"
+                >
                   {addVideoMutation.isPending ? 'Adding...' : 'Add Video'}
                 </Button>
                 <Button
-                  type="button"
-                  variant="outline"
                   onClick={() => setShowAddForm(false)}
+                  variant="outline"
                 >
                   Cancel
                 </Button>
               </div>
-            </form>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
 
-      {/* Bulk Delete Warning */}
-      <Card className="border-red-200 bg-red-50">
-        <CardHeader>
-          <CardTitle className="text-red-800 flex items-center gap-2">
-            <Trash2 className="w-5 h-5" />
-            Bulk Delete All LearnTube Content
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-red-700 mb-4">
-            This will permanently delete ALL YouTube videos and related data (comments, likes, views, etc.).
-            Use this when you have enough original content and want to remove all YouTube material.
-          </p>
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive" disabled={learnTubeVideos.length === 0}>
-                Delete All LearnTube Content ({learnTubeVideos.length} videos)
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently delete all {learnTubeVideos.length} YouTube videos
-                  and all related data including comments, likes, views, and watch history.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={() => bulkDeleteMutation.mutate()}
-                  className="bg-red-600 hover:bg-red-700"
-                >
-                  Delete All LearnTube Content
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        </CardContent>
-      </Card>
-
-      {/* Video List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>LearnTube Videos</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Loading videos...</div>
-          ) : learnTubeVideos.length === 0 ? (
-            <div className="text-center py-8 text-gray-500">
-              No LearnTube videos found. Add some YouTube educational content to get started.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {learnTubeVideos.map((video) => (
-                <div key={video.id} className="flex items-center gap-4 p-4 border rounded-lg">
-                  <img
-                    src={video.thumbnailUrl || `https://img.youtube.com/vi/${video.youtubeId}/maxresdefault.jpg`}
-                    alt={video.title}
-                    className="w-32 h-18 object-cover rounded"
-                  />
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-lg">{video.title}</h3>
-                    <p className="text-gray-600 text-sm line-clamp-2">{video.description}</p>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                      <span className="flex items-center gap-1">
-                        <Eye className="w-4 h-4" />
-                        {video.viewCount.toLocaleString()} views
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Play className="w-4 h-4" />
-                        {video.durationMinutes} min
-                      </span>
-                      <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs">
-                        LearnTube
-                      </span>
-                      <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                        Ad-Free
-                      </span>
-                    </div>
+        {/* Bulk Actions */}
+        {videos && videos.length > 0 && (
+          <Card className="bg-gray-800 border-gray-700 mb-6">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      checked={selectedVideos.length === videos.length}
+                      onCheckedChange={handleSelectAll}
+                    />
+                    <span className="text-sm">
+                      {selectedVideos.length === videos.length ? 'Deselect All' : 'Select All'}
+                    </span>
                   </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => window.open(`https://youtube.com/watch?v=${video.youtubeId}`, '_blank')}
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteVideoMutation.mutate(video.id)}
-                      disabled={deleteVideoMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <span className="text-sm text-gray-400">
+                    {selectedVideos.length} of {videos.length} selected
+                  </span>
                 </div>
+                <div className="flex gap-2">
+                  <Button
+                    onClick={handleBulkDelete}
+                    disabled={selectedVideos.length === 0 || bulkDeleteMutation.isPending}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    Delete Selected
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAll}
+                    disabled={deleteAllMutation.isPending}
+                    variant="destructive"
+                    size="sm"
+                  >
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    Delete All
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Videos Grid */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold">LearnTube Videos ({videos?.length || 0})</h2>
+          </div>
+
+          {videosLoading ? (
+            <div className="flex items-center justify-center py-12">
+              <RefreshCw className="w-8 h-8 animate-spin text-red-500" />
+            </div>
+          ) : !videos || videos.length === 0 ? (
+            <Card className="bg-gray-800 border-gray-700">
+              <CardContent className="pt-6">
+                <div className="text-center py-8">
+                  <Youtube className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+                  <p className="text-gray-400">No LearnTube videos found</p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Add YouTube videos to build your educational content library
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video: LearnTubeVideo) => (
+                <Card key={video.id} className="bg-gray-800 border-gray-700 hover:border-gray-600 transition-colors">
+                  <CardContent className="p-4">
+                    <div className="flex items-start gap-3">
+                      <Checkbox
+                        checked={selectedVideos.includes(video.id)}
+                        onCheckedChange={() => handleVideoSelect(video.id)}
+                      />
+                      <div className="flex-1">
+                        <div className="aspect-video bg-gray-700 rounded-lg mb-3 overflow-hidden">
+                          <img
+                            src={video.thumbnailUrl}
+                            alt={video.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <h3 className="font-semibold text-white mb-2 line-clamp-2">{video.title}</h3>
+                        <p className="text-sm text-gray-400 mb-3 line-clamp-2">{video.description}</p>
+                        <div className="flex items-center gap-2 mb-2">
+                          <Badge variant="secondary" className="text-xs">
+                            {getCategoryName(video.categoryId)}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {video.views} views
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500">
+                          <span>YouTube ID: {video.youtubeId}</span>
+                          <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+
+        {/* Info Alert */}
+        <Alert className="mt-8 bg-gray-800 border-gray-700">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertDescription className="text-gray-300">
+            <strong>LearnTube Management:</strong> This system allows you to add YouTube educational content to your platform. 
+            LearnTube videos cannot run ads and are designed to be easily removed when you have sufficient original content.
+            All videos are embedded from YouTube and marked with source "learntube" for easy bulk operations.
+          </AlertDescription>
+        </Alert>
+      </div>
     </div>
   );
 }

@@ -31,6 +31,7 @@ import AdminVerifications from "@/pages/admin-verifications";
 import AdminReports from "@/pages/admin-reports";
 import AdminContent from "@/pages/admin-content";
 import AdminRetention from "@/pages/admin/retention";
+import LearnTubeAdmin from "@/pages/admin/learntube";
 import CreatorVerification from "@/pages/creator-verification";
 import CreatorTiers from "@/pages/creator-tiers";
 import ReportVideo from "@/pages/report-video";
@@ -72,6 +73,11 @@ function Router() {
           <Route path="/admin/content">
             <AdminAuthGuard>
               <AdminContent />
+            </AdminAuthGuard>
+          </Route>
+          <Route path="/admin/learntube">
+            <AdminAuthGuard>
+              <LearnTubeAdmin />
             </AdminAuthGuard>
           </Route>
           <Route path="/admin/retention">

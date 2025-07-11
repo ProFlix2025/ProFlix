@@ -118,9 +118,17 @@ export interface IStorage {
   // LearnTube operations - YouTube content isolation
   createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video>;
   getLearnTubeVideos(): Promise<Video[]>;
-  deleteAllLearnTubeVideos(): Promise<void>;
+  deleteAllLearnTubeVideos(): Promise<number>;
   getVideosBySource(source: 'proflix' | 'learntube'): Promise<Video[]>;
   bulkDeleteLearnTubeContent(): Promise<{ deleted: number }>;
+  addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video>;
+  bulkDeleteLearnTubeVideos(videoIds: number[]): Promise<number>;
+  getLearnTubeAnalytics(): Promise<{
+    totalVideos: number;
+    totalViews: number;
+    avgViewsPerVideo: number;
+    topCategories: Array<{ name: string; count: number }>;
+  }>;
   
   // 3-Tier specific operations
   getCreatorStats(creatorId: string): Promise<{
@@ -1852,7 +1860,115 @@ export class DatabaseStorage implements IStorage {
     }
     
     console.log(`🗑️ LEARNTUBE CLEANUP COMPLETE: Deleted ${deleteCount} YouTube videos and ALL related data`);
-    return { deleted: deleteCount };
+    return deleteCount;
+  }
+
+  async getLearnTubeVideos(): Promise<Video[]> {
+    const result = await db
+      .select()
+      .from(videos)
+      .where(eq(videos.source, 'learntube'))
+      .orderBy(desc(videos.createdAt));
+    return result;
+  }
+
+  async addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video> {
+    // Get the first subcategory for the given category
+    const subcategory = await db
+      .select()
+      .from(subcategories)
+      .where(eq(subcategories.categoryId, data.categoryId))
+      .limit(1);
+    
+    const subcategoryId = subcategory.length > 0 ? subcategory[0].id : 1; // Fallback to subcategory 1
+
+    const videoData = {
+      creatorId: 'system',
+      title: data.title,
+      description: data.description,
+      categoryId: data.categoryId,
+      subcategoryId: subcategoryId,
+      source: data.source,
+      canRunAds: data.canRunAds,
+      youtubeId: data.youtubeId,
+      videoUrl: `https://www.youtube.com/embed/${data.youtubeId}`,
+      thumbnailUrl: `https://img.youtube.com/vi/${data.youtubeId}/hqdefault.jpg`,
+      duration: 0,
+      views: 0,
+      likes: 0,
+      dislikes: 0,
+      shareCount: 0,
+      isPublished: true,
+      durationMinutes: 0,
+      price: 0,
+      isPremium: false,
+      hasPreview: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const [video] = await db
+      .insert(videos)
+      .values(videoData)
+      .returning();
+    
+    return video;
+  }
+
+  async bulkDeleteLearnTubeVideos(videoIds: number[]): Promise<number> {
+    const deleteResult = await db
+      .delete(videos)
+      .where(and(
+        eq(videos.source, 'learntube'),
+        sql`id = ANY(${videoIds})`
+      ))
+      .returning();
+    
+    return deleteResult.length;
+  }
+
+  async getLearnTubeAnalytics(): Promise<{
+    totalVideos: number;
+    totalViews: number;
+    avgViewsPerVideo: number;
+    topCategories: Array<{ name: string; count: number }>;
+  }> {
+    const learnTubeVideos = await this.getLearnTubeVideos();
+    const totalVideos = learnTubeVideos.length;
+    const totalViews = learnTubeVideos.reduce((sum, video) => sum + video.views, 0);
+    const avgViewsPerVideo = totalVideos > 0 ? Math.round(totalViews / totalVideos) : 0;
+
+    // Get top categories
+    const categoryStats = await db
+      .select({
+        categoryId: videos.categoryId,
+        count: sql<number>`count(*)`.mapWith(Number)
+      })
+      .from(videos)
+      .where(eq(videos.source, 'learntube'))
+      .groupBy(videos.categoryId);
+
+    const topCategories = [];
+    for (const stat of categoryStats) {
+      const category = await db
+        .select({ name: categories.name })
+        .from(categories)
+        .where(eq(categories.id, stat.categoryId));
+      
+      if (category.length > 0) {
+        topCategories.push({
+          name: category[0].name,
+          count: stat.count
+        });
+      }
+    }
+
+    return {
+      totalVideos,
+      totalViews,
+      avgViewsPerVideo,
+      topCategories
+    };
   }
 }
 
