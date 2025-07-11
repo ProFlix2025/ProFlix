@@ -1860,7 +1860,7 @@ export class DatabaseStorage implements IStorage {
     }
     
     console.log(`🗑️ LEARNTUBE CLEANUP COMPLETE: Deleted ${deleteCount} YouTube videos and ALL related data`);
-    return deleteCount;
+    return { deleted: deleteCount };
   }
 
   async addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video> {
