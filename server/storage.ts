@@ -293,54 +293,25 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getViralFeed(): Promise<Video[]> {
-    // Viral feed algorithm: Push new creators to the top, mix with legendary creators
-    // Strategy: 60% new creators (last 30 days), 40% established creators
-    
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    // Get new creators (uploaded in last 30 days)
-    const newCreatorVideos = await db
-      .select()
-      .from(videos)
-      .where(
-        and(
-          eq(videos.isPublished, true),
-          sql`${videos.createdAt} >= ${thirtyDaysAgo.toISOString()}`
-        )
-      )
-      .orderBy(
-        // Prioritize by engagement rate (likes + views), then by recency
-        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0)) DESC, ${videos.createdAt} DESC`
-      )
-      .limit(60);
-    
-    // Get established creators (older than 30 days, high performers)
-    const establishedVideos = await db
-      .select()
-      .from(videos)
-      .where(
-        and(
-          eq(videos.isPublished, true),
-          sql`${videos.createdAt} < ${thirtyDaysAgo.toISOString()}`
-        )
-      )
-      .orderBy(
-        // Sort by performance metrics for established creators
-        sql`(COALESCE(${videos.likes}, 0) + COALESCE(${videos.views}, 0) + COALESCE(${videos.shareCount}, 0)) DESC`
-      )
-      .limit(40);
-    
-    // Combine and shuffle for viral effect
-    const allVideos = [...newCreatorVideos, ...establishedVideos];
-    
-    // Shuffle algorithm to mix new and established creators
-    for (let i = allVideos.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [allVideos[i], allVideos[j]] = [allVideos[j], allVideos[i]];
+    // Simplified viral feed - get all published videos ordered by recent activity
+    try {
+      const allVideos = await db
+        .select()
+        .from(videos)
+        .where(eq(videos.isPublished, true))
+        .orderBy(desc(videos.createdAt))
+        .limit(100);
+      
+      return allVideos;
+    } catch (error) {
+      console.error('Error in getViralFeed:', error);
+      // Fallback to basic query if complex one fails
+      return await db
+        .select()
+        .from(videos)
+        .where(eq(videos.isPublished, true))
+        .orderBy(desc(videos.createdAt));
     }
-    
-    return allVideos;
   }
 
   async getVideosByCategory(categoryId: number): Promise<Video[]> {
