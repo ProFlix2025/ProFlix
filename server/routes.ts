@@ -2383,6 +2383,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Validate category exists
+      const categoryExists = await storage.getCategoryById(parsedCategoryId);
+      if (!categoryExists) {
+        return res.status(400).json({ 
+          message: 'Category not found. Please select a valid category.' 
+        });
+      }
+      
       // Auto-generate video data
       const videoData = {
         youtubeId: videoId,

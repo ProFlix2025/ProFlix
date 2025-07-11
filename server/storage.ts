@@ -263,6 +263,11 @@ export class DatabaseStorage implements IStorage {
     return category;
   }
 
+  async getCategoryById(categoryId: number): Promise<Category | undefined> {
+    const [category] = await db.select().from(categories).where(eq(categories.id, categoryId));
+    return category;
+  }
+
   async createCategory(category: InsertCategory): Promise<Category> {
     const [newCategory] = await db.insert(categories).values(category).returning();
     return newCategory;
@@ -1745,25 +1750,44 @@ export class DatabaseStorage implements IStorage {
 
   // LearnTube operations - YouTube content isolation
   async createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video> {
-    const [newVideo] = await db
-      .insert(videos)
-      .values({
-        ...video,
-        source: 'learntube',
-        isLearnTube: true,
-        youtubeId: video.youtubeId,
-        creatorId: 'learntube-admin', // Special creator for YouTube content
-        isPublished: true,
-        videoType: 'free',
-        isCourse: false, // LearnTube videos cannot be courses
-        coursePrice: 0,
-        canRunAds: false, // NO ADS on YouTube content
-        isProTube: false,
-      })
-      .returning();
-    
-    console.log(`📺 Created LearnTube video: ${newVideo.title} (YouTube ID: ${video.youtubeId})`);
-    return newVideo;
+    try {
+      // Ensure subcategory exists, fallback to first subcategory of category
+      let subcategoryId = video.subcategoryId;
+      if (!subcategoryId || subcategoryId === 992) {
+        const subcategory = await db
+          .select()
+          .from(subcategories)
+          .where(eq(subcategories.categoryId, video.categoryId))
+          .limit(1);
+        
+        subcategoryId = subcategory.length > 0 ? subcategory[0].id : 1; // Ultimate fallback
+      }
+      
+      const [newVideo] = await db
+        .insert(videos)
+        .values({
+          ...video,
+          subcategoryId,
+          source: 'learntube',
+          isLearnTube: true,
+          youtubeId: video.youtubeId,
+          creatorId: 'learntube-admin', // Special creator for YouTube content
+          isPublished: true,
+          videoType: 'free',
+          isCourse: false, // LearnTube videos cannot be courses
+          coursePrice: 0,
+          canRunAds: false, // NO ADS on YouTube content
+          isProTube: false,
+        })
+        .returning();
+      
+      console.log(`📺 Created LearnTube video: ${newVideo.title} (YouTube ID: ${video.youtubeId})`);
+      return newVideo;
+    } catch (error) {
+      console.error('💥 Error creating LearnTube video:', error);
+      console.error('Video data:', video);
+      throw error;
+    }
   }
 
   async getLearnTubeVideos(): Promise<Video[]> {
