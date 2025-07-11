@@ -44,9 +44,7 @@ interface Analytics {
 export default function LearnTubeAdmin() {
   const [selectedVideos, setSelectedVideos] = useState<number[]>([]);
   const [newVideo, setNewVideo] = useState({
-    url: '',
-    title: '',
-    description: '',
+    embedCode: '',
     categoryId: ''
   });
   const [showAddForm, setShowAddForm] = useState(false);
@@ -83,7 +81,7 @@ export default function LearnTubeAdmin() {
   // Add YouTube video mutation
   const addVideoMutation = useMutation({
     mutationFn: async (videoData: typeof newVideo) => {
-      const response = await apiRequest('POST', '/api/admin/learntube/add-youtube', videoData);
+      const response = await apiRequest('POST', '/api/admin/learntube/add-embed', videoData);
       return response.json();
     },
     onSuccess: () => {
@@ -91,7 +89,7 @@ export default function LearnTubeAdmin() {
         title: 'Success',
         description: 'YouTube video added successfully',
       });
-      setNewVideo({ url: '', title: '', description: '', categoryId: '' });
+      setNewVideo({ embedCode: '', categoryId: '' });
       setShowAddForm(false);
       queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
     },
@@ -151,10 +149,10 @@ export default function LearnTubeAdmin() {
   });
 
   const handleAddVideo = () => {
-    if (!newVideo.url || !newVideo.title || !newVideo.categoryId) {
+    if (!newVideo.embedCode || !newVideo.categoryId) {
       toast({
         title: 'Error',
-        description: 'Please fill in all required fields',
+        description: 'Please provide embed code and select a category',
         variant: 'destructive',
       });
       return;
@@ -289,34 +287,17 @@ export default function LearnTubeAdmin() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="block text-sm font-medium mb-2">YouTube URL *</label>
-                <Input
-                  type="url"
-                  placeholder="https://www.youtube.com/watch?v=..."
-                  value={newVideo.url}
-                  onChange={(e) => setNewVideo(prev => ({ ...prev, url: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Title *</label>
-                <Input
-                  type="text"
-                  placeholder="Enter video title"
-                  value={newVideo.title}
-                  onChange={(e) => setNewVideo(prev => ({ ...prev, title: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">Description</label>
+                <label className="block text-sm font-medium mb-2">YouTube Embed Code *</label>
                 <Textarea
-                  placeholder="Enter video description"
-                  value={newVideo.description}
-                  onChange={(e) => setNewVideo(prev => ({ ...prev, description: e.target.value }))}
-                  className="bg-gray-700 border-gray-600 text-white"
-                  rows={3}
+                  placeholder='Paste YouTube embed code here: <iframe width="560" height="315" src="https://www.youtube.com/embed/..." ...'
+                  value={newVideo.embedCode || ''}
+                  onChange={(e) => setNewVideo(prev => ({ ...prev, embedCode: e.target.value }))}
+                  className="bg-gray-700 border-gray-600 text-white font-mono text-sm"
+                  rows={4}
                 />
+                <p className="text-xs text-gray-400 mt-1">
+                  Copy the full embed code from YouTube's share → embed option
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Category *</label>
@@ -327,7 +308,7 @@ export default function LearnTubeAdmin() {
                   <SelectContent>
                     {categories?.map((category: Category) => (
                       <SelectItem key={category.id} value={category.id.toString()}>
-                        {category.name}
+                        {category.emoji} {category.name}
                       </SelectItem>
                     ))}
                   </SelectContent>

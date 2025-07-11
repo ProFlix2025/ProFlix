@@ -2341,6 +2341,93 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add YouTube video via embed code
+  app.post('/api/admin/learntube/add-embed', requireAdminAuth, async (req, res) => {
+    try {
+      const { embedCode, categoryId } = req.body;
+      
+      if (!embedCode || !categoryId) {
+        return res.status(400).json({ 
+          message: 'Embed code and category are required' 
+        });
+      }
+      
+      // Extract video ID from embed code
+      const srcMatch = embedCode.match(/src="https:\/\/www\.youtube\.com\/embed\/([^"?]+)/);
+      if (!srcMatch) {
+        return res.status(400).json({ 
+          message: 'Invalid YouTube embed code. Please use the embed code from YouTube.' 
+        });
+      }
+      
+      const videoId = srcMatch[1];
+      
+      console.log(`🎬 Embed code request: { embedCode: "${embedCode.substring(0, 100)}...", categoryId: ${categoryId} }`);
+      console.log(`✅ Extracted video ID: ${videoId}`);
+      
+      // Auto-generate video data
+      const videoData = {
+        youtubeId: videoId,
+        title: `YouTube Video ${videoId}`,
+        description: `Educational content from YouTube (ID: ${videoId})`,
+        videoUrl: `https://www.youtube.com/embed/${videoId}`,
+        thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+        categoryId: parseInt(categoryId),
+        subcategoryId: 992, // Default subcategory
+        duration: '0',
+        durationMinutes: 0,
+        creatorId: 'system',
+        videoType: 'streaming',
+        source: 'learntube',
+        isLearnTube: true,
+        isProTube: false,
+        canRunAds: false,
+        isCourse: false,
+        coursePrice: 0,
+        courseDescription: null,
+        isFreeContent: false,
+        offersPremiumDiscount: false,
+        shareCount: 0,
+        adRevenue: 0,
+        adImpressions: 0,
+        isDonatedToStreaming: false,
+        streamingWatchTime: 0,
+        views: 0,
+        purchases: 0,
+        likes: 0,
+        dislikes: 0,
+        isPublished: true,
+        isFeatured: false,
+        offerFreePreview: false,
+        tags: null,
+        language: 'en',
+      };
+      
+      console.log(`📝 Auto-generating video data from embed code:`, {
+        youtubeId: videoId,
+        title: videoData.title,
+        description: videoData.description,
+        categoryId: videoData.categoryId,
+        embedUrl: videoData.videoUrl
+      });
+      
+      const video = await storage.createLearnTubeVideo(videoData);
+      
+      console.log(`✅ YouTube video embedded successfully: ${video.id}`);
+      
+      res.json({
+        success: true,
+        video: video
+      });
+      
+    } catch (error) {
+      console.error('Error adding YouTube video via embed:', error);
+      res.status(500).json({ 
+        message: 'Failed to add YouTube video via embed code' 
+      });
+    }
+  });
+
   app.get('/api/videos/by-source/:source', async (req, res) => {
     try {
       const source = req.params.source as 'proflix' | 'learntube';
