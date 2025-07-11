@@ -436,13 +436,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add YouTube video to LearnTube
   app.post('/api/admin/learntube/add-youtube', requireSimpleAdminAuth, async (req, res) => {
     try {
+      console.log('📹 YouTube video add request:', req.body);
       const { url, title, description, categoryId } = req.body;
       
       // Extract YouTube video ID from URL
       const videoId = extractYouTubeVideoId(url);
       if (!videoId) {
+        console.log('❌ Invalid YouTube URL:', url);
         return res.status(400).json({ error: 'Invalid YouTube URL' });
       }
+      
+      console.log('✅ Extracted video ID:', videoId);
+      console.log('📝 Adding video with data:', { youtubeId: videoId, title, description, categoryId });
       
       const video = await storage.addYouTubeVideo({
         youtubeId: videoId,
@@ -453,10 +458,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         canRunAds: false
       });
       
+      console.log('✅ YouTube video added successfully:', video.id);
       res.json({ success: true, video });
     } catch (error) {
-      console.error('Error adding YouTube video:', error);
-      res.status(500).json({ message: 'Failed to add YouTube video' });
+      console.error('❌ Error adding YouTube video:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      res.status(500).json({ message: 'Failed to add YouTube video', error: error.message });
     }
   });
 

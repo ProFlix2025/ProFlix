@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Shield, Lock, User, AlertTriangle } from 'lucide-react';
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function AdminLogin() {
   const [, setLocation] = useLocation();
@@ -32,6 +32,9 @@ export default function AdminLogin() {
       if (response.ok) {
         const data = await response.json();
         console.log('Login successful:', data);
+        
+        // Clear and refetch admin status to ensure fresh session
+        queryClient.invalidateQueries({ queryKey: ['/api/admin/status'] });
         
         // Wait for session to be established, then redirect
         setTimeout(() => {
