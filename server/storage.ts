@@ -1770,7 +1770,7 @@ export class DatabaseStorage implements IStorage {
     return await db
       .select()
       .from(videos)
-      .where(eq(videos.isLearnTube, true))
+      .where(eq(videos.source, 'learntube'))
       .orderBy(desc(videos.createdAt));
   }
 

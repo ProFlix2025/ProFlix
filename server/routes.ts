@@ -2301,6 +2301,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Alternative route for frontend compatibility
+  app.get('/api/videos/learntube', async (req, res) => {
+    try {
+      const videos = await storage.getLearnTubeVideos();
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to fetch LearnTube videos' });
+    }
+  });
+
   app.post('/api/learntube/videos', requireAdminAuth, async (req, res) => {
     try {
       const videoData = {
