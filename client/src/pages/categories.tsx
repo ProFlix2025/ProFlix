@@ -13,6 +13,7 @@ interface Category {
   name: string;
   slug: string;
   description: string;
+  emoji?: string;
   videoCount?: number;
   creatorCount?: number;
   trending?: boolean;
@@ -22,14 +23,14 @@ export default function Categories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  const { data: categories = [], isLoading } = useQuery<Category[]>({
+  const { data: categories = [], isLoading, error } = useQuery<Category[]>({
     queryKey: ["/api/categories"],
   });
 
-  const filteredCategories = categories.filter(category =>
+  const filteredCategories = Array.isArray(categories) ? categories.filter(category =>
     category.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     category.description.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  ) : [];
 
   const featuredCategories = filteredCategories.slice(0, 3);
   const otherCategories = filteredCategories.slice(3);
@@ -105,50 +106,6 @@ export default function Categories() {
           </div>
         </div>
 
-        {/* Featured Categories */}
-        {featuredCategories.length > 0 && (
-          <div className="mb-12">
-            <h2 className="text-3xl font-bold mb-6 flex items-center">
-              <TrendingUp className="w-8 h-8 mr-3 text-netflix-red" />
-              Featured Categories
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {featuredCategories.map((category) => (
-                <Link key={category.id} href={`/category/${category.slug}`}>
-                  <Card className="bg-netflix-gray border-netflix-border hover:border-netflix-red transition-all duration-300 hover:scale-105 cursor-pointer group">
-                    <CardHeader className="pb-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <span className="text-3xl">{category.emoji || '📂'}</span>
-                          <CardTitle className="text-xl text-white group-hover:text-netflix-red transition-colors">
-                            {category.name}
-                          </CardTitle>
-                        </div>
-                        <ArrowRight className="w-5 h-5 text-netflix-light-gray group-hover:text-netflix-red transition-colors" />
-                      </div>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-netflix-light-gray mb-4 line-clamp-3">
-                        {category.description}
-                      </p>
-                      <div className="flex items-center gap-4 text-sm text-netflix-light-gray">
-                        <div className="flex items-center">
-                          <Video className="w-4 h-4 mr-1" />
-                          {category.videoCount || 0} videos
-                        </div>
-                        <div className="flex items-center">
-                          <Users className="w-4 h-4 mr-1" />
-                          {category.creatorCount || 0} creators
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* All Categories */}
         <div className="mb-8">
           <h2 className="text-3xl font-bold mb-6 flex items-center">
@@ -163,7 +120,7 @@ export default function Categories() {
         {/* Categories Display */}
         {viewMode === "grid" ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {otherCategories.map((category) => (
+            {filteredCategories.map((category) => (
               <Link key={category.id} href={`/category/${category.slug}`}>
                 <Card className="bg-netflix-gray border-netflix-border hover:border-netflix-red transition-all duration-300 hover:scale-105 cursor-pointer group h-full">
                   <CardHeader className="pb-3">
@@ -198,7 +155,7 @@ export default function Categories() {
           </div>
         ) : (
           <div className="space-y-4">
-            {otherCategories.map((category) => (
+            {filteredCategories.map((category) => (
               <Link key={category.id} href={`/category/${category.slug}`}>
                 <Card className="bg-netflix-gray border-netflix-border hover:border-netflix-red transition-all duration-300 cursor-pointer group">
                   <CardContent className="p-6">
@@ -254,6 +211,25 @@ export default function Categories() {
               className="bg-netflix-red hover:bg-red-700 text-white"
             >
               Clear Search
+            </Button>
+          </div>
+        )}
+
+        {/* Empty State */}
+        {!isLoading && filteredCategories.length === 0 && !searchTerm && (
+          <div className="text-center py-12">
+            <Grid className="w-16 h-16 text-netflix-light-gray mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-white mb-2">
+              No categories available
+            </h3>
+            <p className="text-netflix-light-gray mb-6">
+              Categories are being set up. Please check back later.
+            </p>
+            <Button
+              onClick={() => window.location.reload()}
+              className="bg-netflix-red hover:bg-red-700 text-white"
+            >
+              Refresh Page
             </Button>
           </div>
         )}
