@@ -1,0 +1,483 @@
+
+Search
+Search
+
+Live tail
+CDT
+
+Menu
+
+==> Cloning from https://github.com/ProFlix2025/ProFlix
+==> Checking out commit 667c792a2615a0f5d573d3fbb905b4e8398a57b1 in branch main
+==> Downloading cache...
+==> Transferred 201MB in 8s. Extraction took 4s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install && npm run db:push && npm run build'...
+up to date, audited 406 packages in 893ms
+59 packages are looking for funding
+  run `npm fund` for details
+2 moderate severity vulnerabilities
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 1928 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-BqG3FRvQ.css   72.07 kB │ gzip:  12.35 kB
+../dist/public/assets/index-DAAkZdEJ.js   737.23 kB │ gzip: 197.29 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.35s
+  dist/index.js  183.8kb
+⚡ Done in 10ms
+==> Uploading build...
+==> Uploaded in 4.7s. Compression took 2.2s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+10:19:21 PM [express] serving on port 10000
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Missing columns added successfully
+✅ Database schema initialized successfully
+✅ Database schema created
+✅ Categories already exist: 30
+✅ Categories already have emojis
+✅ Production database fully initialized
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+10:19:26 PM [express] GET /api/auth/user 401 in 1ms :: {"message":"Not authenticated"}
+10:19:26 PM [express] GET /api/favorites 304 in 1ms :: []
+Error fetching recommended videos: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getTrendingVideos (file:///opt/render/project/src/dist/index.js:1029:16)
+    at async file:///opt/render/project/src/dist/index.js:3690:30 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:26 PM [express] GET /api/recommended 500 in 228ms :: {"message":"Failed to fetch recommended vi…
+10:19:26 PM [express] GET /api/watch-history 304 in 1ms :: []
+Serving SPA fallback for: /favicon.ico
+Error fetching trending videos: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getTrendingVideos (file:///opt/render/project/src/dist/index.js:1029:16)
+    at async file:///opt/render/project/src/dist/index.js:3680:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:26 PM [express] GET /api/trending 500 in 367ms :: {"message":"Failed to fetch trending videos"}
+10:19:26 PM [express] GET /api/categories 304 in 398ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+Error in getViralFeed: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getViralFeed (file:///opt/render/project/src/dist/index.js:755:29)
+    at async file:///opt/render/project/src/dist/index.js:3426:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+Error fetching viral feed: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getViralFeed (file:///opt/render/project/src/dist/index.js:759:18)
+    at async file:///opt/render/project/src/dist/index.js:3426:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:27 PM [express] GET /api/videos 500 in 631ms :: {"message":"Failed to fetch viral feed"}
+Serving SPA fallback for: /admin/login
+10:19:33 PM [express] GET /api/auth/user 401 in 0ms :: {"message":"Not authenticated"}
+Serving SPA fallback for: /favicon.ico
+✅ Admin login successful
+10:19:41 PM [express] POST /api/admin/login 200 in 2ms :: {"success":true,"message":"Admin logged in …
+10:19:41 PM [express] GET /api/categories 200 in 272ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+Serving SPA fallback for: /admin/dashboard
+Error in getViralFeed: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getViralFeed (file:///opt/render/project/src/dist/index.js:755:29)
+    at async file:///opt/render/project/src/dist/index.js:3426:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+Error fetching viral feed: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getViralFeed (file:///opt/render/project/src/dist/index.js:759:18)
+    at async file:///opt/render/project/src/dist/index.js:3426:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:42 PM [express] GET /api/videos 500 in 524ms :: {"message":"Failed to fetch viral feed"}
+10:19:42 PM [express] GET /api/auth/user 401 in 0ms :: {"message":"Not authenticated"}
+10:19:42 PM [express] GET /api/admin/status 200 in 1ms :: {"isAdmin":true}
+Serving SPA fallback for: /favicon.ico
+Error getting creators with stats: error: syntax error at or near ""videos""
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getAllCreatorsWithStats (file:///opt/render/project/src/dist/index.js:1372:28)
+    at async file:///opt/render/project/src/dist/index.js:2826:24 {
+  length: 98,
+  severity: 'ERROR',
+  code: '42601',
+  detail: undefined,
+  hint: undefined,
+  position: '259',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'scan.l',
+  line: '1244',
+  routine: 'scanner_yyerror'
+}
+10:19:42 PM [express] GET /api/admin/creators 304 in 270ms :: []
+Error getting admin analytics: error: function sum() does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getAdminAnalytics (file:///opt/render/project/src/dist/index.js:1323:30)
+    at async file:///opt/render/project/src/dist/index.js:2817:25 {
+  length: 198,
+  severity: 'ERROR',
+  code: '42883',
+  detail: undefined,
+  hint: 'No function matches the given name and argument types. You might need to add explicit type casts.',
+  position: '44',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_func.c',
+  line: '629',
+  routine: 'ParseFuncOrColumn'
+}
+10:19:42 PM [express] GET /api/admin/analytics 304 in 450ms :: {"totalUsers":0,"totalCreators":0,"tot…
+Error fetching trending videos: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getTrendingVideos (file:///opt/render/project/src/dist/index.js:1029:16)
+    at async file:///opt/render/project/src/dist/index.js:3680:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:43 PM [express] GET /api/trending 500 in 271ms :: {"message":"Failed to fetch trending videos"}
+10:19:43 PM [express] GET /api/auth/user 401 in 0ms :: {"message":"Not authenticated"}
+Serving SPA fallback for: /admin/learntube
+10:19:44 PM [express] GET /api/admin/status 304 in 0ms :: {"isAdmin":true}
+10:19:44 PM [express] GET /api/auth/user 401 in 0ms :: {"message":"Not authenticated"}
+Serving SPA fallback for: /favicon.ico
+10:19:44 PM [express] POST /api/setup 200 in 18059ms :: {"message":"Setup complete"}
+10:19:44 PM [express] GET /api/categories 304 in 259ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+Error fetching LearnTube analytics: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getLearnTubeVideos (file:///opt/render/project/src/dist/index.js:1715:16)
+    at async DatabaseStorage.getLearnTubeAnalytics (file:///opt/render/project/src/dist/index.js:1808:33)
+    at async file:///opt/render/project/src/dist/index.js:2747:25 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:44 PM [express] GET /api/admin/learntube/analytics 500 in 271ms :: {"message":"Failed to fetch …
+Error fetching LearnTube videos: error: column "video_type" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getLearnTubeVideos (file:///opt/render/project/src/dist/index.js:1715:16)
+    at async file:///opt/render/project/src/dist/index.js:2659:23 {
+  length: 175,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "videos.video_tier".',
+  position: '147',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3723',
+  routine: 'errorMissingColumn'
+}
+10:19:44 PM [express] GET /api/admin/learntube/videos 500 in 262ms :: {"message":"Failed to fetch Lea…
+✅ Admin login successful
+10:19:45 PM [express] POST /api/admin/login 200 in 1ms :: {"success":true,"message":"Admin logged in …
+⚠️ ADMIN-ONLY LearnTube: Adding temporary YouTube content that generates no revenue
+🎬 Embed code request: { embedCode: "<iframe width="560" height="315" src="https://www.youtube.com/embed/rMDJVlvfpY0?si=ClIZhTchnlpDJufd"...", categoryId: 152 }
+✅ Extracted video ID: rMDJVlvfpY0
+📝 Auto-generating video data from embed code: {
+  youtubeId: 'rMDJVlvfpY0',
+  title: 'YouTube Video rMDJVlvfpY0',
+  description: 'Educational content from YouTube (ID: rMDJVlvfpY0)',
+  categoryId: 152,
+  embedUrl: 'https://www.youtube.com/embed/rMDJVlvfpY0'
+}
+💥 Error creating LearnTube video: error: column "video_type" of relation "videos" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1690:30)
+    at async file:///opt/render/project/src/dist/index.js:4319:21 {
+  length: 130,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '162',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+Video data: {
+  youtubeId: 'rMDJVlvfpY0',
+  title: 'YouTube Video rMDJVlvfpY0',
+  description: 'Educational content from YouTube (ID: rMDJVlvfpY0)',
+  videoUrl: 'https://www.youtube.com/embed/rMDJVlvfpY0',
+  thumbnailUrl: 'https://img.youtube.com/vi/rMDJVlvfpY0/hqdefault.jpg',
+  categoryId: 152,
+  subcategoryId: 992,
+  duration: '0',
+  durationMinutes: 0,
+  creatorId: 'system',
+  source: 'learntube',
+  isLearnTube: true,
+  isProTube: false,
+  canRunAds: false,
+  isCourse: false,
+  coursePrice: 0,
+  courseDescription: null,
+  isFreeContent: false,
+  offersPremiumDiscount: false,
+  shareCount: 0,
+  adRevenue: 0,
+  adImpressions: 0,
+  isDonatedToStreaming: false,
+  streamingWatchTime: 0,
+  views: 0,
+  purchases: 0,
+  likes: 0,
+  dislikes: 0,
+  isPublished: true,
+  isFeatured: false,
+  offerFreePreview: false,
+  tags: null,
+  language: 'en'
+}
+💥 Error adding YouTube video via embed: error: column "video_type" of relation "videos" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1690:30)
+    at async file:///opt/render/project/src/dist/index.js:4319:21 {
+  length: 130,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '162',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+Error details: {
+  message: 'column "video_type" of relation "videos" does not exist',
+  stack: 'error: column "video_type" of relation "videos" does not exist\n' +
+    '    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+    '    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)\n' +
+    '    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1690:30)\n' +
+    '    at async file:///opt/render/project/src/dist/index.js:4319:21',
+  requestBody: {
+    embedCode: '<iframe width="560" height="315" src="https://www.youtube.com/embed/rMDJVlvfpY0?si=ClIZhTchnlpDJufd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    categoryId: '152'
+  }
+}
+10:19:51 PM [express] POST /api/admin/learntube/add-embed 500 in 196ms :: {"message":"Failed to add Y…
