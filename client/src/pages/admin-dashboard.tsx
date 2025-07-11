@@ -131,6 +131,13 @@ export default function AdminDashboard() {
           </div>
           <div className="flex gap-2">
             <Button 
+              onClick={() => window.location.href = '/admin/learntube'}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              <Youtube className="w-4 h-4 mr-2" />
+              LearnTube
+            </Button>
+            <Button 
               onClick={() => window.location.href = '/admin/content'}
               className="bg-green-600 hover:bg-green-700"
             >

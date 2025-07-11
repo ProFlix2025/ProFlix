@@ -147,6 +147,13 @@ export const videos = pgTable("videos", {
   // YouTube-style free videos + course upsells
   videoType: varchar("video_type").notNull().default("free"), // 'free' for all videos
   
+  // Content source system - for proper ad revenue management
+  source: varchar("source").notNull().default("proflix"), // 'proflix', 'protube', or 'learntube'
+  youtubeId: varchar("youtube_id"), // YouTube video ID for LearnTube content
+  isLearnTube: boolean("is_learn_tube").default(false), // Easy identification for bulk deletion
+  isProTube: boolean("is_pro_tube").default(false), // ProFlix original content (can run ads)
+  canRunAds: boolean("can_run_ads").default(true), // false for LearnTube, true for ProTube/ProFlix
+  
   // Course sales (anyone can sell courses)
   isCourse: boolean("is_course").default(false),
   coursePrice: integer("course_price").default(0), // in cents

@@ -1077,6 +1077,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // LearnTube Admin Routes - YouTube Content Management
+  app.get('/api/admin/learntube/videos', requireAdminAuth, async (req, res) => {
+    try {
+      const videos = await storage.getVideosBySource('learntube');
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to fetch LearnTube videos' });
+    }
+  });
+
+  app.post('/api/admin/learntube/add', requireAdminAuth, async (req, res) => {
+    try {
+      const { title, description, youtubeId, categoryId, durationMinutes, thumbnailUrl } = req.body;
+      
+      if (!title || !youtubeId || !categoryId) {
+        return res.status(400).json({ message: 'Title, YouTube ID, and category are required' });
+      }
+
+      const video = await storage.createLearnTubeVideo({
+        title,
+        description: description || '',
+        youtubeId,
+        categoryId: parseInt(categoryId),
+        durationMinutes: durationMinutes || 0,
+        thumbnailUrl: thumbnailUrl || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
+        videoPath: `https://youtube.com/watch?v=${youtubeId}`, // External link
+        filePath: `https://youtube.com/watch?v=${youtubeId}`, // External link
+      });
+
+      res.json({ success: true, video });
+    } catch (error) {
+      console.error('Error adding LearnTube video:', error);
+      res.status(500).json({ message: 'Failed to add LearnTube video' });
+    }
+  });
+
+  app.delete('/api/admin/learntube/delete/:id', requireAdminAuth, async (req, res) => {
+    try {
+      const videoId = parseInt(req.params.id);
+      await storage.deleteVideo(videoId);
+      res.json({ success: true, message: 'LearnTube video deleted successfully' });
+    } catch (error) {
+      console.error('Error deleting LearnTube video:', error);
+      res.status(500).json({ message: 'Failed to delete LearnTube video' });
+    }
+  });
+
+  app.delete('/api/admin/learntube/bulk-delete', requireAdminAuth, async (req, res) => {
+    try {
+      const result = await storage.bulkDeleteLearnTubeContent();
+      res.json({ 
+        success: true, 
+        deleted: result.deleted,
+        message: `Successfully deleted ${result.deleted} LearnTube videos and all related data` 
+      });
+    } catch (error) {
+      console.error('Error in bulk delete LearnTube content:', error);
+      res.status(500).json({ message: 'Failed to delete LearnTube content' });
+    }
+  });
+
   // Category routes
   app.get('/api/categories', async (req, res) => {
     try {
@@ -2059,6 +2121,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error subscribing to streaming:", error);
       res.status(500).json({ message: "Failed to subscribe to streaming" });
+    }
+  });
+
+  // LearnTube API routes - YouTube content management
+  app.get('/api/learntube/videos', async (req, res) => {
+    try {
+      const videos = await storage.getLearnTubeVideos();
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching LearnTube videos:', error);
+      res.status(500).json({ message: 'Failed to fetch LearnTube videos' });
+    }
+  });
+
+  app.post('/api/learntube/videos', requireAdminAuth, async (req, res) => {
+    try {
+      const videoData = {
+        ...req.body,
+        youtubeId: req.body.youtubeId,
+        categoryId: parseInt(req.body.categoryId),
+        subcategoryId: parseInt(req.body.subcategoryId),
+        durationMinutes: parseInt(req.body.durationMinutes) || 0,
+        tags: req.body.tags ? req.body.tags.split(',').map((tag: string) => tag.trim()) : [],
+      };
+      
+      const video = await storage.createLearnTubeVideo(videoData);
+      res.json(video);
+    } catch (error) {
+      console.error('Error creating LearnTube video:', error);
+      res.status(500).json({ message: 'Failed to create LearnTube video' });
+    }
+  });
+
+  app.delete('/api/learntube/videos/all', requireAdminAuth, async (req, res) => {
+    try {
+      const result = await storage.bulkDeleteLearnTubeContent();
+      res.json(result);
+    } catch (error) {
+      console.error('Error deleting all LearnTube content:', error);
+      res.status(500).json({ message: 'Failed to delete LearnTube content' });
+    }
+  });
+
+  app.get('/api/videos/by-source/:source', async (req, res) => {
+    try {
+      const source = req.params.source as 'proflix' | 'learntube';
+      if (!['proflix', 'learntube'].includes(source)) {
+        return res.status(400).json({ message: 'Invalid source' });
+      }
+      
+      const videos = await storage.getVideosBySource(source);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching videos by source:', error);
+      res.status(500).json({ message: 'Failed to fetch videos by source' });
     }
   });
 

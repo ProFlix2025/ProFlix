@@ -115,6 +115,13 @@ export interface IStorage {
   trackAdImpression(creatorId: string, videoId: number, cpmRate: number): Promise<void>;
   createCourseCheckout(userId: string, videoId: number, price: number): Promise<{ url: string }>;
   
+  // LearnTube operations - YouTube content isolation
+  createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video>;
+  getLearnTubeVideos(): Promise<Video[]>;
+  deleteAllLearnTubeVideos(): Promise<void>;
+  getVideosBySource(source: 'proflix' | 'learntube'): Promise<Video[]>;
+  bulkDeleteLearnTubeContent(): Promise<{ deleted: number }>;
+  
   // 3-Tier specific operations
   getCreatorStats(creatorId: string): Promise<{
     totalVideos: number;
@@ -273,6 +280,7 @@ export class DatabaseStorage implements IStorage {
 
   // Video operations
   async getVideos(): Promise<Video[]> {
+    // Include both ProFlix and LearnTube content for free sections
     return await db.select().from(videos).where(eq(videos.isPublished, true)).orderBy(desc(videos.createdAt));
   }
 
@@ -456,6 +464,42 @@ export class DatabaseStorage implements IStorage {
         console.log('ℹ️ Share_count column already exists in videos');
       }
       
+      // Add LearnTube/ProTube columns for content source management
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS source VARCHAR DEFAULT 'proflix';`);
+        console.log('✅ Added source column to videos');
+      } catch (error) {
+        console.log('ℹ️ Source column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS youtube_id VARCHAR;`);
+        console.log('✅ Added youtube_id column to videos');
+      } catch (error) {
+        console.log('ℹ️ Youtube_id column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_learn_tube BOOLEAN DEFAULT false;`);
+        console.log('✅ Added is_learn_tube column to videos');
+      } catch (error) {
+        console.log('ℹ️ Is_learn_tube column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_pro_tube BOOLEAN DEFAULT false;`);
+        console.log('✅ Added is_pro_tube column to videos');
+      } catch (error) {
+        console.log('ℹ️ Is_pro_tube column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS can_run_ads BOOLEAN DEFAULT true;`);
+        console.log('✅ Added can_run_ads column to videos');
+      } catch (error) {
+        console.log('ℹ️ Can_run_ads column already exists in videos');
+      }
+      
       try {
         await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
         console.log('✅ Added subcategory_ids column to videos');
@@ -622,6 +666,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getTrendingVideos(limit: number = 20): Promise<Video[]> {
+    // Include both ProFlix and LearnTube content in trending
     return await db.select().from(videos)
       .where(eq(videos.isPublished, true))
       .orderBy(desc(videos.views), desc(videos.createdAt))
@@ -629,7 +674,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getRecommendedVideos(userId: string, limit: number = 20): Promise<Video[]> {
-    // Simple recommendation: get videos from subscribed channels
+    // Simple recommendation: get videos from subscribed channels + LearnTube content
     const userSubscriptions = await db.select({ channelId: subscriptions.channelId })
       .from(subscriptions)
       .where(eq(subscriptions.subscriberId, userId));
@@ -1716,6 +1761,98 @@ export class DatabaseStorage implements IStorage {
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
+  }
+
+  // LearnTube operations - YouTube content isolation
+  async createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video> {
+    const [newVideo] = await db
+      .insert(videos)
+      .values({
+        ...video,
+        source: 'learntube',
+        isLearnTube: true,
+        youtubeId: video.youtubeId,
+        creatorId: 'learntube-admin', // Special creator for YouTube content
+        isPublished: true,
+        videoType: 'free',
+        isCourse: false, // LearnTube videos cannot be courses
+        coursePrice: 0,
+        canRunAds: false, // NO ADS on YouTube content
+        isProTube: false,
+      })
+      .returning();
+    
+    console.log(`📺 Created LearnTube video: ${newVideo.title} (YouTube ID: ${video.youtubeId})`);
+    return newVideo;
+  }
+
+  async getLearnTubeVideos(): Promise<Video[]> {
+    return await db
+      .select()
+      .from(videos)
+      .where(eq(videos.isLearnTube, true))
+      .orderBy(desc(videos.createdAt));
+  }
+
+  async deleteAllLearnTubeVideos(): Promise<void> {
+    await db
+      .delete(videos)
+      .where(eq(videos.isLearnTube, true));
+    
+    console.log('🗑️ All LearnTube videos deleted');
+  }
+
+  async getVideosBySource(source: 'proflix' | 'learntube'): Promise<Video[]> {
+    return await db
+      .select()
+      .from(videos)
+      .where(eq(videos.source, source))
+      .orderBy(desc(videos.createdAt));
+  }
+
+  async bulkDeleteLearnTubeContent(): Promise<{ deleted: number }> {
+    // Get count before deletion
+    const countResult = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(videos)
+      .where(eq(videos.isLearnTube, true));
+    
+    const deleteCount = countResult[0]?.count || 0;
+    
+    // Get all LearnTube video IDs for related data cleanup
+    const learnTubeVideos = await db
+      .select({ id: videos.id })
+      .from(videos)
+      .where(eq(videos.isLearnTube, true));
+    
+    const videoIds = learnTubeVideos.map(v => v.id);
+    
+    if (videoIds.length > 0) {
+      // Delete related data first
+      await db
+        .delete(comments)
+        .where(sql`${comments.videoId} = ANY(${videoIds})`);
+      
+      await db
+        .delete(videoLikes)
+        .where(sql`${videoLikes.videoId} = ANY(${videoIds})`);
+      
+      await db
+        .delete(watchHistory)
+        .where(sql`${watchHistory.videoId} = ANY(${videoIds})`);
+      
+      await db
+        .delete(favorites)
+        .where(sql`${favorites.videoId} = ANY(${videoIds})`);
+      
+      // Delete all LearnTube videos
+      await db
+        .delete(videos)
+        .where(eq(videos.isLearnTube, true));
+    }
+    
+    console.log(`🗑️ LEARNTUBE CLEANUP COMPLETE: Deleted ${deleteCount} YouTube videos and ALL related data`);
+    return { deleted: deleteCount };
   }
 }
 
