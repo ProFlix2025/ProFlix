@@ -175,7 +175,7 @@ export default function AdminDashboardTemp() {
           <CardHeader>
             <CardTitle className="text-xl text-white flex items-center">
               <Plus className="w-6 h-6 mr-2 text-netflix-red" />
-              Embed YouTube Video to LearnTube
+              Embed YouTube Video to LearnTube (Admin Only - Temporary Content)
             </CardTitle>
           </CardHeader>
           <CardContent>

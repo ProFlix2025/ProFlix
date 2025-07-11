@@ -2341,10 +2341,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Add YouTube video via embed code
+  // Add YouTube video via embed code (ADMIN-ONLY TEMPORARY SYSTEM)
   app.post('/api/admin/learntube/add-embed', requireAdminAuth, async (req, res) => {
     try {
       const { embedCode, categoryId } = req.body;
+      
+      console.log('⚠️ ADMIN-ONLY LearnTube: Adding temporary YouTube content that generates no revenue');
       
       if (!embedCode || !categoryId) {
         return res.status(400).json({ 

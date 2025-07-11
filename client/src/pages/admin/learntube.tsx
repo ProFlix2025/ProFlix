@@ -283,7 +283,13 @@ export default function LearnTubeAdmin() {
         {showAddForm && (
           <Card className="bg-gray-800 border-gray-700 mb-8">
             <CardHeader>
-              <CardTitle>Add YouTube Video</CardTitle>
+              <CardTitle>Add YouTube Video (Admin Only - Temporary System)</CardTitle>
+              <div className="bg-yellow-900/20 border border-yellow-700/50 rounded-lg p-3 mt-2">
+                <p className="text-yellow-300 text-sm">
+                  ⚠️ <strong>TEMPORARY SYSTEM:</strong> This LearnTube content will be deleted once you have sufficient original ProFlix content. 
+                  No ad revenue is generated from these videos.
+                </p>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
@@ -444,9 +450,10 @@ export default function LearnTubeAdmin() {
         <Alert className="mt-8 bg-gray-800 border-gray-700">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription className="text-gray-300">
-            <strong>LearnTube Management:</strong> This system allows you to add YouTube educational content to your platform. 
-            LearnTube videos cannot run ads and are designed to be easily removed when you have sufficient original content.
-            All videos are embedded from YouTube and marked with source "learntube" for easy bulk operations.
+            <strong>ADMIN-ONLY LearnTube System:</strong> This is a temporary content management system for admin use ONLY. 
+            Creators cannot embed YouTube videos - only you as admin can manage LearnTube content.
+            LearnTube videos generate no ad revenue and are designed to be easily deleted once you have sufficient original ProFlix content.
+            All videos are marked with source "learntube" for easy bulk removal operations.
           </AlertDescription>
         </Alert>
       </div>
