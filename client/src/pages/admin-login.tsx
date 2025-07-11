@@ -33,10 +33,10 @@ export default function AdminLogin() {
         const data = await response.json();
         console.log('Login successful:', data);
         
-        // Wait a moment for the session to be established
+        // Wait for session to be established, then redirect
         setTimeout(() => {
-          setLocation('/admin/dashboard');
-        }, 100);
+          window.location.href = '/admin/dashboard';
+        }, 500);
       } else {
         const data = await response.json();
         console.error('Login failed:', data);
