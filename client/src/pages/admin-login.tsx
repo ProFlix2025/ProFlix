@@ -27,15 +27,24 @@ export default function AdminLogin() {
         password
       });
 
+      console.log('Login response:', response.status);
+
       if (response.ok) {
-        // Successful login
-        setLocation('/admin/dashboard');
+        const data = await response.json();
+        console.log('Login successful:', data);
+        
+        // Wait a moment for the session to be established
+        setTimeout(() => {
+          setLocation('/admin/dashboard');
+        }, 100);
       } else {
         const data = await response.json();
+        console.error('Login failed:', data);
         setError(data.error || 'Login failed');
         setAttempts(prev => prev + 1);
       }
     } catch (err: any) {
+      console.error('Login error:', err);
       setError(err.message || 'Connection error');
       setAttempts(prev => prev + 1);
     } finally {

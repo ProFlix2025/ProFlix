@@ -21,7 +21,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   });
 
   useEffect(() => {
-    if (!isLoading && (!adminStatus?.authenticated || error)) {
+    if (!isLoading && (!adminStatus?.isAdmin || error)) {
       // Redirect to admin login if not authenticated
       setLocation('/admin/login');
     }
@@ -85,7 +85,7 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   }
 
   // Show unauthorized state
-  if (!adminStatus?.authenticated) {
+  if (!adminStatus?.isAdmin) {
     return (
       <div className="min-h-screen bg-black flex items-center justify-center">
         <Card className="w-full max-w-md bg-netflix-gray border-netflix-border">

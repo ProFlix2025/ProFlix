@@ -6,6 +6,9 @@ import { sql } from 'drizzle-orm';
 // Admin session storage
 const adminSessions = new Map<string, { userId: string, expiresAt: number }>();
 
+// Rate limiting for admin login attempts
+const adminLoginAttempts = new Map<string, { count: number, resetTime: number }>();
+
 // Environment variables for admin credentials
 const ADMIN_USERNAME = process.env.ADMIN_USERNAME || 'admin';
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'ProFlix2025!Admin';
@@ -164,8 +167,8 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Set secure cookie
     res.cookie('admin-session', sessionToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Allow in development
+      sameSite: 'lax',
       maxAge: 60 * 60 * 1000 // 1 hour
     });
     
@@ -213,8 +216,7 @@ export const adminStatus = (req: Request, res: Response) => {
   });
 };
 
-// Rate limiting storage
-const adminLoginAttempts = new Map<string, { count: number; resetTime: number }>();
+// Rate limiting storage already declared above
 
 // Clean up expired sessions every hour
 setInterval(() => {

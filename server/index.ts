@@ -28,7 +28,7 @@ app.use(session({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
-// Cookie parser for admin sessions
+// Simple cookie parser for admin sessions
 app.use((req, res, next) => {
   const cookies = req.headers.cookie;
   if (cookies) {
@@ -40,6 +40,8 @@ app.use((req, res, next) => {
       }
     });
     (req as any).cookies = parsed;
+  } else {
+    (req as any).cookies = {};
   }
   next();
 });
