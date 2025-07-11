@@ -1051,7 +1051,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Customer retention admin routes
-  app.get("/api/admin/downgraded-creators", requireAdminAuth, async (req, res) => {
+  app.get("/api/admin/downgraded-creators", requireSimpleAdminAuth, async (req, res) => {
     try {
       const downgradedCreators = await storage.getDowngradedProCreators();
       res.json(downgradedCreators);
@@ -1061,7 +1061,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/reactivate-creator/:userId", requireAdminAuth, async (req, res) => {
+  app.post("/api/admin/reactivate-creator/:userId", requireSimpleAdminAuth, async (req, res) => {
     try {
       const { userId } = req.params;
       const { tier } = req.body;
@@ -1070,7 +1070,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log admin action
       await storage.logSecurityEvent({
-        userId: req.user?.id || 'admin',
+        userId: 'admin',
         action: 'reactivate_pro_creator',
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown',
@@ -1085,7 +1085,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/downgrade-creator/:userId", requireAdminAuth, async (req, res) => {
+  app.post("/api/admin/downgrade-creator/:userId", requireSimpleAdminAuth, async (req, res) => {
     try {
       const { userId } = req.params;
       const { reason } = req.body;
@@ -1094,7 +1094,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log admin action
       await storage.logSecurityEvent({
-        userId: req.user?.id || 'admin',
+        userId: 'admin',
         action: 'downgrade_pro_creator',
         ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
         userAgent: req.get('User-Agent') || 'unknown',
