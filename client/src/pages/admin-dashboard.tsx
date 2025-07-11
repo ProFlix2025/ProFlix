@@ -161,7 +161,13 @@ function YouTubeVideoManager() {
       return;
     }
 
-    addVideoMutation.mutate(newVideo);
+    // Convert categoryId to number for backend
+    const videoData = {
+      ...newVideo,
+      categoryId: parseInt(newVideo.categoryId)
+    };
+
+    addVideoMutation.mutate(videoData);
   };
 
   const handleDeleteVideo = (videoId: number) => {
