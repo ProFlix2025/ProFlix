@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star, ChevronDown, ShoppingCart } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star, ChevronDown, ShoppingCart, Folder } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
