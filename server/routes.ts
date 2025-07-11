@@ -133,6 +133,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
   });
 
+  // Fix production database via GET request
+  app.get('/api/admin/fix-production-db-get', async (req, res) => {
+    try {
+      const { fixProductionDatabase } = await import('./fixProductionDB');
+      await fixProductionDatabase();
+      res.json({ message: 'Production database fixed successfully via GET' });
+    } catch (error) {
+      console.error('Production database fix error:', error);
+      res.status(500).json({ message: 'Production database fix failed', error: error.message });
+    }
+  });
+
   // Check database schema for debugging
   app.get('/api/admin/check-schema', async (req, res) => {
     try {
