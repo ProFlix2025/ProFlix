@@ -1,0 +1,364 @@
+All logs
+Search
+Search
+
+Live tail
+CDT
+
+Menu
+
+==> Cloning from https://github.com/ProFlix2025/ProFlix
+==> Checking out commit 899a5bf8b22081b6d6335731370c3cef2d9a808c in branch main
+==> Downloading cache...
+==> Transferred 201MB in 8s. Extraction took 6s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install && npm run db:push && npm run build'...
+up to date, audited 406 packages in 1s
+59 packages are looking for funding
+  run `npm fund` for details
+2 moderate severity vulnerabilities
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 1925 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-D_uVdSJm.css   71.19 kB │ gzip:  12.25 kB
+../dist/public/assets/index-BY40acoF.js   707.33 kB │ gzip: 191.75 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.80s
+▲ [WARNING] Duplicate member "getVideosBySubcategory" in class body [duplicate-class-member]
+    server/storage.ts:341:8:
+      341 │   async getVideosBySubcategory(subcategoryId: number): Promise<Vi...
+          ╵         ~~~~~~~~~~~~~~~~~~~~~~
+  The original member "getVideosBySubcategory" is here:
+    server/storage.ts:331:8:
+      331 │   async getVideosBySubcategory(subcategoryId: number): Promise<Vi...
+          ╵         ~~~~~~~~~~~~~~~~~~~~~~
+1 warning
+  dist/index.js  149.4kb
+⚡ Done in 11ms
+==> Uploading build...
+==> Uploaded in 5.6s. Compression took 3.4s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+5:00:47 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Database schema initialized successfully
+✅ Database schema created
+⚠️ Database auto-setup error: column "emoji" does not exist
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:00:52 AM [express] GET /api/categories 500 in 837ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:00:54 AM [express] GET /api/categories 500 in 403ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:00:55 AM [express] GET /api/categories 500 in 413ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:00:59 AM [express] GET /api/categories 500 in 408ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:01:00 AM [express] GET /api/categories 500 in 419ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:01:01 AM [express] GET /api/categories 500 in 407ms :: {"message":"Failed to fetch categories"}
+Serving SPA fallback for: /favicon.ico
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:01:02 AM [express] GET /api/categories 500 in 406ms :: {"message":"Failed to fetch categories"}
+Error fetching trending videos: error: column "duration_minutes" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getTrendingVideos (file:///opt/render/project/src/dist/index.js:834:16)
+    at async file:///opt/render/project/src/dist/index.js:3082:23 {
+  length: 116,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '80',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+Error fetching recommended videos: error: column "duration_minutes" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getTrendingVideos (file:///opt/render/project/src/dist/index.js:834:16)
+    at async file:///opt/render/project/src/dist/index.js:3092:30 {
+  length: 116,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '80',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:01:03 AM [express] GET /api/trending 500 in 413ms :: {"message":"Failed to fetch trending videos"}
+5:01:03 AM [express] GET /api/recommended 500 in 419ms :: {"message":"Failed to fetch recommended vi…
+Serving SPA fallback for: /favicon.ico
+Error fetching viral feed: error: column "duration_minutes" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getViralFeed (file:///opt/render/project/src/dist/index.js:731:34)
+    at async file:///opt/render/project/src/dist/index.js:2828:23 {
+  length: 116,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '80',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+Error fetching categories: error: column "emoji" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getCategories (file:///opt/render/project/src/dist/index.js:699:16)
+    at async file:///opt/render/project/src/dist/index.js:2788:27 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '45',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3716',
+  routine: 'errorMissingColumn'
+}
+5:01:03 AM [express] GET /api/videos 500 in 786ms :: {"message":"Failed to fetch viral feed"}
+5:01:03 AM [express] GET /api/categories 500 in 830ms :: {"message":"Failed to fetch categories"}

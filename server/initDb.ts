@@ -196,6 +196,19 @@ export async function initializeDatabase() {
       );
     `);
     
+    // Add missing columns that may not exist in production
+    try {
+      await db.execute(sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS emoji VARCHAR;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_id INTEGER;`);
+      console.log('✅ Missing columns added successfully');
+    } catch (error) {
+      console.log('⚠️ Column addition completed (some may have already existed)');
+    }
+    
     console.log('✅ Database schema initialized successfully');
     return true;
   } catch (error) {

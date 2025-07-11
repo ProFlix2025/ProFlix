@@ -417,6 +417,78 @@ export class DatabaseStorage implements IStorage {
     return video;
   }
 
+  async addMissingColumns(): Promise<void> {
+    try {
+      // Add missing columns to categories table
+      await db.execute(sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS emoji VARCHAR(2);`);
+      
+      // Add missing columns to videos table
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_id INTEGER;`);
+      
+      // Add missing columns to users table
+      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_tier VARCHAR DEFAULT 'free';`);
+      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 5;`);
+      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro_creator BOOLEAN DEFAULT false;`);
+      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_ends_at TIMESTAMP;`);
+      
+      // Update existing records with default values
+      await db.execute(sql`UPDATE videos SET is_published = true WHERE is_published IS NULL;`);
+      await db.execute(sql`UPDATE videos SET share_count = 0 WHERE share_count IS NULL;`);
+      await db.execute(sql`UPDATE users SET pro_creator_tier = 'free' WHERE pro_creator_tier IS NULL;`);
+      await db.execute(sql`UPDATE users SET video_hour_limit = 5 WHERE video_hour_limit IS NULL;`);
+      await db.execute(sql`UPDATE users SET current_video_hours = 0 WHERE current_video_hours IS NULL;`);
+      
+      // Update categories with emojis
+      const categoryEmojis = [
+        ['Art & Creativity', '🎨'],
+        ['Business & Finance', '💼'],
+        ['Education & Learning', '📚'],
+        ['Entertainment', '🎬'],
+        ['Fashion & Style', '👗'],
+        ['Film & Media', '🎥'],
+        ['Fitness & Health', '💪'],
+        ['Food & Cooking', '🍳'],
+        ['Gaming', '🎮'],
+        ['Home & DIY', '🏠'],
+        ['Lifestyle', '✨'],
+        ['Music & Audio', '🎵'],
+        ['News & Politics', '📰'],
+        ['Pets & Animals', '🐾'],
+        ['Science & Technology', '🔬'],
+        ['Sports & Recreation', '⚽'],
+        ['Travel & Adventure', '✈️'],
+        ['Automotive', '🚗'],
+        ['Beauty & Skincare', '💄'],
+        ['Comedy', '😂'],
+        ['Dance', '💃'],
+        ['Digital Marketing', '📱'],
+        ['Environment', '🌱'],
+        ['History', '📜'],
+        ['Languages', '🗣️'],
+        ['Mental Health', '🧠'],
+        ['Photography', '📸'],
+        ['Real Estate', '🏘️'],
+        ['Relationships', '💕'],
+        ['Spirituality', '🧘'],
+        ['Parenting', '👶']
+      ];
+      
+      for (const [name, emoji] of categoryEmojis) {
+        await db.execute(sql`UPDATE categories SET emoji = ${emoji} WHERE name = ${name} AND emoji IS NULL;`);
+      }
+      
+      console.log('✅ Missing database columns added successfully');
+    } catch (error) {
+      console.error('❌ Error adding missing columns:', error);
+      throw error;
+    }
+  }
+
   async getTrendingVideos(limit: number = 20): Promise<Video[]> {
     return await db.select().from(videos)
       .where(eq(videos.isPublished, true))
