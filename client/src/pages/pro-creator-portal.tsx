@@ -101,7 +101,7 @@ export default function ProCreatorPortal() {
                 <h3 className="text-white font-semibold mb-2">Pro Creator</h3>
                 <p className="text-netflix-red text-2xl font-bold">$99/month</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
-                  <li>• Unlimited video uploads</li>
+                  <li>• Up to 50 hours of video content</li>
                   <li>• Up to 20 courses (100% profit)</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
@@ -122,8 +122,13 @@ export default function ProCreatorPortal() {
             
             <div className="bg-netflix-dark-gray p-4 rounded-lg text-center">
               <h3 className="text-white font-semibold mb-2">Enterprise Creator</h3>
-              <p className="text-netflix-light-gray">Need more than 100 courses? Custom pricing available.</p>
-              <p className="text-netflix-red font-semibold">Contact us for enterprise solutions</p>
+              <p className="text-netflix-red text-2xl font-bold">$799/month</p>
+              <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
+                <li>• Up to 500 hours of video content</li>
+                <li>• Unlimited courses (100% profit)</li>
+                <li>• Enterprise analytics</li>
+                <li>• Custom integrations</li>
+              </ul>
             </div>
             
             <div className="text-center space-y-4">

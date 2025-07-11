@@ -1462,6 +1462,17 @@ export class DatabaseStorage implements IStorage {
         ADD COLUMN IF NOT EXISTS last_reactivation_email TIMESTAMP;
       `);
       
+      // Add video hour limit columns
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 0;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;
+      `);
+      
       console.log('✅ Database columns added successfully');
     } catch (error) {
       console.error('Database column addition error:', error);
@@ -1497,6 +1508,12 @@ export class DatabaseStorage implements IStorage {
       'standard': 20,
       'plus': 100,
       'enterprise': 999999
+    };
+    
+    const tierHourLimits = {
+      'free': 0, // Unlimited but can't sell courses
+      'pro': 50, // 50 hours for Pro Creator
+      'enterprise': 500 // 500 hours for Enterprise Creator
     };
 
     const [user] = await db

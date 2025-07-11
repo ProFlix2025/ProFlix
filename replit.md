@@ -282,6 +282,14 @@ Preferred communication style: Simple, everyday language.
 - ✅ Anyone can sell courses now, Pro Creator provides enhanced features
 - ✅ YouTube-style video uploads available to everyone, enhanced monetization features for Pro Creators
 
+## Pro Creator Pricing Updates (January 11, 2025)
+- ✅ Updated Pro Creator ($99/month) with 50-hour video content limit 
+- ✅ Updated Enterprise Creator price to $799/month with 500-hour video content limit
+- ✅ Removed white-label course platform and dedicated manager from Enterprise tier
+- ✅ Added video hour tracking columns to database schema (videoHourLimit, currentVideoHours)
+- ✅ Enhanced customer retention system to track video content hours usage
+- ✅ Updated all pricing displays in creator-tiers.tsx and pro-creator-portal.tsx
+
 ## Pro Creator Code System (January 09, 2025)
 - ✅ Added `proCreatorCodes` table to database schema
 - ✅ Implemented code generation with 12-character unique codes
