@@ -1222,6 +1222,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isCourse = req.body.isCourse === 'true';
       const coursePrice = parseInt(req.body.coursePrice) || 0;
 
+      // Parse subcategory IDs
+      let subcategoryIds: number[] = [];
+      try {
+        subcategoryIds = JSON.parse(req.body.subcategoryIds || '[]');
+        if (!Array.isArray(subcategoryIds) || subcategoryIds.length === 0) {
+          return res.status(400).json({ message: 'At least one subcategory is required' });
+        }
+        // Validate all subcategory IDs are numbers
+        subcategoryIds = subcategoryIds.map(id => {
+          const numId = parseInt(id);
+          if (isNaN(numId)) {
+            throw new Error('Invalid subcategory ID');
+          }
+          return numId;
+        });
+      } catch (error) {
+        return res.status(400).json({ message: 'Invalid subcategory IDs format' });
+      }
+
       const videoData = {
         title: req.body.title,
         description: req.body.description,
@@ -1230,7 +1249,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         duration: req.body.duration,
         durationMinutes: req.body.durationMinutes ? parseInt(req.body.durationMinutes) : 0,
         categoryId: parseInt(req.body.categoryId),
-        subcategoryId: parseInt(req.body.subcategoryId),
+        subcategoryId: subcategoryIds[0], // Use first subcategory for backward compatibility
+        subcategoryIds: subcategoryIds,
         creatorId,
         // YouTube-style: All videos are free, but Pro Creators can add course upsells
         videoType: 'free',

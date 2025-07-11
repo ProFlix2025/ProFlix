@@ -79,7 +79,7 @@ const uploadSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   duration: z.string().optional(),
   categoryId: z.string().min(1, "Category is required"),
-  subcategoryId: z.string().min(1, "Subcategory is required"),
+  subcategoryIds: z.array(z.string()).min(1, "At least one subcategory is required"),
   price: z.number().min(25, "Course price must be at least $25").max(999, "Course price cannot exceed $999"),
   privacy: z.enum(["public", "unlisted", "private"]).default("public"),
   tags: z.string().optional(),
@@ -145,7 +145,7 @@ export default function CreatorDashboard() {
       description: "",
       duration: "",
       categoryId: "",
-      subcategoryId: "",
+      subcategoryIds: [],
       price: 25,
       privacy: "public",
       tags: "",
@@ -249,6 +249,9 @@ export default function CreatorDashboard() {
       } else if (key === 'price') {
         // Convert price from dollars to cents
         formData.append('coursePrice', String(Math.round(Number(value) * 100)));
+      } else if (key === 'subcategoryIds') {
+        // Convert subcategory IDs to integers and pass as JSON
+        formData.append('subcategoryIds', JSON.stringify(value.map(id => parseInt(id))));
       } else {
         formData.append(key, String(value));
       }
@@ -438,7 +441,7 @@ export default function CreatorDashboard() {
                               onValueChange={(value) => {
                                 field.onChange(value);
                                 setSelectedCategoryId(value);
-                                form.setValue("subcategoryId", ""); // Reset subcategory
+                                form.setValue("subcategoryIds", []); // Reset subcategories
                               }} 
                               defaultValue={field.value}
                             >
@@ -461,24 +464,41 @@ export default function CreatorDashboard() {
                       />
                       <FormField
                         control={form.control}
-                        name="subcategoryId"
+                        name="subcategoryIds"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Subcategory *</FormLabel>
-                            <Select onValueChange={field.onChange} value={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Select Subcategory" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {filteredSubcategories?.map((subcategory: any) => (
-                                  <SelectItem key={subcategory.id} value={subcategory.id.toString()}>
+                            <FormLabel>Subcategories * (Select multiple)</FormLabel>
+                            <div className="space-y-2 max-h-48 overflow-y-auto border rounded-md p-3">
+                              {filteredSubcategories?.map((subcategory: any) => (
+                                <div key={subcategory.id} className="flex items-center space-x-2">
+                                  <input
+                                    type="checkbox"
+                                    id={`subcategory-${subcategory.id}`}
+                                    checked={field.value.includes(subcategory.id.toString())}
+                                    onChange={(e) => {
+                                      const value = subcategory.id.toString();
+                                      if (e.target.checked) {
+                                        field.onChange([...field.value, value]);
+                                      } else {
+                                        field.onChange(field.value.filter(id => id !== value));
+                                      }
+                                    }}
+                                    className="w-4 h-4 text-primary border-gray-300 rounded focus:ring-primary"
+                                  />
+                                  <label 
+                                    htmlFor={`subcategory-${subcategory.id}`}
+                                    className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer"
+                                  >
                                     {subcategory.name}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
+                                  </label>
+                                </div>
+                              ))}
+                            </div>
+                            {field.value.length === 0 && selectedCategoryId && (
+                              <p className="text-sm text-gray-500 dark:text-gray-400">
+                                Select at least one subcategory
+                              </p>
+                            )}
                             <FormMessage />
                           </FormItem>
                         )}

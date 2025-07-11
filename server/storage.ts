@@ -329,6 +329,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getVideosBySubcategory(subcategoryId: number): Promise<Video[]> {
+    // Handle both old and new schema during migration
+    return await db.select().from(videos).where(
+      and(
+        sql`${videos.subcategoryIds} @> ARRAY[${subcategoryId}]::integer[]`,
+        eq(videos.isPublished, true)
+      )
+    ).orderBy(desc(videos.createdAt));
+  }
+
+  async getVideosBySubcategory(subcategoryId: number): Promise<Video[]> {
     return await db.select().from(videos).where(
       and(eq(videos.subcategoryId, subcategoryId), eq(videos.isPublished, true))
     ).orderBy(desc(videos.createdAt));

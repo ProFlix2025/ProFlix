@@ -142,6 +142,7 @@ export const videos = pgTable("videos", {
   durationMinutes: integer("duration_minutes").default(0), // Duration in minutes for hour tracking
   categoryId: integer("category_id").notNull(),
   subcategoryId: integer("subcategory_id").notNull(),
+  subcategoryIds: integer("subcategory_ids").array(), // Array of subcategory IDs (new field)
   creatorId: varchar("creator_id").notNull(),
   
   // YouTube-style free videos + course upsells
@@ -549,6 +550,7 @@ export const insertVideoSchema = createInsertSchema(videos).omit({
   updatedAt: true,
 }).extend({
   tags: z.array(z.string()).optional(),
+  subcategoryIds: z.array(z.number()).min(1, "At least one subcategory is required").optional(),
   price: z.number().min(1000, "Course price must be at least $10").max(100000, "Course price cannot exceed $1,000"), // Price in cents
 });
 
