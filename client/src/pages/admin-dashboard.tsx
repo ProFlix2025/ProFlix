@@ -17,7 +17,8 @@ import {
   Ban,
   CheckCircle,
   Crown,
-  BookOpen
+  BookOpen,
+  RotateCcw
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -149,6 +150,13 @@ export default function AdminDashboard() {
             >
               <Settings className="w-4 h-4 mr-2" />
               Code Generator
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/admin/retention'}
+              className="bg-orange-600 hover:bg-orange-700"
+            >
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Customer Retention
             </Button>
           </div>
         </div>

@@ -771,6 +771,88 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Customer retention admin routes
+  app.get("/api/admin/downgraded-creators", requireAdminAuth, async (req, res) => {
+    try {
+      const downgradedCreators = await storage.getDowngradedProCreators();
+      res.json(downgradedCreators);
+    } catch (error) {
+      console.error("Error fetching downgraded creators:", error);
+      res.status(500).json({ message: "Failed to fetch downgraded creators" });
+    }
+  });
+
+  app.post("/api/admin/reactivate-creator/:userId", requireAdminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { tier } = req.body;
+      
+      const user = await storage.reactivateProCreator(userId, tier);
+      
+      // Log admin action
+      await storage.logSecurityEvent({
+        userId: req.user?.id || 'admin',
+        action: 'reactivate_pro_creator',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        details: JSON.stringify({ targetUserId: userId, tier }),
+        success: true,
+      });
+      
+      res.json({ message: "Creator reactivated successfully", user });
+    } catch (error) {
+      console.error("Error reactivating creator:", error);
+      res.status(500).json({ message: "Failed to reactivate creator" });
+    }
+  });
+
+  app.post("/api/admin/downgrade-creator/:userId", requireAdminAuth, async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { reason } = req.body;
+      
+      const user = await storage.downgradeProCreator(userId, reason || 'admin_downgrade');
+      
+      // Log admin action
+      await storage.logSecurityEvent({
+        userId: req.user?.id || 'admin',
+        action: 'downgrade_pro_creator',
+        ipAddress: req.ip || req.connection.remoteAddress || 'unknown',
+        userAgent: req.get('User-Agent') || 'unknown',
+        details: JSON.stringify({ targetUserId: userId, reason }),
+        success: true,
+      });
+      
+      res.json({ message: "Creator downgraded successfully", user });
+    } catch (error) {
+      console.error("Error downgrading creator:", error);
+      res.status(500).json({ message: "Failed to downgrade creator" });
+    }
+  });
+
+  // Customer retention webhook for subscription failures
+  app.post("/api/webhook/subscription-failed", async (req, res) => {
+    try {
+      const { userId, reason } = req.body;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID required" });
+      }
+      
+      // Downgrade instead of canceling
+      await storage.downgradeProCreator(userId, reason || 'payment_failed');
+      
+      // Track reactivation attempt
+      await storage.updateReactivationAttempt(userId);
+      
+      console.log(`💡 Customer retention: Downgraded ${userId} to free tier instead of canceling`);
+      res.json({ message: "User downgraded to free tier for retention" });
+    } catch (error) {
+      console.error("Error handling subscription failure:", error);
+      res.status(500).json({ message: "Failed to handle subscription failure" });
+    }
+  });
+
   // Initialize categories and subcategories
   app.post('/api/setup', async (req, res) => {
     try {

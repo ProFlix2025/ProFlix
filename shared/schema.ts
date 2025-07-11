@@ -46,6 +46,13 @@ export const users = pgTable("users", {
   courseLimit: integer("course_limit").default(1), // free=1, standard=20, plus=100, enterprise=unlimited
   currentCourseCount: integer("current_course_count").default(0),
   
+  // Customer retention tracking
+  previousProCreatorTier: varchar("previous_pro_creator_tier"), // Track what tier they downgraded from
+  downgradedAt: timestamp("downgraded_at"), // When they were downgraded
+  downgradedReason: varchar("downgraded_reason"), // 'payment_failed', 'cancelled', 'expired'
+  reactivationAttempts: integer("reactivation_attempts").default(0),
+  lastReactivationEmail: timestamp("last_reactivation_email"),
+  
   // Creator earnings from ads
   totalAdRevenue: integer("total_ad_revenue").default(0), // in cents
   

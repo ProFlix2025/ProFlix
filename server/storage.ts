@@ -68,6 +68,12 @@ export interface IStorage {
   updateUserCreatorTier(userId: string, tier: string): Promise<User>;
   getUsersByRole(role: string): Promise<User[]>;
   
+  // Customer retention methods
+  downgradeProCreator(userId: string, reason: string): Promise<User>;
+  reactivateProCreator(userId: string, tier: string): Promise<User>;
+  getDowngradedProCreators(): Promise<User[]>;
+  updateReactivationAttempt(userId: string): Promise<void>;
+  
 
   
   // Course purchase operations
@@ -1430,11 +1436,109 @@ export class DatabaseStorage implements IStorage {
         ADD COLUMN IF NOT EXISTS is_system_account BOOLEAN DEFAULT false;
       `);
       
+      // Add customer retention columns
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS previous_pro_creator_tier VARCHAR;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS downgraded_at TIMESTAMP;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS downgraded_reason VARCHAR;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS reactivation_attempts INTEGER DEFAULT 0;
+      `);
+      
+      await db.execute(sql`
+        ALTER TABLE users 
+        ADD COLUMN IF NOT EXISTS last_reactivation_email TIMESTAMP;
+      `);
+      
       console.log('✅ Database columns added successfully');
     } catch (error) {
       console.error('Database column addition error:', error);
       // Continue execution - columns might already exist
     }
+  }
+
+  // Customer retention methods
+  async downgradeProCreator(userId: string, reason: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        previousProCreatorTier: sql`${users.proCreatorTier}`,
+        proCreatorTier: 'free',
+        isProCreator: false,
+        proCreatorEndsAt: null,
+        proCreatorPlan: null,
+        downgradedAt: new Date(),
+        downgradedReason: reason,
+        courseLimit: 1, // Reset to free tier limit
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    console.log(`📉 Downgraded Pro Creator ${userId} to free tier - Reason: ${reason}`);
+    return user;
+  }
+
+  async reactivateProCreator(userId: string, tier: string): Promise<User> {
+    const tierLimits = {
+      'free': 1,
+      'standard': 20,
+      'plus': 100,
+      'enterprise': 999999
+    };
+
+    const [user] = await db
+      .update(users)
+      .set({
+        proCreatorTier: tier,
+        isProCreator: tier !== 'free',
+        courseLimit: tierLimits[tier as keyof typeof tierLimits] || 1,
+        previousProCreatorTier: null,
+        downgradedAt: null,
+        downgradedReason: null,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    console.log(`🚀 Reactivated Pro Creator ${userId} to ${tier} tier`);
+    return user;
+  }
+
+  async getDowngradedProCreators(): Promise<User[]> {
+    return await db
+      .select()
+      .from(users)
+      .where(
+        and(
+          sql`${users.previousProCreatorTier} IS NOT NULL`,
+          sql`${users.downgradedAt} IS NOT NULL`
+        )
+      )
+      .orderBy(desc(users.downgradedAt));
+  }
+
+  async updateReactivationAttempt(userId: string): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        reactivationAttempts: sql`${users.reactivationAttempts} + 1`,
+        lastReactivationEmail: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
   }
 }
 
