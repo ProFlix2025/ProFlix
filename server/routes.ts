@@ -468,6 +468,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Simplified YouTube video embedding (no auth required for testing)
+  app.post('/api/admin/learntube/add-youtube-simple', async (req, res) => {
+    try {
+      console.log('🎬 Simple YouTube embed request:', req.body);
+      const { url, categoryId } = req.body;
+      
+      // Extract YouTube video ID from URL
+      const videoId = extractYouTubeVideoId(url);
+      if (!videoId) {
+        console.log('❌ Invalid YouTube URL:', url);
+        return res.status(400).json({ error: 'Invalid YouTube URL' });
+      }
+      
+      console.log('✅ Extracted video ID:', videoId);
+      
+      // Auto-generate title and description
+      const title = `YouTube Video ${videoId}`;
+      const description = `Educational content from YouTube (ID: ${videoId})`;
+      
+      console.log('📝 Auto-generating video data:', { youtubeId: videoId, title, description, categoryId });
+      
+      const video = await storage.addYouTubeVideo({
+        youtubeId: videoId,
+        title,
+        description,
+        categoryId,
+        source: 'learntube',
+        canRunAds: false
+      });
+      
+      console.log('✅ YouTube video embedded successfully:', video.id);
+      res.json({ success: true, video });
+    } catch (error) {
+      console.error('❌ Error embedding YouTube video:', error);
+      console.error('Error details:', error.message);
+      console.error('Error stack:', error.stack);
+      res.status(500).json({ message: 'Failed to embed YouTube video', error: error.message });
+    }
+  });
+
   // Bulk delete LearnTube videos
   app.post('/api/admin/learntube/bulk-delete', requireSimpleAdminAuth, async (req, res) => {
     try {

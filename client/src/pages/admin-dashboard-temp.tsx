@@ -33,8 +33,6 @@ interface Video {
 
 export default function AdminDashboardTemp() {
   const [youtubeUrl, setYoutubeUrl] = useState('');
-  const [videoTitle, setVideoTitle] = useState('');
-  const [videoDescription, setVideoDescription] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('');
   const { toast } = useToast();
 
@@ -50,8 +48,8 @@ export default function AdminDashboardTemp() {
 
   // Add YouTube video mutation
   const addVideoMutation = useMutation({
-    mutationFn: async (data: { url: string; title: string; description: string; categoryId: number }) => {
-      const response = await fetch('/api/admin/learntube/add-youtube', {
+    mutationFn: async (data: { url: string; categoryId: number }) => {
+      const response = await fetch('/api/admin/learntube/add-youtube-simple', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -70,12 +68,10 @@ export default function AdminDashboardTemp() {
     onSuccess: () => {
       toast({
         title: 'Success',
-        description: 'YouTube video added successfully',
+        description: 'YouTube video embedded successfully',
       });
       // Reset form
       setYoutubeUrl('');
-      setVideoTitle('');
-      setVideoDescription('');
       setSelectedCategory('');
       // Refresh videos
       queryClient.invalidateQueries({ queryKey: ['/api/videos/learntube'] });
@@ -83,7 +79,7 @@ export default function AdminDashboardTemp() {
     onError: (error: any) => {
       toast({
         title: 'Error',
-        description: error.message || 'Failed to add video',
+        description: error.message || 'Failed to embed video',
         variant: 'destructive',
       });
     }
@@ -93,10 +89,10 @@ export default function AdminDashboardTemp() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!youtubeUrl || !videoTitle || !videoDescription || !selectedCategory) {
+    if (!youtubeUrl || !selectedCategory) {
       toast({
         title: 'Error',
-        description: 'Please fill in all fields',
+        description: 'Please provide YouTube URL and select a category',
         variant: 'destructive',
       });
       return;
@@ -104,8 +100,6 @@ export default function AdminDashboardTemp() {
 
     addVideoMutation.mutate({
       url: youtubeUrl,
-      title: videoTitle,
-      description: videoDescription,
       categoryId: parseInt(selectedCategory),
     });
   };
@@ -181,7 +175,7 @@ export default function AdminDashboardTemp() {
           <CardHeader>
             <CardTitle className="text-xl text-white flex items-center">
               <Plus className="w-6 h-6 mr-2 text-netflix-red" />
-              Add YouTube Video to LearnTube
+              Embed YouTube Video to LearnTube
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -215,30 +209,6 @@ export default function AdminDashboardTemp() {
                   </Select>
                 </div>
               </div>
-              <div>
-                <Label htmlFor="video-title" className="text-white">Video Title</Label>
-                <Input
-                  id="video-title"
-                  type="text"
-                  placeholder="Enter video title"
-                  value={videoTitle}
-                  onChange={(e) => setVideoTitle(e.target.value)}
-                  className="bg-netflix-dark-gray border-netflix-border text-white"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="video-description" className="text-white">Description</Label>
-                <Textarea
-                  id="video-description"
-                  placeholder="Enter video description"
-                  value={videoDescription}
-                  onChange={(e) => setVideoDescription(e.target.value)}
-                  className="bg-netflix-dark-gray border-netflix-border text-white"
-                  rows={3}
-                  required
-                />
-              </div>
               <Button
                 type="submit"
                 className="bg-netflix-red hover:bg-red-700 text-white"
@@ -247,12 +217,12 @@ export default function AdminDashboardTemp() {
                 {addVideoMutation.isPending ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    Adding Video...
+                    Embedding Video...
                   </>
                 ) : (
                   <>
                     <Youtube className="w-4 h-4 mr-2" />
-                    Add Video
+                    Embed Video
                   </>
                 )}
               </Button>
