@@ -143,5 +143,5 @@ export default function AdminAuthGuard({ children }: AdminAuthGuardProps) {
   }
 
   // Render protected content
-  return <>{children}</>;
+  return <div className="min-h-screen bg-black text-white">{children}</div>;
 }

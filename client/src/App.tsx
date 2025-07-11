@@ -27,6 +27,7 @@ import ProCreatorPortal from "@/pages/pro-creator-portal";
 import AdminLogin from "@/pages/admin-login";
 import AdminCodes from "@/pages/admin-codes";
 import AdminDashboard from "@/pages/admin-dashboard";
+import AdminDashboardTemp from "@/pages/admin-dashboard-temp";
 import AdminVerifications from "@/pages/admin-verifications";
 import AdminReports from "@/pages/admin-reports";
 import AdminContent from "@/pages/admin-content";
@@ -61,6 +62,7 @@ function Router() {
               <AdminDashboard />
             </AdminAuthGuard>
           </Route>
+          <Route path="/admin/test" component={AdminDashboardTemp} />
           <Route path="/admin/verifications">
             <AdminAuthGuard>
               <AdminVerifications />
