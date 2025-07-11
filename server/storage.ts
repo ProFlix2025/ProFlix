@@ -1863,8 +1863,6 @@ export class DatabaseStorage implements IStorage {
     return deleteCount;
   }
 
-
-
   async addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video> {
     // Get the first subcategory for the given category
     const subcategory = await db
