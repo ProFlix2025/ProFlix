@@ -234,7 +234,12 @@ export class DatabaseStorage implements IStorage {
 
   // Category operations
   async getCategories(): Promise<Category[]> {
-    return await db.select().from(categories);
+    try {
+      return await db.select().from(categories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      throw error;
+    }
   }
 
   async getCategoryBySlug(slug: string): Promise<Category | undefined> {
@@ -419,31 +424,104 @@ export class DatabaseStorage implements IStorage {
 
   async addMissingColumns(): Promise<void> {
     try {
+      console.log('🔧 Starting database migration...');
+      
       // Add missing columns to categories table
-      await db.execute(sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS emoji VARCHAR(2);`);
+      try {
+        await db.execute(sql`ALTER TABLE categories ADD COLUMN IF NOT EXISTS emoji VARCHAR(2);`);
+        console.log('✅ Added emoji column to categories');
+      } catch (error) {
+        console.log('ℹ️ Emoji column already exists in categories');
+      }
       
       // Add missing columns to videos table
-      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;`);
-      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;`);
-      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;`);
-      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
-      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_id INTEGER;`);
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS duration_minutes INTEGER;`);
+        console.log('✅ Added duration_minutes column to videos');
+      } catch (error) {
+        console.log('ℹ️ Duration_minutes column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_published BOOLEAN DEFAULT true;`);
+        console.log('✅ Added is_published column to videos');
+      } catch (error) {
+        console.log('ℹ️ Is_published column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;`);
+        console.log('✅ Added share_count column to videos');
+      } catch (error) {
+        console.log('ℹ️ Share_count column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
+        console.log('✅ Added subcategory_ids column to videos');
+      } catch (error) {
+        console.log('ℹ️ Subcategory_ids column already exists in videos');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_id INTEGER;`);
+        console.log('✅ Added subcategory_id column to videos');
+      } catch (error) {
+        console.log('ℹ️ Subcategory_id column already exists in videos');
+      }
       
       // Add missing columns to users table
-      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_tier VARCHAR DEFAULT 'free';`);
-      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 5;`);
-      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;`);
-      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro_creator BOOLEAN DEFAULT false;`);
-      await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_ends_at TIMESTAMP;`);
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_tier VARCHAR DEFAULT 'free';`);
+        console.log('✅ Added pro_creator_tier column to users');
+      } catch (error) {
+        console.log('ℹ️ Pro_creator_tier column already exists in users');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS video_hour_limit INTEGER DEFAULT 5;`);
+        console.log('✅ Added video_hour_limit column to users');
+      } catch (error) {
+        console.log('ℹ️ Video_hour_limit column already exists in users');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS current_video_hours INTEGER DEFAULT 0;`);
+        console.log('✅ Added current_video_hours column to users');
+      } catch (error) {
+        console.log('ℹ️ Current_video_hours column already exists in users');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS is_pro_creator BOOLEAN DEFAULT false;`);
+        console.log('✅ Added is_pro_creator column to users');
+      } catch (error) {
+        console.log('ℹ️ Is_pro_creator column already exists in users');
+      }
+      
+      try {
+        await db.execute(sql`ALTER TABLE users ADD COLUMN IF NOT EXISTS pro_creator_ends_at TIMESTAMP;`);
+        console.log('✅ Added pro_creator_ends_at column to users');
+      } catch (error) {
+        console.log('ℹ️ Pro_creator_ends_at column already exists in users');
+      }
       
       // Update existing records with default values
-      await db.execute(sql`UPDATE videos SET is_published = true WHERE is_published IS NULL;`);
-      await db.execute(sql`UPDATE videos SET share_count = 0 WHERE share_count IS NULL;`);
-      await db.execute(sql`UPDATE users SET pro_creator_tier = 'free' WHERE pro_creator_tier IS NULL;`);
-      await db.execute(sql`UPDATE users SET video_hour_limit = 5 WHERE video_hour_limit IS NULL;`);
-      await db.execute(sql`UPDATE users SET current_video_hours = 0 WHERE current_video_hours IS NULL;`);
+      console.log('🔄 Updating existing records...');
+      
+      try {
+        await db.execute(sql`UPDATE videos SET is_published = true WHERE is_published IS NULL;`);
+        await db.execute(sql`UPDATE videos SET share_count = 0 WHERE share_count IS NULL;`);
+        await db.execute(sql`UPDATE users SET pro_creator_tier = 'free' WHERE pro_creator_tier IS NULL;`);
+        await db.execute(sql`UPDATE users SET video_hour_limit = 5 WHERE video_hour_limit IS NULL;`);
+        await db.execute(sql`UPDATE users SET current_video_hours = 0 WHERE current_video_hours IS NULL;`);
+        console.log('✅ Updated existing records with default values');
+      } catch (error) {
+        console.log('⚠️ Error updating existing records:', error.message);
+      }
       
       // Update categories with emojis
+      console.log('🔄 Adding emojis to categories...');
       const categoryEmojis = [
         ['Art & Creativity', '🎨'],
         ['Business & Finance', '💼'],
@@ -479,12 +557,16 @@ export class DatabaseStorage implements IStorage {
       ];
       
       for (const [name, emoji] of categoryEmojis) {
-        await db.execute(sql`UPDATE categories SET emoji = ${emoji} WHERE name = ${name} AND emoji IS NULL;`);
+        try {
+          await db.execute(sql`UPDATE categories SET emoji = ${emoji} WHERE name = ${name} AND (emoji IS NULL OR emoji = '');`);
+        } catch (error) {
+          console.log(`⚠️ Error updating emoji for ${name}:`, error.message);
+        }
       }
       
-      console.log('✅ Missing database columns added successfully');
+      console.log('✅ Database migration completed successfully');
     } catch (error) {
-      console.error('❌ Error adding missing columns:', error);
+      console.error('❌ Error in database migration:', error);
       throw error;
     }
   }

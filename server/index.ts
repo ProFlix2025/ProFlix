@@ -89,7 +89,11 @@ app.use((req, res, next) => {
     console.log(`Serving static files from: ${path.join(__dirname, "public")}`);
     app.use(express.static(path.join(__dirname, "public")));
 
-    app.get("*", (req, res) => {
+    // Only serve SPA fallback for non-API routes
+    app.get("*", (req, res, next) => {
+      if (req.path.startsWith('/api/')) {
+        return next(); // Let API routes handle this
+      }
       console.log(`Serving SPA fallback for: ${req.path}`);
       res.sendFile(path.join(__dirname, "public", "index.html"));
     });
