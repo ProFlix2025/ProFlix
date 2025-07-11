@@ -204,6 +204,15 @@ export async function initializeDatabase() {
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS share_count INTEGER DEFAULT 0;`);
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_ids INTEGER[];`);
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS subcategory_id INTEGER;`);
+      
+      // Add critical missing columns for production
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS source VARCHAR DEFAULT 'proflix';`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS youtube_id VARCHAR;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_learn_tube BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_pro_tube BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS can_run_ads BOOLEAN DEFAULT TRUE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS video_type VARCHAR DEFAULT 'free';`);
+      
       console.log('✅ Missing columns added successfully');
     } catch (error) {
       console.log('⚠️ Column addition completed (some may have already existed)');
