@@ -116,6 +116,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check database schema for debugging
+  app.get('/api/admin/check-schema', async (req, res) => {
+    try {
+      const result = await storage.checkDatabaseSchema();
+      res.json(result);
+    } catch (error) {
+      console.error('Schema check error:', error);
+      res.status(500).json({ message: 'Schema check failed', error: error.message });
+    }
+  });
+
   // Pro Creator Portal routes - Public access for application
   app.get('/api/pro-creator/status', async (req: any, res) => {
     try {

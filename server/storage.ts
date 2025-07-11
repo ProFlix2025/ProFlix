@@ -489,6 +489,53 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async checkDatabaseSchema(): Promise<any> {
+    try {
+      // Check categories table structure
+      const categoriesResult = await db.execute(sql`
+        SELECT column_name, data_type, is_nullable 
+        FROM information_schema.columns 
+        WHERE table_name = 'categories' 
+        ORDER BY ordinal_position;
+      `);
+      
+      // Check videos table structure
+      const videosResult = await db.execute(sql`
+        SELECT column_name, data_type, is_nullable 
+        FROM information_schema.columns 
+        WHERE table_name = 'videos' 
+        ORDER BY ordinal_position;
+      `);
+      
+      // Check users table structure
+      const usersResult = await db.execute(sql`
+        SELECT column_name, data_type, is_nullable 
+        FROM information_schema.columns 
+        WHERE table_name = 'users' 
+        ORDER BY ordinal_position;
+      `);
+      
+      // Count categories
+      const categoriesCount = await db.execute(sql`SELECT COUNT(*) as count FROM categories;`);
+      
+      return {
+        categories: {
+          structure: categoriesResult.rows,
+          count: categoriesCount.rows[0]?.count || 0
+        },
+        videos: {
+          structure: videosResult.rows
+        },
+        users: {
+          structure: usersResult.rows
+        }
+      };
+    } catch (error) {
+      console.error('Schema check error:', error);
+      throw error;
+    }
+  }
+
   async getTrendingVideos(limit: number = 20): Promise<Video[]> {
     return await db.select().from(videos)
       .where(eq(videos.isPublished, true))
