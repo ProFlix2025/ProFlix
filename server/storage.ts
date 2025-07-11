@@ -122,6 +122,7 @@ export interface IStorage {
   getVideosBySource(source: 'proflix' | 'learntube'): Promise<Video[]>;
   bulkDeleteLearnTubeContent(): Promise<{ deleted: number }>;
   addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video>;
+  addYouTubeVideoWithEmbed(data: { youtubeId: string; title: string; description: string; categoryId: number; embedUrl: string; source: string; canRunAds: boolean }): Promise<Video>;
   bulkDeleteLearnTubeVideos(videoIds: number[]): Promise<number>;
   getLearnTubeAnalytics(): Promise<{
     totalVideos: number;
@@ -1854,6 +1855,49 @@ export class DatabaseStorage implements IStorage {
       canRunAds: data.canRunAds,
       youtubeId: data.youtubeId,
       videoUrl: `https://www.youtube.com/embed/${data.youtubeId}`,
+      thumbnailUrl: `https://img.youtube.com/vi/${data.youtubeId}/hqdefault.jpg`,
+      duration: 0,
+      views: 0,
+      likes: 0,
+      dislikes: 0,
+      shareCount: 0,
+      isPublished: true,
+      durationMinutes: 0,
+      price: 0,
+      isPremium: false,
+      hasPreview: false,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
+
+    const [video] = await db
+      .insert(videos)
+      .values(videoData)
+      .returning();
+    
+    return video;
+  }
+
+  async addYouTubeVideoWithEmbed(data: { youtubeId: string; title: string; description: string; categoryId: number; embedUrl: string; source: string; canRunAds: boolean }): Promise<Video> {
+    // Get the first subcategory for the given category
+    const subcategory = await db
+      .select()
+      .from(subcategories)
+      .where(eq(subcategories.categoryId, data.categoryId))
+      .limit(1);
+    
+    const subcategoryId = subcategory.length > 0 ? subcategory[0].id : 1; // Fallback to subcategory 1
+
+    const videoData = {
+      creatorId: 'system',
+      title: data.title,
+      description: data.description,
+      categoryId: data.categoryId,
+      subcategoryId: subcategoryId,
+      source: data.source,
+      canRunAds: data.canRunAds,
+      youtubeId: data.youtubeId,
+      videoUrl: data.embedUrl, // Use the provided embed URL
       thumbnailUrl: `https://img.youtube.com/vi/${data.youtubeId}/hqdefault.jpg`,
       duration: 0,
       views: 0,

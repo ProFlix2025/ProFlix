@@ -487,13 +487,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const title = `YouTube Video ${videoId}`;
       const description = `Educational content from YouTube (ID: ${videoId})`;
       
-      console.log('📝 Auto-generating video data:', { youtubeId: videoId, title, description, categoryId });
+      // Create proper embed URL instead of direct YouTube URL
+      const embedUrl = `https://www.youtube.com/embed/${videoId}`;
       
-      const video = await storage.addYouTubeVideo({
+      console.log('📝 Auto-generating video data:', { youtubeId: videoId, title, description, categoryId, embedUrl });
+      
+      // Insert directly into database with embed URL
+      const video = await storage.addYouTubeVideoWithEmbed({
         youtubeId: videoId,
         title,
         description,
         categoryId,
+        embedUrl,
         source: 'learntube',
         canRunAds: false
       });
