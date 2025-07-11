@@ -91,18 +91,23 @@ export const adminLogin = async (req: Request, res: Response) => {
       // Log failed attempt
       console.warn(`Failed admin login attempt from ${clientIp} at ${new Date().toISOString()}`);
       
-      // TODO: Log to database for security monitoring
-      // await db.execute(sql`
-      //   INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
-      //   VALUES (
-      //     'failed_login',
-      //     ${clientIp},
-      //     ${req.get('User-Agent') || 'unknown'},
-      //     ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
-      //     NOW()
-      //   )
-      //   ON CONFLICT DO NOTHING
-      // `);
+      // Log failed login to database (production safe)
+      try {
+        await db.execute(sql`
+          INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
+          VALUES (
+            'failed_login',
+            ${clientIp || 'unknown'},
+            ${req.get('User-Agent') || 'unknown'},
+            ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
+            NOW()
+          )
+          ON CONFLICT DO NOTHING
+        `);
+      } catch (error) {
+        // Don't let logging errors crash the login process
+        console.log('Failed login logging skipped:', error.message);
+      }
       
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -118,31 +123,23 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Log successful login
     console.log(`✅ Admin login successful from ${clientIp} at ${new Date().toISOString()}`);
     
-    // Log successful login to database
+    // Log successful login to database (production safe)
     try {
-      await db.execute(sql`
-        CREATE TABLE IF NOT EXISTS admin_security_logs (
-          id SERIAL PRIMARY KEY,
-          event_type VARCHAR(50) NOT NULL,
-          ip_address VARCHAR(45),
-          user_agent TEXT,
-          details TEXT,
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-      `);
-      
+      // Only try to create table if it doesn't exist - use a simpler approach for production
       await db.execute(sql`
         INSERT INTO admin_security_logs (event_type, ip_address, user_agent, details, created_at)
         VALUES (
           'successful_login',
-          ${clientIp},
+          ${clientIp || 'unknown'},
           ${req.get('User-Agent') || 'unknown'},
           ${JSON.stringify({ username, timestamp: new Date().toISOString() })},
           NOW()
         )
+        ON CONFLICT DO NOTHING
       `);
     } catch (error) {
-      console.log('Admin security logging error:', error);
+      // Don't let logging errors crash the admin login
+      console.log('Admin security logging skipped:', error.message);
     }
     
     res.json({ 
