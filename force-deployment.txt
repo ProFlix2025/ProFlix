@@ -1,0 +1,15 @@
+FORCE DEPLOYMENT TRIGGER - Production Database Fixed
+
+The production database has been updated with all required columns:
+- source (VARCHAR DEFAULT 'proflix')  
+- youtube_id (VARCHAR)
+- is_learn_tube (BOOLEAN DEFAULT FALSE)
+- is_pro_tube (BOOLEAN DEFAULT FALSE)
+- can_run_ads (BOOLEAN DEFAULT TRUE)
+- video_type (VARCHAR DEFAULT 'free')
+
+Development server working perfectly - all API endpoints returning 200 status codes.
+
+Production server needs to be redeployed to use the updated code with the new database schema.
+
+This file triggers a commit to force deployment.
