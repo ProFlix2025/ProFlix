@@ -304,7 +304,7 @@ export const watchHistory = pgTable("watch_history", {
   watchTime: integer("watch_time").default(0), // seconds watched
 });
 
-// Favorites table
+// Favorites table (for free videos)
 export const favorites = pgTable("favorites", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
@@ -313,6 +313,17 @@ export const favorites = pgTable("favorites", {
 }, (table) => [
   index("idx_favorites_user_id").on(table.userId),
   index("idx_favorites_video_id").on(table.videoId),
+]);
+
+// Wishlist table (for courses to buy)
+export const wishlist = pgTable("wishlist", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull(),
+  videoId: integer("video_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  index("idx_wishlist_user_id").on(table.userId),
+  index("idx_wishlist_video_id").on(table.videoId),
 ]);
 
 // Shared videos table
@@ -409,6 +420,8 @@ export const videosRelations = relations(videos, ({ one, many }) => ({
   }),
   likes: many(videoLikes),
   comments: many(comments),
+  favorites: many(favorites),
+  wishlist: many(wishlist),
 }));
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -514,6 +527,17 @@ export const favoritesRelations = relations(favorites, ({ one }) => ({
   }),
   video: one(videos, {
     fields: [favorites.videoId],
+    references: [videos.id],
+  }),
+}));
+
+export const wishlistRelations = relations(wishlist, ({ one }) => ({
+  user: one(users, {
+    fields: [wishlist.userId],
+    references: [users.id],
+  }),
+  video: one(videos, {
+    fields: [wishlist.videoId],
     references: [videos.id],
   }),
 }));

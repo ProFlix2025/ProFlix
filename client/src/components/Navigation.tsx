@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star, ChevronDown } from "lucide-react";
+import { Search, User, Settings, LogOut, Video, Home, Grid3X3, Heart, Star, ChevronDown, ShoppingCart } from "lucide-react";
 
 export default function Navigation() {
   const [, navigate] = useLocation();
@@ -165,12 +165,20 @@ export default function Navigation() {
 
 
         {isAuthenticated && (
-          <Link href="/favorites" className="text-white hover:text-netflix-red transition-colors">
-            <div className="flex items-center space-x-2">
-              <Heart className="w-5 h-5" />
-              <span className="text-lg">Favorites</span>
-            </div>
-          </Link>
+          <>
+            <Link href="/favorites" className="text-white hover:text-netflix-red transition-colors">
+              <div className="flex items-center space-x-2">
+                <Heart className="w-5 h-5" />
+                <span className="text-lg">Favorites</span>
+              </div>
+            </Link>
+            <Link href="/wishlist" className="text-white hover:text-netflix-red transition-colors">
+              <div className="flex items-center space-x-2">
+                <ShoppingCart className="w-5 h-5" />
+                <span className="text-lg">Wishlist</span>
+              </div>
+            </Link>
+          </>
         )}
 
         {user && (user as any)?.role === 'creator' ? (

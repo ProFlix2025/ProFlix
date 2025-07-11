@@ -21,6 +21,7 @@ import DMCAPolicy from "@/pages/dmca-policy";
 import TermsOfUse from "@/pages/terms-of-use";
 import PrivacyPolicy from "@/pages/privacy-policy";
 import Favorites from "@/pages/favorites";
+import Wishlist from "@/pages/wishlist";
 import Premium from "@/pages/premium";
 import ProCreatorPortal from "@/pages/pro-creator-portal";
 import AdminLogin from "@/pages/admin-login";
@@ -88,6 +89,7 @@ function Router() {
 
           <Route path="/course-purchase/:videoId" component={CoursePurchase} />
           <Route path="/favorites" component={Favorites} />
+          <Route path="/wishlist" component={Wishlist} />
           <Route path="/dmca-policy" component={DMCAPolicy} />
           <Route path="/terms-of-use" component={TermsOfUse} />
           <Route path="/privacy-policy" component={PrivacyPolicy} />
