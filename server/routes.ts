@@ -582,13 +582,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
+      if (!['free', 'pro', 'enterprise'].includes(tier)) {
+        return res.status(400).json({ error: 'Invalid tier' });
+      }
+
       // Update user's creator tier
       await storage.updateUserCreatorTier(userId, tier);
+
+      // Set video hour limits based on tier
+      let videoHourLimit = 5; // Free tier default
+      if (tier === 'pro') {
+        videoHourLimit = 50; // Pro tier
+      } else if (tier === 'enterprise') {
+        videoHourLimit = 500; // Enterprise tier
+      }
+
+      // Update video hour limit
+      await storage.updateVideoHourLimit(userId, videoHourLimit);
 
       res.json({ 
         success: true, 
         message: `Successfully upgraded to ${tier} creator tier`,
-        tier 
+        tier,
+        videoHourLimit
       });
     } catch (error) {
       console.error("Error upgrading creator tier:", error);
@@ -1222,25 +1238,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const isCourse = req.body.isCourse === 'true';
       const coursePrice = parseInt(req.body.coursePrice) || 0;
 
-      // Parse subcategory IDs
-      let subcategoryIds: number[] = [];
-      try {
-        subcategoryIds = JSON.parse(req.body.subcategoryIds || '[]');
-        if (!Array.isArray(subcategoryIds) || subcategoryIds.length === 0) {
-          return res.status(400).json({ message: 'At least one subcategory is required' });
-        }
-        // Validate all subcategory IDs are numbers
-        subcategoryIds = subcategoryIds.map(id => {
-          const numId = parseInt(id);
-          if (isNaN(numId)) {
-            throw new Error('Invalid subcategory ID');
-          }
-          return numId;
-        });
-      } catch (error) {
-        return res.status(400).json({ message: 'Invalid subcategory IDs format' });
-      }
-
       const videoData = {
         title: req.body.title,
         description: req.body.description,
@@ -1249,8 +1246,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         duration: req.body.duration,
         durationMinutes: req.body.durationMinutes ? parseInt(req.body.durationMinutes) : 0,
         categoryId: parseInt(req.body.categoryId),
-        subcategoryId: subcategoryIds[0], // Use first subcategory for backward compatibility
-        subcategoryIds: subcategoryIds,
+        subcategoryId: parseInt(req.body.subcategoryId),
         creatorId,
         // YouTube-style: All videos are free, but Pro Creators can add course upsells
         videoType: 'free',

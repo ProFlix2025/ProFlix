@@ -76,7 +76,7 @@ const creatorTiers = [
       "Custom domain support"
     ],
     limitations: [],
-    cta: "Contact Sales",
+    cta: "Start Enterprise",
     description: "For organizations and top-tier creators scaling their business"
   }
 ];
@@ -100,8 +100,12 @@ export default function CreatorTiers() {
         // Redirect to Pro Creator portal for subscription
         window.location.href = '/pro-creator-portal';
       } else if (tierId === 'enterprise') {
-        // Contact sales flow
-        window.location.href = 'mailto:sales@proflix.app?subject=Enterprise Creator Inquiry';
+        // Enterprise tier direct sign-up
+        await apiRequest('POST', '/api/creator/upgrade', { tier: 'enterprise' });
+        toast({
+          title: "Enterprise Creator Activated!",
+          description: "Welcome to Enterprise Creator with 500 hours of video content and advanced features.",
+        });
       }
     },
     onSuccess: () => {
