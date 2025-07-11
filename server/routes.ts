@@ -1141,6 +1141,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get creator video hours quota status
+  app.get('/api/creator/video-hours', isAuthenticated, async (req: any, res) => {
+    try {
+      const creatorId = req.user.claims.sub;
+      const user = await storage.getUser(creatorId);
+      
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+      
+      const currentHours = user.currentVideoHours || 0;
+      const hourLimit = user.videoHourLimit || 5;
+      const remainingHours = Math.max(0, hourLimit - currentHours);
+      const usagePercentage = (currentHours / hourLimit) * 100;
+      
+      res.json({
+        currentHours: Math.round(currentHours * 100) / 100, // Round to 2 decimal places
+        hourLimit,
+        remainingHours: Math.round(remainingHours * 100) / 100,
+        usagePercentage: Math.round(usagePercentage * 100) / 100,
+        tierName: user.proCreatorTier || 'free',
+        canUpgrade: hourLimit <= 5, // Free creators can upgrade
+        nearLimit: usagePercentage > 80 // Warning when 80% full
+      });
+    } catch (error) {
+      console.error('Error fetching video hours status:', error);
+      res.status(500).json({ message: 'Failed to fetch video hours status' });
+    }
+  });
+
   app.post('/api/creator/videos', isAuthenticated, upload.fields([
     { name: 'video', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 }
@@ -1151,6 +1181,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       if (!files.video || !files.video[0]) {
         return res.status(400).json({ message: 'Video file is required' });
+      }
+
+      // Check video content hour limits before processing
+      const user = await storage.getUser(creatorId);
+      if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+      }
+
+      const videoDurationMinutes = req.body.durationMinutes ? parseInt(req.body.durationMinutes) : 0;
+      const videoDurationHours = videoDurationMinutes / 60;
+      const currentHours = user.currentVideoHours || 0;
+      const hourLimit = user.videoHourLimit || 5; // Default to 5 hours for free creators
+      
+      // Check if this upload would exceed the hour limit
+      if (currentHours + videoDurationHours > hourLimit) {
+        const remainingHours = Math.max(0, hourLimit - currentHours);
+        const remainingMinutes = Math.floor(remainingHours * 60);
+        
+        return res.status(403).json({ 
+          message: `Upload blocked: This video would exceed your ${hourLimit}-hour content limit. You have ${remainingMinutes} minutes remaining.`,
+          error: 'CONTENT_LIMIT_EXCEEDED',
+          currentHours: currentHours,
+          hourLimit: hourLimit,
+          remainingHours: remainingHours,
+          videoHours: videoDurationHours,
+          upgradeRequired: hourLimit <= 5 // Suggest upgrade for free creators
+        });
       }
 
       let tags = [];
@@ -1193,6 +1250,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const video = await storage.createVideo(validation.data);
+      
+      // Update user's current video hours after successful upload
+      await storage.updateUserVideoHours(creatorId, videoDurationHours);
+      
       res.status(201).json(video);
     } catch (error) {
       console.error('Error creating video:', error);
@@ -1240,7 +1301,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: 'Video not found' });
       }
 
+      // Calculate hours to subtract from user's quota
+      const videoDurationHours = (existingVideo.durationMinutes || 0) / 60;
+      
       await storage.deleteVideo(videoId);
+      
+      // Free up the video hours quota
+      await storage.updateUserVideoHours(creatorId, -videoDurationHours);
+      
       res.json({ message: 'Video deleted' });
     } catch (error) {
       console.error('Error deleting video:', error);

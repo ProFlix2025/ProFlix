@@ -73,6 +73,7 @@ export interface IStorage {
   reactivateProCreator(userId: string, tier: string): Promise<User>;
   getDowngradedProCreators(): Promise<User[]>;
   updateReactivationAttempt(userId: string): Promise<void>;
+  updateUserVideoHours(userId: string, additionalHours: number): Promise<void>;
   
 
   
@@ -1561,6 +1562,16 @@ export class DatabaseStorage implements IStorage {
       .set({
         reactivationAttempts: sql`${users.reactivationAttempts} + 1`,
         lastReactivationEmail: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, userId));
+  }
+
+  async updateUserVideoHours(userId: string, additionalHours: number): Promise<void> {
+    await db
+      .update(users)
+      .set({
+        currentVideoHours: sql`${users.currentVideoHours} + ${additionalHours}`,
         updatedAt: new Date(),
       })
       .where(eq(users.id, userId));
