@@ -129,6 +129,20 @@ app.use((req, res, next) => {
             }
           } else {
             console.log('✅ Categories already exist:', existingCategories.length);
+            
+            // Check if emojis need to be added
+            const firstCategory = existingCategories[0];
+            if (!firstCategory.emoji) {
+              console.log('🎨 Adding emojis to categories...');
+              try {
+                await storage.addMissingColumns();
+                console.log('✅ Emojis added to categories');
+              } catch (error) {
+                console.log('⚠️ Error adding emojis:', error.message);
+              }
+            } else {
+              console.log('✅ Categories already have emojis');
+            }
           }
           
           console.log('✅ Production database fully initialized');
