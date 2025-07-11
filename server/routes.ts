@@ -2403,7 +2403,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         duration: '0',
         durationMinutes: 0,
         creatorId: 'system',
-        videoType: 'streaming',
         source: 'learntube',
         isLearnTube: true,
         isProTube: false,

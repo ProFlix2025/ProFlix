@@ -1773,7 +1773,6 @@ export class DatabaseStorage implements IStorage {
           youtubeId: video.youtubeId,
           creatorId: 'learntube-admin', // Special creator for YouTube content
           isPublished: true,
-          videoType: 'free',
           isCourse: false, // LearnTube videos cannot be courses
           coursePrice: 0,
           canRunAds: false, // NO ADS on YouTube content

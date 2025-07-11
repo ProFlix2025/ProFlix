@@ -1,0 +1,44 @@
+10:13:39 PM [express] GET /api/categories 304 in 262ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+10:13:41 PM [express] POST /api/setup 200 in 17772ms :: {"message":"Setup complete"}
+⚠️ ADMIN-ONLY LearnTube: Adding temporary YouTube content that generates no revenue
+🎬 Embed code request: { embedCode: "<iframe width="560" height="315" src="https://www.youtube.com/embed/rMDJVlvfpY0?si=ClIZhTchnlpDJufd"...", categoryId: 152 }
+✅ Extracted video ID: rMDJVlvfpY0
+📝 Auto-generating video data from embed code: {
+  youtubeId: 'rMDJVlvfpY0',
+  title: 'YouTube Video rMDJVlvfpY0',
+  description: 'Educational content from YouTube (ID: rMDJVlvfpY0)',
+  categoryId: 152,
+  embedUrl: 'https://www.youtube.com/embed/rMDJVlvfpY0'
+}
+💥 Error adding YouTube video via embed: error: column "video_type" of relation "videos" does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1680:28)
+    at async file:///opt/render/project/src/dist/index.js:4299:21 {
+  length: 130,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '162',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1065',
+  routine: 'checkInsertTargets'
+}
+Error details: {
+  message: 'column "video_type" of relation "videos" does not exist',
+  stack: 'error: column "video_type" of relation "videos" does not exist\n' +
+    '    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+    '    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)\n' +
+    '    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1680:28)\n' +
+    '    at async file:///opt/render/project/src/dist/index.js:4299:21',
