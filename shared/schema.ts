@@ -144,8 +144,7 @@ export const videos = pgTable("videos", {
   subcategoryId: integer("subcategory_id").notNull(),
   creatorId: varchar("creator_id").notNull(),
   
-  // YouTube-style free videos + course upsells
-  videoType: varchar("video_type").notNull().default("free"), // 'free' for all videos
+  // YouTube-style free videos + course upsells (removed videoType column)
   
   // Content source system - for proper ad revenue management
   source: varchar("source").notNull().default("proflix"), // 'proflix', 'protube', or 'learntube'

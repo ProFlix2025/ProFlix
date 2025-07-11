@@ -1582,7 +1582,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         subcategoryId: parseInt(req.body.subcategoryId),
         creatorId,
         // YouTube-style: All videos are free, but Pro Creators can add course upsells
-        videoType: 'free',
         isCourse: isCourse,
         coursePrice: coursePrice,
         courseDescription: req.body.courseDescription || null,

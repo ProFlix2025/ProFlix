@@ -1021,21 +1021,17 @@ export class DatabaseStorage implements IStorage {
     const user = await this.getUser(creatorId);
     if (!user) throw new Error('User not found');
 
-    // Get video counts by type
+    // Get video counts - simplified without videoType column
     const videoStats = await db
       .select({
-        videoType: videos.videoType,
         count: count(),
         totalViews: sql<number>`SUM(${videos.views})`,
       })
       .from(videos)
-      .where(eq(videos.creatorId, creatorId))
-      .groupBy(videos.videoType);
+      .where(eq(videos.creatorId, creatorId));
 
-    const streamingVideos = videoStats.find(s => s.videoType === 'streaming')?.count || 0;
-    const basicVideos = videoStats.find(s => s.videoType === 'basic')?.count || 0;
-    const premiumVideos = videoStats.find(s => s.videoType === 'premium')?.count || 0;
-    const totalViews = videoStats.reduce((sum, stat) => sum + (stat.totalViews || 0), 0);
+    const totalVideos = videoStats[0]?.count || 0;
+    const totalViews = videoStats[0]?.totalViews || 0;
 
     // Get earnings from purchases
     const purchaseStats = await db
@@ -1052,15 +1048,15 @@ export class DatabaseStorage implements IStorage {
     const basicEarnings = purchaseStats.find(s => s.purchaseType === 'basic')?.creatorEarnings || 0;
 
     return {
-      totalVideos: streamingVideos + basicVideos + premiumVideos,
+      totalVideos,
       totalViews,
       totalEarnings: streamingEarnings + basicEarnings,
       uploadHoursUsed: user.uploadHoursUsed || 0,
       uploadHoursLimit: user.uploadHoursLimit || 5,
       accountType: user.accountType || 'free',
-      streamingVideos,
-      basicVideos,
-      premiumVideos,
+      streamingVideos: 0,
+      basicVideos: 0,
+      premiumVideos: totalVideos,
       streamingEarnings,
       basicEarnings,
     };
@@ -1614,7 +1610,6 @@ export class DatabaseStorage implements IStorage {
       thumbnailUrl,
       tags: tags || [],
       isPublished: true,
-      videoType: 'free',
     };
     
     const [video] = await db
