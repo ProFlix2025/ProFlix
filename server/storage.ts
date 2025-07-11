@@ -1863,14 +1863,7 @@ export class DatabaseStorage implements IStorage {
     return deleteCount;
   }
 
-  async getLearnTubeVideos(): Promise<Video[]> {
-    const result = await db
-      .select()
-      .from(videos)
-      .where(eq(videos.source, 'learntube'))
-      .orderBy(desc(videos.createdAt));
-    return result;
-  }
+
 
   async addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video> {
     // Get the first subcategory for the given category

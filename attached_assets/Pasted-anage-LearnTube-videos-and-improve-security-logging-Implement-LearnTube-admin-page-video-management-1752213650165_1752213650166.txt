@@ -1,0 +1,84 @@
+anage LearnTube videos and improve security logging Implement LearnTube admin page, video management, analytics, session-based auth, and improved admin security logging. Replit-Commit-Author: Agent Replit-Commit-Session-Id: b28ee2b1-2459-4906-9440-ed7f51eab2d9 Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/3498affb-413c-412f-9771-2a23c343019f/8995ec9a-56f5-40c4-b926-4c9c4bcdaa61.jpg
+Rollback
+
+All logs
+Search
+Search
+
+Live tail
+CDT
+
+Menu
+
+==> Cloning from https://github.com/ProFlix2025/ProFlix
+==> Checking out commit 555e0c00dc71bf745dda2f0784eb30b6bff1fe74 in branch main
+==> Downloading cache...
+==> Transferred 201MB in 8s. Extraction took 5s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install && npm run db:push && npm run build'...
+up to date, audited 406 packages in 2s
+59 packages are looking for funding
+  run `npm fund` for details
+2 moderate severity vulnerabilities
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 1926 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-EDWh1ljH.css   71.56 kB │ gzip:  12.29 kB
+../dist/public/assets/index-BDjOPUQr.js   718.04 kB │ gzip: 194.29 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 5.39s
+▲ [WARNING] Duplicate member "getLearnTubeVideos" in class body [duplicate-class-member]
+    server/storage.ts:1866:8:
+      1866 │   async getLearnTubeVideos(): Promise<Video[]> {
+           ╵         ~~~~~~~~~~~~~~~~~~
+  The original member "getLearnTubeVideos" is here:
+    server/storage.ts:1797:8:
+      1797 │   async getLearnTubeVideos(): Promise<Video[]> {
+           ╵         ~~~~~~~~~~~~~~~~~~
+1 warning
+  dist/index.js  177.5kb
+⚡ Done in 12ms
+==> Uploading build...
+==> Uploaded in 4.7s. Compression took 3.4s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+5:54:18 AM [express] serving on port 10000
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Missing columns added successfully
+✅ Database schema initialized successfully
+✅ Database schema created
+✅ Categories already exist: 30
+✅ Categories already have emojis
+✅ Production database fully initialized
+==> Your service is live 🎉
