@@ -38,33 +38,18 @@ function verifyAdminCredentials(username: string, password: string): boolean {
 
 // Admin authentication middleware
 export const requireAdminAuth = (req: Request, res: Response, next: NextFunction) => {
-  const sessionToken = req.cookies?.['admin-session'] || req.headers['x-admin-session'];
+  const session = (req as any).session;
   
-  if (!sessionToken) {
+  // Check if admin is authenticated via session
+  if (!session || !session.isAdmin) {
     return res.status(401).json({ 
       error: 'Admin authentication required',
       redirectTo: '/admin/login' 
     });
   }
   
-  const session = adminSessions.get(sessionToken);
-  
-  if (!session || session.expiresAt < Date.now()) {
-    // Clean up expired session
-    if (session) {
-      adminSessions.delete(sessionToken);
-    }
-    return res.status(401).json({ 
-      error: 'Admin session expired',
-      redirectTo: '/admin/login' 
-    });
-  }
-  
-  // Extend session by 1 hour
-  session.expiresAt = Date.now() + (60 * 60 * 1000);
-  
   // Add admin info to request
-  (req as any).admin = { userId: session.userId };
+  (req as any).admin = { userId: 'admin' };
   next();
 };
 
@@ -125,17 +110,13 @@ export const adminLogin = async (req: Request, res: Response) => {
     // Reset failed attempts on successful login
     adminLoginAttempts.delete(attemptKey);
     
-    // Generate session token
-    const sessionToken = generateSessionToken();
-    const expiresAt = Date.now() + (60 * 60 * 1000); // 1 hour
-    
-    adminSessions.set(sessionToken, {
-      userId: 'admin',
-      expiresAt
-    });
+    // Set admin session using express-session
+    (req as any).session.isAdmin = true;
+    (req as any).session.adminUser = 'admin';
+    (req as any).session.adminLoginTime = new Date().toISOString();
     
     // Log successful login
-    console.log(`Admin login successful from ${clientIp} at ${new Date().toISOString()}`);
+    console.log(`✅ Admin login successful from ${clientIp} at ${new Date().toISOString()}`);
     
     // Log successful login to database
     try {
@@ -164,18 +145,10 @@ export const adminLogin = async (req: Request, res: Response) => {
       console.log('Admin security logging error:', error);
     }
     
-    // Set secure cookie
-    res.cookie('admin-session', sessionToken, {
-      httpOnly: true,
-      secure: false, // Allow in development
-      sameSite: 'lax',
-      maxAge: 60 * 60 * 1000 // 1 hour
-    });
-    
     res.json({ 
       success: true, 
       message: 'Admin login successful',
-      expiresAt: new Date(expiresAt).toISOString()
+      authenticated: true
     });
     
   } catch (error) {
@@ -186,33 +159,29 @@ export const adminLogin = async (req: Request, res: Response) => {
 
 // Admin logout endpoint
 export const adminLogout = (req: Request, res: Response) => {
-  const sessionToken = req.cookies?.['admin-session'];
+  const session = (req as any).session;
   
-  if (sessionToken) {
-    adminSessions.delete(sessionToken);
+  if (session) {
+    session.isAdmin = false;
+    session.adminUser = null;
+    session.adminLoginTime = null;
   }
   
-  res.clearCookie('admin-session');
   res.json({ success: true, message: 'Admin logout successful' });
 };
 
 // Check admin session status
 export const adminStatus = (req: Request, res: Response) => {
-  const sessionToken = req.cookies?.['admin-session'];
+  const session = (req as any).session;
   
-  if (!sessionToken) {
-    return res.json({ authenticated: false });
-  }
-  
-  const session = adminSessions.get(sessionToken);
-  
-  if (!session || session.expiresAt < Date.now()) {
+  if (!session || !session.isAdmin) {
     return res.json({ authenticated: false });
   }
   
   res.json({ 
     authenticated: true, 
-    expiresAt: new Date(session.expiresAt).toISOString()
+    adminUser: session.adminUser,
+    loginTime: session.adminLoginTime
   });
 };
 
