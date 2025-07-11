@@ -45,6 +45,7 @@ export async function initializeDatabase() {
         "name" VARCHAR NOT NULL,
         "slug" VARCHAR UNIQUE NOT NULL,
         "description" TEXT,
+        "emoji" VARCHAR,
         "created_at" TIMESTAMP DEFAULT now()
       );
       
