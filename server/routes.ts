@@ -287,12 +287,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Pro Creator code routes
-  app.post('/api/pro-creator/generate-code', isAuthenticated, async (req: any, res) => {
+  app.post('/api/pro-creator/generate-code', requireAdminAuth, async (req: any, res) => {
     try {
-      // TODO: Add admin authorization check
       const { expiresAt } = req.body;
       
+      console.log('🎫 Admin generating Pro Creator code...');
+      
       const code = await storage.generateProCreatorCode(expiresAt ? new Date(expiresAt) : undefined);
+      
+      console.log(`✅ Generated Pro Creator code: ${code.code}`);
+      
       res.json(code);
     } catch (error) {
       console.error('Error generating Pro Creator code:', error);
@@ -386,9 +390,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
 
   // Admin endpoint to generate Pro Creator codes
-  app.post('/api/admin/generate-codes', requireSimpleAdminAuth, async (req, res) => {
+  app.post('/api/admin/generate-codes', requireAdminAuth, async (req, res) => {
     try {
       const { count = 1, expiresInDays = 365 } = req.body;
+      console.log(`🎫 Admin generating ${count} Pro Creator codes...`);
+      
       const codes = [];
       
       const expiresAt = new Date();
@@ -398,6 +404,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const code = await storage.generateProCreatorCode(expiresAt);
         codes.push(code);
       }
+      
+      console.log(`✅ Generated ${codes.length} Pro Creator codes`);
       
       res.json({ 
         codes,
@@ -411,7 +419,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin endpoint to list all codes
-  app.get('/api/admin/codes', requireSimpleAdminAuth, async (req, res) => {
+  app.get('/api/admin/codes', requireAdminAuth, async (req, res) => {
     try {
       const codes = await storage.getAllProCreatorCodes();
       res.json(codes);
@@ -2367,6 +2375,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`🎬 Embed code request: { embedCode: "${embedCode.substring(0, 100)}...", categoryId: ${categoryId} }`);
       console.log(`✅ Extracted video ID: ${videoId}`);
       
+      // Validate categoryId is a valid number
+      const parsedCategoryId = parseInt(categoryId);
+      if (isNaN(parsedCategoryId)) {
+        return res.status(400).json({ 
+          message: 'Invalid category ID. Please select a valid category.' 
+        });
+      }
+      
       // Auto-generate video data
       const videoData = {
         youtubeId: videoId,
@@ -2374,7 +2390,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         description: `Educational content from YouTube (ID: ${videoId})`,
         videoUrl: `https://www.youtube.com/embed/${videoId}`,
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
-        categoryId: parseInt(categoryId),
+        categoryId: parsedCategoryId,
         subcategoryId: 992, // Default subcategory
         duration: '0',
         durationMinutes: 0,
@@ -2423,9 +2439,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
     } catch (error) {
-      console.error('Error adding YouTube video via embed:', error);
+      console.error('💥 Error adding YouTube video via embed:', error);
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        requestBody: req.body
+      });
       res.status(500).json({ 
-        message: 'Failed to add YouTube video via embed code' 
+        message: 'Failed to add YouTube video via embed code',
+        error: error.message 
       });
     }
   });
