@@ -1,0 +1,88 @@
+73
+Display all video categories on the categories page with emoji support Updates the category page to display all categories with optional emoji; handles query errors and adds an emoji field to the Category interface. Replit-Commit-Author: Agent Replit-Commit-Session-Id: b28ee2b1-2459-4906-9440-ed7f51eab2d9 Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/3498affb-413c-412f-9771-2a23c343019f/af561fbb-bb27-4e5d-a75b-372e49b7ef21.jpg
+
+All logs
+Search
+Search
+
+Live tail
+CDT
+
+Menu
+
+==> Cloning from https://github.com/ProFlix2025/ProFlix
+==> Checking out commit 6c3b87372d7a8e92d8f6a5f55b0204c4219bf2a1 in branch main
+==> Downloading cache...
+==> Transferred 201MB in 8s. Extraction took 4s.
+==> Using Node.js version 22.16.0 (default)
+==> Docs on specifying a Node.js version: https://render.com/docs/node-version
+==> Using Bun version 1.1.0 (default)
+==> Docs on specifying a Bun version: https://render.com/docs/bun-version
+==> Running build command 'npm install && npm run db:push && npm run build'...
+up to date, audited 406 packages in 1s
+59 packages are looking for funding
+  run `npm fund` for details
+2 moderate severity vulnerabilities
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+Run `npm audit` for details.
+> rest-express@1.0.0 db:push
+> npx drizzle-kit push:pg
+This command is deprecated, please use updated 'push' command (see https://orm.drizzle.team/kit-docs/upgrade-21#how-to-migrate-to-0210)
+> rest-express@1.0.0 build
+> npx vite build && npx esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist
+vite v5.4.19 building for production...
+transforming...
+✓ 1925 modules transformed.
+rendering chunks...
+computing gzip size...
+../dist/public/index.html                   0.44 kB │ gzip:   0.30 kB
+../dist/public/assets/index-D_uVdSJm.css   71.19 kB │ gzip:  12.25 kB
+../dist/public/assets/index-BY40acoF.js   707.33 kB │ gzip: 191.75 kB
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 4.65s
+▲ [WARNING] Duplicate member "getVideosBySubcategory" in class body [duplicate-class-member]
+    server/storage.ts:341:8:
+      341 │   async getVideosBySubcategory(subcategoryId: number): Promise<Vi...
+          ╵         ~~~~~~~~~~~~~~~~~~~~~~
+  The original member "getVideosBySubcategory" is here:
+    server/storage.ts:331:8:
+      331 │   async getVideosBySubcategory(subcategoryId: number): Promise<Vi...
+          ╵         ~~~~~~~~~~~~~~~~~~~~~~
+1 warning
+  dist/index.js  149.4kb
+⚡ Done in 9ms
+==> Uploading build...
+==> Uploaded in 5.6s. Compression took 3.0s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+4:56:57 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Database schema initialized successfully
+✅ Database schema created
+⚠️ Database auto-setup error: column "emoji" does not exist
+Serving SPA fallback for: /favicon.ico
+Serving SPA fallback for: /favorites
+Serving SPA fallback for: /favicon.ico
+Serving SPA fallback for: /favicon.ico
