@@ -5,6 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Users, 
   DollarSign, 
@@ -19,7 +22,9 @@ import {
   Crown,
   BookOpen,
   RotateCcw,
-  Youtube
+  Youtube,
+  Plus,
+  Trash2
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -48,6 +53,279 @@ interface Analytics {
   dailyVisits: Array<{ date: string; visits: number }>;
   hourlyActivity: Array<{ hour: number; activity: number }>;
   topCreators: Array<{ id: string; name: string; earnings: number; videos: number }>;
+}
+
+interface LearnTubeVideo {
+  id: number;
+  title: string;
+  description: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  categoryId: number;
+  subcategoryId: number;
+  youtubeId: string;
+  views: number;
+  likes: number;
+  createdAt: string;
+  source: string;
+  canRunAds: boolean;
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+function YouTubeVideoManager() {
+  const [newVideo, setNewVideo] = useState({
+    url: '',
+    title: '',
+    description: '',
+    categoryId: ''
+  });
+  const [showAddForm, setShowAddForm] = useState(false);
+  const { toast } = useToast();
+
+  // Fetch LearnTube videos
+  const { data: videos, isLoading: videosLoading } = useQuery({
+    queryKey: ['admin', 'learntube', 'videos'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/admin/learntube/videos');
+      return response.json();
+    }
+  });
+
+  // Fetch categories
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/categories');
+      return response.json();
+    }
+  });
+
+  // Add video mutation
+  const addVideoMutation = useMutation({
+    mutationFn: async (videoData: any) => {
+      const response = await apiRequest('POST', '/api/admin/learntube/add-youtube', videoData);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'YouTube video added successfully',
+      });
+      setNewVideo({ url: '', title: '', description: '', categoryId: '' });
+      setShowAddForm(false);
+      queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to add video',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  // Delete video mutation
+  const deleteVideoMutation = useMutation({
+    mutationFn: async (videoId: number) => {
+      const response = await apiRequest('DELETE', `/api/admin/learntube/videos/${videoId}`);
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Success',
+        description: 'Video deleted successfully',
+      });
+      queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to delete video',
+        variant: 'destructive',
+      });
+    }
+  });
+
+  const handleAddVideo = () => {
+    if (!newVideo.url || !newVideo.title || !newVideo.categoryId) {
+      toast({
+        title: 'Error',
+        description: 'Please fill in all required fields',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    addVideoMutation.mutate(newVideo);
+  };
+
+  const handleDeleteVideo = (videoId: number) => {
+    const confirmed = window.confirm('Are you sure you want to delete this video?');
+    if (confirmed) {
+      deleteVideoMutation.mutate(videoId);
+    }
+  };
+
+  const extractVideoId = (url: string) => {
+    const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
+    return match ? match[1] : null;
+  };
+
+  const getCategoryName = (categoryId: number) => {
+    const category = categories?.find((c: Category) => c.id === categoryId);
+    return category?.name || 'Unknown';
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Youtube className="w-6 h-6 text-red-500" />
+          <h2 className="text-2xl font-bold text-white">YouTube Video Management</h2>
+        </div>
+        <Button
+          onClick={() => setShowAddForm(!showAddForm)}
+          className="bg-red-600 hover:bg-red-700"
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add YouTube Video
+        </Button>
+      </div>
+
+      {/* Add Form */}
+      {showAddForm && (
+        <Card className="bg-netflix-gray border-netflix-border">
+          <CardHeader>
+            <CardTitle className="text-white">Add YouTube Video</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <label className="text-white font-medium">YouTube URL *</label>
+              <Input
+                value={newVideo.url}
+                onChange={(e) => setNewVideo({ ...newVideo, url: e.target.value })}
+                placeholder="https://www.youtube.com/watch?v=..."
+                className="bg-netflix-black text-white border-netflix-border"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-white font-medium">Title *</label>
+              <Input
+                value={newVideo.title}
+                onChange={(e) => setNewVideo({ ...newVideo, title: e.target.value })}
+                placeholder="Enter video title"
+                className="bg-netflix-black text-white border-netflix-border"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-white font-medium">Description</label>
+              <Textarea
+                value={newVideo.description}
+                onChange={(e) => setNewVideo({ ...newVideo, description: e.target.value })}
+                placeholder="Enter video description"
+                className="bg-netflix-black text-white border-netflix-border"
+                rows={3}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-white font-medium">Category *</label>
+              <Select value={newVideo.categoryId} onValueChange={(value) => setNewVideo({ ...newVideo, categoryId: value })}>
+                <SelectTrigger className="bg-netflix-black text-white border-netflix-border">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories?.map((category: Category) => (
+                    <SelectItem key={category.id} value={category.id.toString()}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex gap-2">
+              <Button
+                onClick={handleAddVideo}
+                disabled={addVideoMutation.isPending}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                {addVideoMutation.isPending ? 'Adding...' : 'Add Video'}
+              </Button>
+              <Button
+                onClick={() => setShowAddForm(false)}
+                variant="outline"
+              >
+                Cancel
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Videos List */}
+      <Card className="bg-netflix-gray border-netflix-border">
+        <CardHeader>
+          <CardTitle className="text-white">YouTube Videos ({videos?.length || 0})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {videosLoading ? (
+            <div className="animate-spin w-8 h-8 border-4 border-netflix-red border-t-transparent rounded-full mx-auto" />
+          ) : (
+            <div className="space-y-4">
+              {videos?.map((video: LearnTubeVideo) => (
+                <div key={video.id} className="flex items-center justify-between p-4 bg-netflix-black rounded-lg">
+                  <div className="flex items-center gap-4">
+                    <img
+                      src={video.thumbnailUrl}
+                      alt={video.title}
+                      className="w-16 h-12 object-cover rounded"
+                    />
+                    <div>
+                      <h3 className="text-white font-medium">{video.title}</h3>
+                      <p className="text-netflix-light-gray text-sm">{getCategoryName(video.categoryId)}</p>
+                      <p className="text-netflix-light-gray text-xs">
+                        {video.views.toLocaleString()} views • {new Date(video.createdAt).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="bg-red-600 text-white">
+                      LearnTube
+                    </Badge>
+                    <Button
+                      onClick={() => handleDeleteVideo(video.id)}
+                      variant="destructive"
+                      size="sm"
+                      disabled={deleteVideoMutation.isPending}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              ))}
+              
+              {videos?.length === 0 && (
+                <div className="text-center py-8">
+                  <Youtube className="w-12 h-12 text-netflix-light-gray mx-auto mb-4" />
+                  <p className="text-netflix-light-gray">No YouTube videos found</p>
+                  <p className="text-netflix-light-gray text-sm">Start by adding your first video</p>
+                </div>
+              )}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default function AdminDashboard() {
@@ -170,9 +448,10 @@ export default function AdminDashboard() {
         </div>
 
         <Tabs defaultValue="analytics" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 bg-netflix-gray">
+          <TabsList className="grid w-full grid-cols-4 bg-netflix-gray">
             <TabsTrigger value="analytics" className="text-white">Analytics</TabsTrigger>
             <TabsTrigger value="creators" className="text-white">Creators</TabsTrigger>
+            <TabsTrigger value="youtube" className="text-white">YouTube Videos</TabsTrigger>
             <TabsTrigger value="financial" className="text-white">Financial</TabsTrigger>
           </TabsList>
 
@@ -385,6 +664,10 @@ export default function AdminDashboard() {
                 )}
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="youtube" className="space-y-6">
+            <YouTubeVideoManager />
           </TabsContent>
 
           <TabsContent value="financial" className="space-y-6">
