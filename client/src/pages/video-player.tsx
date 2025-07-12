@@ -245,18 +245,33 @@ export default function VideoPlayer() {
                 <div className="relative video-aspect rounded-lg overflow-hidden">
                   {/* Check if this is a LearnTube video (YouTube embed) */}
                   {video.isLearnTube ? (
-                    <iframe
-                      src={video.videoUrl}
-                      title={video.title}
-                      className="w-full h-full"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowFullScreen
-                      onLoad={() => {
-                        // Track view when iframe loads
-                        viewMutation.mutate();
-                      }}
-                    />
+                    <div className="w-full h-full bg-black flex items-center justify-center relative">
+                      <iframe
+                        src={video.videoUrl}
+                        title={video.title}
+                        className="w-full h-full min-h-[400px]"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowFullScreen
+                        onLoad={() => {
+                          console.log('LearnTube iframe loaded:', video.videoUrl);
+                          // Track view when iframe loads
+                          viewMutation.mutate();
+                        }}
+                        onError={(e) => {
+                          console.error('LearnTube iframe error:', e);
+                        }}
+                      />
+                      {/* Fallback message */}
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="text-center text-white bg-black bg-opacity-50 p-4 rounded-lg">
+                          <p className="text-sm">Loading educational content...</p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            If video doesn't load, it may be restricted in your region
+                          </p>
+                        </div>
+                      </div>
+                    </div>
                   ) : (
                     <video
                       ref={videoRef}
