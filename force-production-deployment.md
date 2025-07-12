@@ -2,11 +2,13 @@
 
 ## Critical Issue
 Production database is missing the `is_course` column and other essential columns, causing 500 errors.
+Additionally, the foreign key constraint for `creator_id` fails because the system user doesn't exist.
 
 ## Solution Applied
 - Updated server/initDb.ts to add ALL missing columns during startup
 - Added comprehensive column list including is_course, course_price, ad_revenue, etc.
 - Created production-database-fix-complete.sql with all required columns
+- Added system user creation for LearnTube videos to fix foreign key constraint
 
 ## Changes Made
 ```sql

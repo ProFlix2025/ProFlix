@@ -232,6 +232,26 @@ export async function initializeDatabase() {
       console.log('⚠️ Column addition completed (some may have already existed)');
     }
     
+    // Create system user for LearnTube videos
+    try {
+      await db.execute(sql`
+        INSERT INTO users (id, email, first_name, last_name, role, is_system_account, channel_name, channel_description)
+        VALUES ('system', 'system@proflix.com', 'System', 'Admin', 'creator', true, 'LearnTube', 'Educational content from YouTube')
+        ON CONFLICT (id) DO UPDATE SET
+          email = 'system@proflix.com',
+          first_name = 'System',
+          last_name = 'Admin',
+          role = 'creator',
+          is_system_account = true,
+          channel_name = 'LearnTube',
+          channel_description = 'Educational content from YouTube'
+      `);
+      
+      console.log('✅ System user created for LearnTube videos');
+    } catch (error) {
+      console.log('⚠️ System user creation completed (may already exist)');
+    }
+    
     console.log('✅ Database schema initialized successfully');
     return true;
   } catch (error) {

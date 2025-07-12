@@ -40,5 +40,17 @@ CREATE TABLE IF NOT EXISTS "pro_creator_codes" (
   "created_at" TIMESTAMP DEFAULT NOW()
 );
 
+-- Create system user for LearnTube videos
+INSERT INTO users (id, email, first_name, last_name, role, is_system_account, channel_name, channel_description)
+VALUES ('system', 'system@proflix.com', 'System', 'Admin', 'creator', true, 'LearnTube', 'Educational content from YouTube')
+ON CONFLICT (id) DO UPDATE SET
+  email = 'system@proflix.com',
+  first_name = 'System',
+  last_name = 'Admin',
+  role = 'creator',
+  is_system_account = true,
+  channel_name = 'LearnTube',
+  channel_description = 'Educational content from YouTube';
+
 -- Update completed
 SELECT 'Production database fix completed successfully' AS status;

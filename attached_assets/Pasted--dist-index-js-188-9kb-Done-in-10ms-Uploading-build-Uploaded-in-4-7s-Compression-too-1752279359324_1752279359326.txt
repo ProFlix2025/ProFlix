@@ -1,0 +1,219 @@
+  dist/index.js  188.9kb
+⚡ Done in 10ms
+==> Uploading build...
+==> Uploaded in 4.7s. Compression took 2.3s
+==> Build successful 🎉
+==> Deploying...
+==> Running 'node dist/index.js'
+✅ Stripe initialized
+Warning: connect.session() MemoryStore is not
+designed for a production environment, as it will leak
+memory, and will not scale past a single process.
+Serving static files from: /opt/render/project/src/dist/public
+Starting ProFlix server...
+Port: 10000 (from Render)
+Environment: production
+Static files: /opt/render/project/src/dist/public
+Database URL: SET
+✅ ProFlix server successfully running on port 10000
+✅ Ready to accept connections at 0.0.0.0:10000
+12:11:28 AM [express] serving on port 10000
+==> Your service is live 🎉
+==> 
+==> ///////////////////////////////////////////////////////////
+==> 
+==> Available at your primary URL https://proflix-backend.onrender.com
+==> 
+==> ///////////////////////////////////////////////////////////
+🔄 Auto-initializing production database...
+🔄 Initializing database schema...
+✅ Missing columns added successfully
+✅ Database schema initialized successfully
+✅ Database schema created
+✅ Categories already exist: 30
+✅ Categories already have emojis
+✅ Production database fully initialized
+12:14:31 AM [express] GET /api/auth/user 401 in 2ms :: {"message":"Not authenticated"}
+12:14:31 AM [express] GET /api/favorites 304 in 0ms :: []
+12:14:31 AM [express] GET /api/watch-history 304 in 1ms :: []
+12:14:32 AM [express] GET /api/videos 200 in 272ms :: []
+12:14:32 AM [express] GET /api/recommended 200 in 309ms :: []
+12:14:32 AM [express] GET /api/trending 200 in 323ms :: []
+Serving SPA fallback for: /favicon.ico
+12:14:32 AM [express] GET /api/categories 304 in 281ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+12:14:33 AM [express] GET /api/admin/status 200 in 1ms :: {"isAdmin":false}
+Serving SPA fallback for: /favicon.ico
+Serving SPA fallback for: /admin/login
+12:14:44 AM [express] GET /api/auth/user 401 in 1ms :: {"message":"Not authenticated"}
+Serving SPA fallback for: /favicon.ico
+12:14:49 AM [express] POST /api/setup 200 in 17570ms :: {"message":"Setup complete"}
+✅ Admin login successful
+12:15:00 AM [express] POST /api/admin/login 200 in 1ms :: {"success":true,"message":"Admin logged in …
+Serving SPA fallback for: /admin/dashboard
+12:15:01 AM [express] GET /api/admin/status 200 in 0ms :: {"isAdmin":true}
+12:15:01 AM [express] GET /api/auth/user 401 in 1ms :: {"message":"Not authenticated"}
+Serving SPA fallback for: /favicon.ico
+Error getting creators with stats: error: syntax error at or near ""videos""
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getAllCreatorsWithStats (file:///opt/render/project/src/dist/index.js:1367:28)
+    at async file:///opt/render/project/src/dist/index.js:2870:24 {
+  length: 98,
+  severity: 'ERROR',
+  code: '42601',
+  detail: undefined,
+  hint: undefined,
+  position: '259',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'scan.l',
+  line: '1244',
+  routine: 'scanner_yyerror'
+}
+12:15:01 AM [express] GET /api/admin/creators 304 in 277ms :: []
+Error getting admin analytics: error: function sum() does not exist
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.getAdminAnalytics (file:///opt/render/project/src/dist/index.js:1318:30)
+    at async file:///opt/render/project/src/dist/index.js:2861:25 {
+  length: 198,
+  severity: 'ERROR',
+  code: '42883',
+  detail: undefined,
+  hint: 'No function matches the given name and argument types. You might need to add explicit type casts.',
+  position: '44',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_func.c',
+  line: '629',
+  routine: 'ParseFuncOrColumn'
+}
+12:15:02 AM [express] GET /api/admin/analytics 304 in 475ms :: {"totalUsers":0,"totalCreators":0,"tot…
+Serving SPA fallback for: /admin/learntube
+12:15:03 AM [express] GET /api/auth/user 401 in 1ms :: {"message":"Not authenticated"}
+12:15:03 AM [express] GET /api/admin/status 304 in 0ms :: {"isAdmin":true}
+Serving SPA fallback for: /favicon.ico
+12:15:03 AM [express] GET /api/categories 304 in 278ms :: [{"id":1,"name":"Art","slug":"art","descrip…
+12:15:03 AM [express] GET /api/admin/learntube/videos 200 in 274ms :: []
+12:15:03 AM [express] GET /api/admin/learntube/analytics 200 in 328ms :: {"totalVideos":0,"totalViews…
+⚠️ ADMIN-ONLY LearnTube: Adding temporary YouTube content that generates no revenue
+🎬 Embed code request: { embedCode: "<iframe width="560" height="315" src="https://www.youtube.com/embed/rMDJVlvfpY0?si=ClIZhTchnlpDJufd"...", categoryId: 152 }
+✅ Extracted video ID: rMDJVlvfpY0
+📝 Auto-generating video data from embed code: {
+  youtubeId: 'rMDJVlvfpY0',
+  title: 'YouTube Video rMDJVlvfpY0',
+  description: 'Educational content from YouTube (ID: rMDJVlvfpY0)',
+  categoryId: 152,
+  embedUrl: 'https://www.youtube.com/embed/rMDJVlvfpY0'
+}
+💥 Error creating LearnTube video: error: insert or update on table "videos" violates foreign key constraint "videos_creator_id_fkey"
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1684:30)
+    at async file:///opt/render/project/src/dist/index.js:4362:21 {
+  length: 269,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (creator_id)=(learntube-admin) is not present in table "users".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'videos',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'videos_creator_id_fkey',
+  file: 'ri_triggers.c',
+  line: '2599',
+  routine: 'ri_ReportViolation'
+}
+Video data: {
+  youtubeId: 'rMDJVlvfpY0',
+  title: 'YouTube Video rMDJVlvfpY0',
+  description: 'Educational content from YouTube (ID: rMDJVlvfpY0)',
+  videoUrl: 'https://www.youtube.com/embed/rMDJVlvfpY0',
+  thumbnailUrl: 'https://img.youtube.com/vi/rMDJVlvfpY0/hqdefault.jpg',
+  categoryId: 152,
+  subcategoryId: 992,
+  duration: '0',
+  durationMinutes: 0,
+  creatorId: 'system',
+  source: 'learntube',
+  isLearnTube: true,
+  isProTube: false,
+  canRunAds: false,
+  isCourse: false,
+  coursePrice: 0,
+  courseDescription: null,
+  isFreeContent: false,
+  offersPremiumDiscount: false,
+  shareCount: 0,
+  adRevenue: 0,
+  adImpressions: 0,
+  isDonatedToStreaming: false,
+  streamingWatchTime: 0,
+  views: 0,
+  purchases: 0,
+  likes: 0,
+  dislikes: 0,
+  isPublished: true,
+  isFeatured: false,
+  offerFreePreview: false,
+  tags: null,
+  language: 'en'
+}
+💥 Error adding YouTube video via embed: error: insert or update on table "videos" violates foreign key constraint "videos_creator_id_fkey"
+    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33
+    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)
+    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)
+    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1684:30)
+    at async file:///opt/render/project/src/dist/index.js:4362:21 {
+  length: 269,
+  severity: 'ERROR',
+  code: '23503',
+  detail: 'Key (creator_id)=(learntube-admin) is not present in table "users".',
+  hint: undefined,
+  position: undefined,
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: 'public',
+  table: 'videos',
+  column: undefined,
+  dataType: undefined,
+  constraint: 'videos_creator_id_fkey',
+  file: 'ri_triggers.c',
+  line: '2599',
+  routine: 'ri_ReportViolation'
+}
+Error details: {
+  message: 'insert or update on table "videos" violates foreign key constraint "videos_creator_id_fkey"',
+  stack: 'error: insert or update on table "videos" violates foreign key constraint "videos_creator_id_fkey"\n' +
+    '    at file:///opt/render/project/src/node_modules/@neondatabase/serverless/index.mjs:1087:33\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n' +
+    '    at async NeonPreparedQuery.execute (file:///opt/render/project/src/node_modules/drizzle-orm/neon-serverless/session.js:76:20)\n' +
+    '    at async DatabaseStorage.createLearnTubeVideo (file:///opt/render/project/src/dist/index.js:1684:30)\n' +
+    '    at async file:///opt/render/project/src/dist/index.js:4362:21',
+  requestBody: {
+    embedCode: '<iframe width="560" height="315" src="https://www.youtube.com/embed/rMDJVlvfpY0?si=ClIZhTchnlpDJufd" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',
+    categoryId: '152'
+  }
+}
+12:15:21 AM [express] POST /api/admin/learntube/add-embed 500 in 405ms :: {"message":"Failed to add Y…
