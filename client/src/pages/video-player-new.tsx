@@ -334,27 +334,29 @@ export default function VideoPlayerNew() {
             </div>
 
             {/* Creator Info */}
-            <div className="flex items-center gap-4 mb-6">
-              <img
-                src={video.creator.profileImageUrl || "/default-avatar.png"}
-                alt={video.creator.channelName}
-                className="w-12 h-12 rounded-full"
-              />
-              <div className="flex-1">
-                <div className="flex items-center gap-2">
-                  <h3 className="font-semibold">{video.creator.channelName}</h3>
-                  {video.creator.isProCreator && (
-                    <Badge className="bg-netflix-red">Pro Creator</Badge>
-                  )}
+            {video.creator && (
+              <div className="flex items-center gap-4 mb-6">
+                <img
+                  src={video.creator.profileImageUrl || "/default-avatar.png"}
+                  alt={video.creator.channelName || "Creator"}
+                  className="w-12 h-12 rounded-full"
+                />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold">{video.creator.channelName || "Creator"}</h3>
+                    {video.creator.isProCreator && (
+                      <Badge className="bg-netflix-red">Pro Creator</Badge>
+                    )}
+                  </div>
+                  <p className="text-sm text-gray-400">
+                    {video.creator.firstName} {video.creator.lastName}
+                  </p>
                 </div>
-                <p className="text-sm text-gray-400">
-                  {video.creator.firstName} {video.creator.lastName}
-                </p>
+                <Button variant="outline" size="sm">
+                  Subscribe
+                </Button>
               </div>
-              <Button variant="outline" size="sm">
-                Subscribe
-              </Button>
-            </div>
+            )}
           </div>
 
           {/* Sidebar */}
@@ -370,8 +372,8 @@ export default function VideoPlayerNew() {
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-400">Creator Type:</span>
-                    <Badge className={video.creator.isProCreator ? "bg-green-600" : "bg-blue-600"}>
-                      {video.creator.isProCreator ? "Pro Creator" : "Free Creator"}
+                    <Badge className={video.creator?.isProCreator ? "bg-green-600" : "bg-blue-600"}>
+                      {video.creator?.isProCreator ? "Pro Creator" : "New Creator"}
                     </Badge>
                   </div>
                   

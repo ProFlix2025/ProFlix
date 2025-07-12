@@ -12,28 +12,27 @@ import Navigation from "@/components/Navigation";
 
 const creatorTiers = [
   {
-    id: "free",
-    name: "Free Creator",
-    price: 0,
-    billing: "Free Forever",
-    popular: false,
+    id: "new",
+    name: "New Creator",
+    price: 29,
+    billing: "per month",
+    popular: true,
     features: [
-      "Upload unlimited videos",
-      "YouTube-style ad revenue sharing",
-      "Sell courses up to 5 hours content",
+      "30-day free trial",
+      "Upload up to 50 hours of video content",
       "Keep 100% of course sales revenue",
       "Basic analytics dashboard",
       "Community features (likes, comments, shares)",
       "Standard video player",
-      "Basic creator profile"
+      "Basic creator profile",
+      "Course creation and monetization"
     ],
     limitations: [
-      "5-hour limit on course content",
-      "No premium features",
+      "50-hour limit on video content",
       "Standard support only"
     ],
-    cta: "Start Creating",
-    description: "Perfect for new creators - sell courses up to 5 hours and keep 100% profit!"
+    cta: "Start Free Trial",
+    description: "Perfect for new creators - 30 days free, then $29/month with 100% revenue retention!"
   },
   {
     id: "pro",
@@ -93,9 +92,9 @@ export default function CreatorTiers() {
         return;
       }
       
-      if (tierId === 'free') {
-        // Free tier - just update user status
-        await apiRequest('POST', '/api/creator/upgrade', { tier: 'free' });
+      if (tierId === 'new') {
+        // New Creator tier - 30-day free trial
+        await apiRequest('POST', '/api/creator/upgrade', { tier: 'new' });
       } else if (tierId === 'pro') {
         // Redirect to Pro Creator portal for subscription
         window.location.href = '/pro-creator-portal';
@@ -109,10 +108,10 @@ export default function CreatorTiers() {
       }
     },
     onSuccess: () => {
-      if (selectedTier === 'free') {
+      if (selectedTier === 'new') {
         toast({
           title: "Welcome to ProFlix!",
-          description: "You can now start uploading videos and earning ad revenue.",
+          description: "Your 30-day free trial has started. Upload videos and keep 100% of revenue!",
         });
       }
     },

@@ -87,23 +87,23 @@ export default function ProCreatorPortal() {
           <CardContent className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="bg-netflix-dark-gray p-4 rounded-lg border-2 border-green-500">
-                <h3 className="text-white font-semibold mb-2">Free Creator</h3>
-                <p className="text-green-400 text-2xl font-bold">$0/month</p>
-                <p className="text-green-400 text-sm">Everyone starts here!</p>
+                <h3 className="text-white font-semibold mb-2">New Creator</h3>
+                <p className="text-green-400 text-2xl font-bold">$29/month</p>
+                <p className="text-green-400 text-sm">30-day free trial!</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
-                  <li>• Unlimited video uploads</li>
-                  <li>• Up to 5 hours course content</li>
+                  <li>• Up to 50 hours of video content</li>
                   <li>• 100% course profit retention</li>
                   <li>• Basic analytics</li>
                   <li>• Community support</li>
+                  <li>• Course creation tools</li>
                 </ul>
               </div>
               <div className="bg-netflix-dark-gray p-4 rounded-lg">
                 <h3 className="text-white font-semibold mb-2">Pro Creator</h3>
                 <p className="text-netflix-red text-2xl font-bold">$99/month</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
-                  <li>• Up to 50 hours of video content</li>
-                  <li>• Up to 20 courses (100% profit)</li>
+                  <li>• Unlimited video uploads</li>
+                  <li>• Unlimited courses (100% profit)</li>
                   <li>• Advanced analytics</li>
                   <li>• Priority support</li>
                 </ul>
