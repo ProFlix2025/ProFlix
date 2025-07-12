@@ -45,14 +45,14 @@ export default function Premium() {
 
   const features = [
     {
-      icon: <Play className="w-5 h-5" />,
-      title: "Ad-Free Viewing",
-      description: "Watch all videos without interruptions"
-    },
-    {
       icon: <DollarSign className="w-5 h-5" />,
       title: "Course Discounts",
-      description: "Get discounts on courses when creators offer them"
+      description: "Get 10% off all course purchases from creators"
+    },
+    {
+      icon: <Trophy className="w-5 h-5" />,
+      title: "Early Access",
+      description: "Be first to see new features and content"
     },
     {
       icon: <Heart className="w-5 h-5" />,
@@ -60,22 +60,22 @@ export default function Premium() {
       description: "Get help faster with premium support"
     },
     {
-      icon: <Trophy className="w-5 h-5" />,
-      title: "Early Access",
-      description: "Be first to see new features and content"
+      icon: <Clock className="w-5 h-5" />,
+      title: "Exclusive Content",
+      description: "Access to premium creator content and events"
     }
   ];
 
   const plans = [
     {
-      name: "Free",
+      name: "Free Viewer",
       price: "$0",
       period: "forever",
       features: [
-        "Watch all videos with ads",
+        "Watch all free videos",
         "Like and share videos",
-        "Basic support",
-        "Purchase courses"
+        "Follow creators for updates",
+        "Purchase courses (account required)"
       ],
       popular: false,
       cta: "Current Plan"
@@ -85,10 +85,11 @@ export default function Premium() {
       price: "$29",
       period: "month",
       features: [
-        "Ad-free viewing experience",
-        "Course discounts from participating creators",
+        "All free features",
+        "10% discount on all courses",
+        "Early access to new content",
         "Priority support",
-        "Early access to new features"
+        "Exclusive creator events"
       ],
       popular: true,
       cta: "Upgrade Now"
@@ -110,7 +111,7 @@ export default function Premium() {
             </h1>
           </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-            Unlock the full ProFlix experience with ad-free viewing, course discounts, and priority support
+            Unlock the full ProFlix experience with course discounts, early access, and priority support
           </p>
           
           {user?.isPremiumViewer && (

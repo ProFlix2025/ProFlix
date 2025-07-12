@@ -272,7 +272,7 @@ export default function CreatorDiscovery() {
                                   <Star className="w-4 h-4 text-yellow-400" />
                                   <div>
                                     <div className="font-medium">Premium Viewer - $29/month</div>
-                                    <div className="text-sm text-gray-400">Discounts + early access</div>
+                                    <div className="text-sm text-gray-400">Course discounts + early access</div>
                                   </div>
                                 </div>
                               </SelectItem>
@@ -288,6 +288,7 @@ export default function CreatorDiscovery() {
                           <ul className="text-sm text-gray-300 space-y-1">
                             <li>• Instant notifications when {creator.brandName} uploads</li>
                             <li>• Access to all free content</li>
+                            <li>• Required for course purchases</li>
                             {selectedTier === 'premium' && (
                               <>
                                 <li>• 10% discount on all courses</li>

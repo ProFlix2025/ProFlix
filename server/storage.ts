@@ -2120,7 +2120,7 @@ export class DatabaseStorage implements IStorage {
         brandName: sql<string>`COALESCE(${users.channelName}, CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
         description: sql<string>`COALESCE(${users.channelDescription}, 'Creative content creator')`,
         categoryName: sql<string>`'All Categories'`,
-        videoCount: sql<number>`COALESCE((SELECT COUNT(*)::integer FROM ${videos} WHERE creator_id = ${users.id}), 0)`,
+        videoCount: sql<number>`0`,
         subscriberCount: users.subscriberCount,
         isPro: users.isProCreator,
         heroImageUrl: users.profileImageUrl,

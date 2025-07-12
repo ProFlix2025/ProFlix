@@ -207,6 +207,8 @@ Preferred communication style: Simple, everyday language.
 ✅ **Database Schema**: Added viewer_subscriptions table for following creators
 ✅ **API Endpoints**: Created subscription and viewer account creation endpoints
 ✅ **Frontend**: Built comprehensive creator discovery page with hero images and brand showcases
+✅ **Account Required**: Updated messaging to require sign-up for course purchases
+✅ **Removed Ad References**: Eliminated all ad-related language since platform has no advertising model
 
 ## Deployment Status
 

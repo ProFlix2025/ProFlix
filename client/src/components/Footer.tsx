@@ -10,7 +10,7 @@ export default function Footer() {
           <div className="text-center md:text-left">
             <h3 className="text-xl font-bold text-netflix-red">ProFlix</h3>
             <p className="text-netflix-light-gray text-sm mt-1">
-              Free YouTube-style video platform with course monetization
+              Original content creators. Sign up required for course purchases.
             </p>
           </div>
 
