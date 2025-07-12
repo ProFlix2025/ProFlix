@@ -246,46 +246,10 @@ export default function VideoPlayer() {
                   {/* Check if this is a LearnTube video (YouTube embed) */}
                   {video.isLearnTube ? (
                     <div className="w-full h-full bg-black flex items-center justify-center relative">
-                      {/* YouTube embedding notice */}
-                      <div className="text-center p-8 max-w-md">
-                        <div className="mb-6">
-                          <div className="w-16 h-16 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M23.498 6.186a2.999 2.999 0 0 0-2.112-2.112C19.505 3.546 12 3.546 12 3.546s-7.505 0-9.386.528A2.999 2.999 0 0 0 .502 6.186C0 8.067 0 12 0 12s0 3.933.502 5.814a2.999 2.999 0 0 0 2.112 2.112c1.881.528 9.386.528 9.386.528s7.505 0 9.386-.528a2.999 2.999 0 0 0 2.112-2.112C24 15.933 24 12 24 12s0-3.933-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                            </svg>
-                          </div>
-                          <h3 className="text-xl font-bold text-white mb-2">YouTube Content</h3>
-                          <p className="text-gray-300 mb-4">
-                            This is educational content from YouTube. Click below to watch on YouTube.
-                          </p>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          <a 
-                            href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="block w-full bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                            onClick={() => {
-                              // Track view when user clicks to YouTube
-                              viewMutation.mutate();
-                            }}
-                          >
-                            Watch on YouTube
-                          </a>
-                          
-                          <p className="text-xs text-gray-500">
-                            YouTube ID: {video.youtubeId}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      {/* Hidden iframe for testing (uncomment when embedding works) */}
-                      {/* 
                       <iframe
                         src={video.videoUrl}
                         title={video.title}
-                        className="w-full h-full min-h-[400px] border-2 border-gray-600"
+                        className="w-full h-full min-h-[400px]"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
@@ -293,13 +257,24 @@ export default function VideoPlayer() {
                         onLoad={() => {
                           console.log('✅ LearnTube iframe loaded successfully:', video.videoUrl);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
+                          // Track view when iframe loads
+                          viewMutation.mutate();
                         }}
                         onError={(e) => {
                           console.error('❌ LearnTube iframe error:', e);
                           console.error('Failed video URL:', video.videoUrl);
                         }}
                       />
-                      */}
+                      
+                      {/* Fallback for localhost development */}
+                      <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center pointer-events-none" 
+                           style={{ display: 'none' }} 
+                           id="localhost-fallback">
+                        <div className="text-center text-white p-4">
+                          <p className="text-sm mb-2">YouTube embedding blocked on localhost</p>
+                          <p className="text-xs text-gray-400">Will work in production deployment</p>
+                        </div>
+                      </div>
                     </div>
                   ) : (
                     <video

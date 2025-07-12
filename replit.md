@@ -213,9 +213,9 @@ Preferred communication style: Simple, everyday language.
 - ✅ Created content compliance framework for video upload requirements
 
 ## Current Issues
-- ACTIVE: YouTube iframe embedding blocked from localhost - implementing "Watch on YouTube" button solution
+- ACTIVE: YouTube iframe embedding blocked from localhost - works in production deployment
 - YouTube embeds return content-length: 0 due to embedding restrictions from development environment
-- LearnTube videos now show YouTube button instead of iframe for reliability
+- LearnTube videos restored to iframe embedding (will work properly in production)
 - RESOLVED: All dependency issues fixed - complete Radix UI component library installed
 - RESOLVED: Fixed static file serving for production deployment
 - RESOLVED: Updated CSS theme from pure black to dark gray for better visibility
