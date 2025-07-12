@@ -1273,10 +1273,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const video = await storage.createLearnTubeVideo({
         title,
         description: description || '',
+        videoUrl: `https://www.youtube.com/embed/${youtubeId}`, // Required field
+        thumbnailUrl: thumbnailUrl || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
         youtubeId,
         categoryId: parseInt(categoryId),
         durationMinutes: durationMinutes || 0,
-        thumbnailUrl: thumbnailUrl || `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`,
         videoPath: `https://youtube.com/watch?v=${youtubeId}`, // External link
         filePath: `https://youtube.com/watch?v=${youtubeId}`, // External link
       });

@@ -267,23 +267,21 @@ export default function VideoPlayer() {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         referrerPolicy="strict-origin-when-cross-origin"
-                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                         onLoad={() => {
-                          console.log('✅ LearnTube iframe loaded successfully:', video.videoUrl);
+                          console.log('✅ YouTube iframe loaded successfully:', video.title);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
-                          console.log('🚀 Production deployment: This iframe will work properly');
                           console.log('📍 Current hostname:', window.location.hostname);
                           setIframeError(false);
+                          setShowEmbedFallback(false);
                           // Track view when iframe loads
                           viewMutation.mutate();
                         }}
                         onError={(e) => {
-                          console.error('❌ LearnTube iframe error:', e);
+                          console.error('❌ YouTube iframe failed to load:', video.title, e);
                           console.error('Failed video URL:', video.videoUrl);
                           console.error('📍 Current hostname:', window.location.hostname);
                           console.error('🔍 Video ID:', video.youtubeId);
                           setIframeError(true);
-                          // Always show fallback if there's an error
                           setShowEmbedFallback(true);
                         }}
                       />
