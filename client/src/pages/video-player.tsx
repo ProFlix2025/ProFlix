@@ -260,13 +260,13 @@ export default function VideoPlayer() {
                   {video.isLearnTube ? (
                     <div className="w-full h-full bg-black flex items-center justify-center relative">
                       <iframe
-                        src={video.videoUrl}
+                        src={video.videoUrl?.replace(/\?si=.*$/, '')} // Remove ?si= parameter
                         title={video.title}
                         className="w-full h-full min-h-[400px]"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
-                        referrerPolicy="strict-origin-when-cross-origin"
+                        referrerPolicy="no-referrer-when-downgrade"
                         onLoad={() => {
                           console.log('✅ YouTube iframe loaded successfully:', video.title);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
