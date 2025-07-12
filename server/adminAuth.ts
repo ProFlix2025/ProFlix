@@ -30,6 +30,14 @@ function verifyAdminCredentials(username: string, password: string): boolean {
   const expectedHash = hashPassword(ADMIN_PASSWORD, salt);
   const providedHash = hashPassword(password, salt);
   
+  console.log('🔐 Credential verification:', {
+    username,
+    expectedUsername: ADMIN_USERNAME,
+    usernameMatch: username === ADMIN_USERNAME,
+    expectedPassword: ADMIN_PASSWORD,
+    hashMatch: expectedHash === providedHash
+  });
+  
   return username === ADMIN_USERNAME && crypto.timingSafeEqual(
     Buffer.from(expectedHash, 'hex'),
     Buffer.from(providedHash, 'hex')
@@ -57,6 +65,8 @@ export const requireAdminAuth = (req: Request, res: Response, next: NextFunction
 export const adminLogin = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
+    
+    console.log('🔐 Admin login attempt:', { username, passwordLength: password?.length });
     
     if (!username || !password) {
       return res.status(400).json({ error: 'Username and password required' });

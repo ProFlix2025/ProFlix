@@ -54,6 +54,11 @@ function Router() {
           <Route path="/premium" component={Premium} />
           <Route path="/pro-creator-portal" component={ProCreatorPortal} />
           <Route path="/admin/login" component={AdminLogin} />
+          <Route path="/admin">
+            <AdminAuthGuard>
+              <AdminDashboard />
+            </AdminAuthGuard>
+          </Route>
           <Route path="/admin/codes">
             <AdminAuthGuard>
               <AdminCodes />
