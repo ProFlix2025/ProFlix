@@ -431,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // LearnTube Management API Routes
   // Get all LearnTube videos
-  app.get('/api/admin/learntube/videos', requireSimpleAdminAuth, async (req, res) => {
+  app.get('/api/admin/learntube/videos', requireAdminAuth, async (req, res) => {
     try {
       const videos = await storage.getLearnTubeVideos();
       res.json(videos);
@@ -442,7 +442,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add YouTube video to LearnTube
-  app.post('/api/admin/learntube/add-youtube', requireSimpleAdminAuth, async (req, res) => {
+  app.post('/api/admin/learntube/add-youtube', requireAdminAuth, async (req, res) => {
     try {
       console.log('📹 YouTube video add request:', req.body);
       const { url, title, description, categoryId } = req.body;
@@ -522,7 +522,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Bulk delete LearnTube videos
-  app.post('/api/admin/learntube/bulk-delete', requireSimpleAdminAuth, async (req, res) => {
+  app.post('/api/admin/learntube/bulk-delete', requireAdminAuth, async (req, res) => {
     try {
       const { videoIds } = req.body;
       const deletedCount = await storage.bulkDeleteLearnTubeVideos(videoIds);
@@ -534,7 +534,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete all LearnTube videos
-  app.post('/api/admin/learntube/delete-all', requireSimpleAdminAuth, async (req, res) => {
+  app.post('/api/admin/learntube/delete-all', requireAdminAuth, async (req, res) => {
     try {
       const deletedCount = await storage.deleteAllLearnTubeVideos();
       res.json({ success: true, deletedCount });
@@ -545,7 +545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get LearnTube analytics
-  app.get('/api/admin/learntube/analytics', requireSimpleAdminAuth, async (req, res) => {
+  app.get('/api/admin/learntube/analytics', requireAdminAuth, async (req, res) => {
     try {
       const analytics = await storage.getLearnTubeAnalytics();
       res.json(analytics);
