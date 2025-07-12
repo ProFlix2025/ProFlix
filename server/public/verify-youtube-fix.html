@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Fix Verification</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #000; color: #fff; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test { margin: 20px 0; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .iframe-container { width: 100%; height: 400px; border: 2px solid #666; margin: 10px 0; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #0f5132; color: #d1e7dd; }
+        .error { background: #58151c; color: #f8d7da; }
+        .warning { background: #664d03; color: #fff3cd; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 YouTube Fix Verification Test</h1>
+        <p>Testing ChatGPT's youtube-nocookie.com fix for .app domain playback issues</p>
+        
+        <div class="test">
+            <h3>❌ Test 1: Original youtube.com (Expected to fail on .app domains)</h3>
+            <div class="iframe-container">
+                <iframe 
+                    id="iframe1"
+                    src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    referrerpolicy="strict-origin-when-cross-origin">
+                </iframe>
+            </div>
+            <div id="status1" class="status warning">⏳ Loading...</div>
+        </div>
+
+        <div class="test">
+            <h3>✅ Test 2: youtube-nocookie.com (ChatGPT fix - should work)</h3>
+            <div class="iframe-container">
+                <iframe 
+                    id="iframe2"
+                    src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ"
+                    title="YouTube video player"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowfullscreen
+                    referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+            <div id="status2" class="status warning">⏳ Loading...</div>
+        </div>
+
+        <div class="test">
+            <h3>📊 Environment Info</h3>
+            <ul>
+                <li><strong>Domain:</strong> <span id="domain"></span></li>
+                <li><strong>Protocol:</strong> <span id="protocol"></span></li>
+                <li><strong>Full URL:</strong> <span id="fullurl"></span></li>
+                <li><strong>Is .app domain:</strong> <span id="isapp"></span></li>
+                <li><strong>Test Time:</strong> <span id="timestamp"></span></li>
+            </ul>
+        </div>
+
+        <div class="test">
+            <h3>🎯 Expected Results</h3>
+            <ul>
+                <li><strong>On localhost:</strong> Both iframes should load thumbnails, but playback may vary</li>
+                <li><strong>On .app domains:</strong> youtube.com may show thumbnail but not play, youtube-nocookie.com should play</li>
+                <li><strong>The Fix:</strong> youtube-nocookie.com should resolve playback blocking on production domains</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Display environment info
+        document.getElementById('domain').textContent = window.location.hostname;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('fullurl').textContent = window.location.href;
+        document.getElementById('isapp').textContent = window.location.hostname.endsWith('.app') ? 'YES' : 'NO';
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+
+        // Test iframe loading
+        const iframe1 = document.getElementById('iframe1');
+        const iframe2 = document.getElementById('iframe2');
+        const status1 = document.getElementById('status1');
+        const status2 = document.getElementById('status2');
+
+        iframe1.onload = () => {
+            status1.innerHTML = '✅ Iframe loaded (thumbnail may show, but may not play on .app domains)';
+            status1.className = 'status success';
+        };
+
+        iframe1.onerror = () => {
+            status1.innerHTML = '❌ Iframe failed to load completely';
+            status1.className = 'status error';
+        };
+
+        iframe2.onload = () => {
+            status2.innerHTML = '✅ Iframe loaded (ChatGPT fix - should play on .app domains)';
+            status2.className = 'status success';
+        };
+
+        iframe2.onerror = () => {
+            status2.innerHTML = '❌ Iframe failed to load - fix may not work';
+            status2.className = 'status error';
+        };
+
+        // Timeout test
+        setTimeout(() => {
+            if (status1.textContent.includes('Loading...')) {
+                status1.innerHTML = '⏰ Timeout - iframe may be blocked';
+                status1.className = 'status error';
+            }
+            if (status2.textContent.includes('Loading...')) {
+                status2.innerHTML = '⏰ Timeout - iframe may be blocked';
+                status2.className = 'status error';
+            }
+        }, 5000);
+
+        // Log URLs for debugging
+        console.log('🔍 Testing URLs:');
+        console.log('Original:', iframe1.src);
+        console.log('Fixed:', iframe2.src);
+        console.log('Environment:', window.location.hostname);
+    </script>
+</body>
+</html>
