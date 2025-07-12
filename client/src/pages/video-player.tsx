@@ -30,6 +30,13 @@ export default function VideoPlayer() {
   const [showEmbedFallback, setShowEmbedFallback] = useState(false);
   const videoId = params.id;
 
+  // Auto-trigger fallback for localhost development
+  useEffect(() => {
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      setShowEmbedFallback(true);
+    }
+  }, []);
+
   const { data: video, isLoading } = useQuery({
     queryKey: [`/api/videos/${videoId}`],
     enabled: !!videoId,
