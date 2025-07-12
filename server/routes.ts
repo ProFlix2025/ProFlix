@@ -2368,7 +2368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Add YouTube video via embed code (ADMIN-ONLY TEMPORARY SYSTEM)
   app.post('/api/admin/learntube/add-embed', requireAdminAuth, async (req, res) => {
     try {
-      const { embedCode, categoryId } = req.body;
+      const { embedCode, categoryId, customTitle } = req.body;
       
       console.log('⚠️ ADMIN-ONLY LearnTube: Adding temporary YouTube content that generates no revenue');
       
@@ -2409,10 +2409,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Auto-generate video data with better title
       const categoryName = categoryExists.name;
+      const finalTitle = customTitle || `${categoryName} Educational Content`;
       const videoData = {
         youtubeId: videoId,
-        title: `${categoryName} Tutorial - LearnTube Content`,
-        description: `Educational ${categoryName.toLowerCase()} content from YouTube. This is temporary content that will be replaced with original ProFlix videos.`,
+        title: finalTitle,
+        description: `Learn about ${categoryName.toLowerCase()} with this educational video. This is temporary content that will be replaced with original ProFlix videos.`,
         videoUrl: `https://www.youtube.com/embed/${videoId}`,
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
         categoryId: parsedCategoryId,
