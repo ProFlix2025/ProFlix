@@ -629,6 +629,23 @@ export const insertSharedVideoSchema = createInsertSchema(sharedVideos).omit({
   createdAt: true,
 });
 
+// Viewer subscriptions table (for following creators)
+export const viewerSubscriptions = pgTable("viewer_subscriptions", {
+  id: serial("id").primaryKey(),
+  viewerId: varchar("viewer_id").notNull(),
+  creatorId: varchar("creator_id").notNull(),
+  tier: varchar("tier").notNull().default("free"), // 'free' or 'premium'
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertViewerSubscriptionSchema = createInsertSchema(viewerSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type UpsertUser = typeof users.$inferInsert;
 export type User = typeof users.$inferSelect;
@@ -679,3 +696,5 @@ export type ProCreatorSubscription = typeof proCreatorSubscriptions.$inferSelect
 export type InsertProCreatorSubscription = typeof proCreatorSubscriptions.$inferInsert;
 export type ProCreatorCode = typeof proCreatorCodes.$inferSelect;
 export type InsertProCreatorCode = typeof proCreatorCodes.$inferInsert;
+export type ViewerSubscription = typeof viewerSubscriptions.$inferSelect;
+export type InsertViewerSubscription = z.infer<typeof insertViewerSubscriptionSchema>;

@@ -187,10 +187,26 @@ Changelog:
   - **Implemented "Add to Streaming" Feature**: Complete backend API and frontend button functionality
   - **Updated Landing Page**: Now focuses on simplified two-tier creator system messaging
   - **Original Content Focus**: Completely removed YouTube dependencies and LearnTube references
+  - **Creator Discovery Homepage**: Replaced main landing page with creator discovery system
+  - **Viewer Account System**: Added free and premium viewer tiers with subscription functionality
+  - **Creator Subscriptions**: Users can follow creators for notifications and early access
+  - **Removed Streaming Focus**: Eliminated YouTube/Netflix models to focus on creator-viewer relationships
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+
+## Latest Changes (January 12, 2025)
+
+✅ **Creator Discovery Homepage**: Replaced main landing page with featured creator showcase
+✅ **Viewer Account System**: Added free and premium viewer tiers
+  - Free Viewers: Get notifications when creators upload new content
+  - Premium Viewers: $29/month for discounts and early access to courses
+✅ **Creator Subscriptions**: Users can follow creators without authentication required
+✅ **Removed Streaming Model**: Eliminated YouTube/Netflix approach to focus on creator-viewer relationships
+✅ **Database Schema**: Added viewer_subscriptions table for following creators
+✅ **API Endpoints**: Created subscription and viewer account creation endpoints
+✅ **Frontend**: Built comprehensive creator discovery page with hero images and brand showcases
 
 ## Deployment Status
 

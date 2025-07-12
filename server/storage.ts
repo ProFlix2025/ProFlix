@@ -9,7 +9,7 @@ import {
   playlists,
   playlistVideos,
   watchHistory,
-
+  viewerSubscriptions,
   coursePurchases,
   favorites,
   sharedVideos,
@@ -54,6 +54,8 @@ import {
   type InsertRateLimit,
   type SecurityLog,
   type InsertSecurityLog,
+  type ViewerSubscription,
+  type InsertViewerSubscription,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, like, and, sql, count, inArray } from "drizzle-orm";
@@ -123,6 +125,11 @@ export interface IStorage {
   createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video>;
   getLearnTubeVideos(): Promise<Video[]>;
   deleteAllLearnTubeVideos(): Promise<number>;
+  
+  // Creator Discovery operations
+  getFeaturedCreators(): Promise<any[]>;
+  subscribeToCreator(viewerId: string, creatorId: string, tier: string): Promise<void>;
+  createViewerAccount(data: { email: string; firstName: string; tier: string; subscribeToCreator?: string }): Promise<User>;
   getVideosBySource(source: 'proflix' | 'learntube'): Promise<Video[]>;
   bulkDeleteLearnTubeContent(): Promise<{ deleted: number }>;
   addYouTubeVideo(data: { youtubeId: string; title: string; description: string; categoryId: number; source: string; canRunAds: boolean }): Promise<Video>;
@@ -2099,6 +2106,86 @@ export class DatabaseStorage implements IStorage {
       .where(eq(videos.source, 'learntube'));
     
     return result[0]?.count || 0;
+  }
+
+  // Creator Discovery methods
+  async getFeaturedCreators(): Promise<any[]> {
+    const result = await db
+      .select({
+        id: users.id,
+        username: users.firstName,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        profileImageUrl: users.profileImageUrl,
+        brandName: sql<string>`COALESCE(${users.channelName}, CONCAT(${users.firstName}, ' ', ${users.lastName}))`,
+        description: sql<string>`COALESCE(${users.channelDescription}, 'Creative content creator')`,
+        categoryName: sql<string>`'All Categories'`,
+        videoCount: sql<number>`COALESCE((SELECT COUNT(*)::integer FROM ${videos} WHERE creator_id = ${users.id}), 0)`,
+        subscriberCount: users.subscriberCount,
+        isPro: users.isProCreator,
+        heroImageUrl: users.profileImageUrl,
+      })
+      .from(users)
+      .where(eq(users.role, 'creator'))
+      .orderBy(desc(users.subscriberCount))
+      .limit(20);
+
+    return result;
+  }
+
+  async subscribeToCreator(viewerId: string, creatorId: string, tier: string): Promise<void> {
+    await db
+      .insert(viewerSubscriptions)
+      .values({
+        viewerId,
+        creatorId,
+        tier,
+        isActive: true,
+      })
+      .onConflictDoUpdate({
+        target: [viewerSubscriptions.viewerId, viewerSubscriptions.creatorId],
+        set: {
+          tier,
+          isActive: true,
+          updatedAt: new Date(),
+        },
+      });
+
+    // Update creator's subscriber count
+    await db
+      .update(users)
+      .set({
+        subscriberCount: sql`${users.subscriberCount} + 1`,
+      })
+      .where(eq(users.id, creatorId));
+  }
+
+  async createViewerAccount(data: { 
+    email: string; 
+    firstName: string; 
+    tier: string; 
+    subscribeToCreator?: string 
+  }): Promise<User> {
+    const userId = `viewer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    
+    const [newUser] = await db
+      .insert(users)
+      .values({
+        id: userId,
+        email: data.email,
+        firstName: data.firstName,
+        role: 'viewer',
+        isPremiumViewer: data.tier === 'premium',
+        premiumViewerEndsAt: data.tier === 'premium' ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) : null,
+      })
+      .returning();
+
+    // Subscribe to creator if specified
+    if (data.subscribeToCreator) {
+      await this.subscribeToCreator(userId, data.subscribeToCreator, data.tier);
+    }
+
+    return newUser;
   }
 }
 

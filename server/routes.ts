@@ -2620,6 +2620,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Creator Discovery API endpoints
+  app.get('/api/featured-creators', async (req, res) => {
+    try {
+      const creators = await storage.getFeaturedCreators();
+      res.json(creators);
+    } catch (error) {
+      console.error('Error fetching featured creators:', error);
+      res.status(500).json({ message: 'Failed to fetch featured creators' });
+    }
+  });
+
+  // Subscribe to creator endpoint
+  app.post('/api/subscribe-to-creator', isAuthenticated, async (req: any, res) => {
+    try {
+      const { creatorId, tier = 'free' } = req.body;
+      const userId = req.user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(401).json({ message: 'User not authenticated' });
+      }
+
+      await storage.subscribeToCreator(userId, creatorId, tier);
+      res.json({ message: 'Successfully subscribed to creator' });
+    } catch (error) {
+      console.error('Error subscribing to creator:', error);
+      res.status(500).json({ message: 'Failed to subscribe to creator' });
+    }
+  });
+
+  // Create viewer account endpoint
+  app.post('/api/create-viewer-account', async (req, res) => {
+    try {
+      const { email, name, tier = 'free', subscribeToCreator } = req.body;
+      
+      if (!email || !name) {
+        return res.status(400).json({ message: 'Email and name are required' });
+      }
+
+      const viewerAccount = await storage.createViewerAccount({
+        email,
+        firstName: name,
+        tier,
+        subscribeToCreator
+      });
+
+      res.json({ 
+        message: 'Account created successfully', 
+        user: viewerAccount 
+      });
+    } catch (error) {
+      console.error('Error creating viewer account:', error);
+      res.status(500).json({ message: 'Failed to create viewer account' });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

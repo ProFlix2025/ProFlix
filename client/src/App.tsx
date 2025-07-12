@@ -9,6 +9,7 @@ import AdminAuthGuard from "@/components/AdminAuthGuard";
 import Footer from "@/components/Footer";
 
 import Home from "@/pages/home";
+import CreatorDiscovery from "@/pages/creator-discovery";
 import SearchPage from "@/pages/search";
 import CreatorDashboard from "@/pages/creator-dashboard";
 import CreatorDashboardNew from "@/pages/creator-dashboard-new";
@@ -50,7 +51,8 @@ function Router() {
     <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
         <Switch>
-          <Route path="/" component={Home} />
+          <Route path="/" component={CreatorDiscovery} />
+          <Route path="/home" component={Home} />
           <Route path="/premium" component={Premium} />
           <Route path="/pro-creator-portal" component={ProCreatorPortal} />
           <Route path="/admin/login" component={AdminLogin} />
