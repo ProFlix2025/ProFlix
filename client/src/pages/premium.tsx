@@ -47,7 +47,7 @@ export default function Premium() {
     {
       icon: <DollarSign className="w-5 h-5" />,
       title: "Course Discounts",
-      description: "Get 10% off all course purchases from creators"
+      description: "Special discounts on select courses from creators who offer premium pricing"
     },
     {
       icon: <Trophy className="w-5 h-5" />,
@@ -61,8 +61,8 @@ export default function Premium() {
     },
     {
       icon: <Clock className="w-5 h-5" />,
-      title: "Exclusive Content",
-      description: "Access to premium creator content and events"
+      title: "Free Course Access",
+      description: "Future access to free courses offered exclusively to premium viewers"
     }
   ];
 
@@ -86,10 +86,10 @@ export default function Premium() {
       period: "month",
       features: [
         "All free features",
-        "10% discount on all courses",
+        "Discounts on select courses from creators",
         "Early access to new content",
         "Priority support",
-        "Exclusive creator events"
+        "Future free course access"
       ],
       popular: true,
       cta: "Upgrade Now"
@@ -111,7 +111,7 @@ export default function Premium() {
             </h1>
           </div>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto mb-8">
-            Unlock the full ProFlix experience with course discounts, early access, and priority support
+            Unlock the full ProFlix experience with creator-controlled course discounts, early access, and future free course offerings
           </p>
           
           {user?.isPremiumViewer && (

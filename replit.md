@@ -13,9 +13,14 @@ ProFlix is a video platform focused on original content creators with a simple t
 - Future streaming expansion with premium content
 
 **Two-Tier Creator System**
-- New Creators: $29/month (30-day free trial), upload up to 10 hours, keep 100% of revenue
-- Pro Creators: $99/month subscription, unlimited uploads, keep 100% of revenue
+- New Creators: $29/month (30-day free trial), upload up to 10 hours, keep 100% of course revenue
+- Pro Creators: $99/month subscription, unlimited uploads, keep 100% of course revenue
 - "Add to Streaming" feature for future Netflix-style unlimited content
+
+**Platform Revenue Streams**
+- Creator subscriptions: New Creator ($29/month) and Pro Creator ($99/month) tiers
+- Premium viewer subscriptions: $29/month (100% platform revenue) to fund free course offerings
+- Future streaming section: Potential revenue sharing with creators for premium content
 
 ### User Account Tiers
 
@@ -173,7 +178,7 @@ Changelog:
   - **Free Video Streaming**: All videos now free to watch with YouTube-style features (likes, shares, comments, views)
   - **Ad-Supported Revenue**: Creators earn from ad revenue sharing on their videos
   - **Course Upsells**: Pro Creators ($99/month) can sell premium courses ($10-$4,000) under videos
-  - **Premium Viewers**: $29/month subscription for ad-free viewing + 10% course discounts
+  - **Premium Viewers**: $29/month subscription for creator-controlled course discounts + priority access
   - **New User Tiers**: Viewer (Free), Premium Viewer ($29/month), Creator (Free), Pro Creator ($99/month)
   - **Database Schema Update**: Added ad revenue tracking, course sales, premium subscriptions
   - **YouTube-Style Video Player**: New video player with ads, course upsells, and social features
@@ -213,6 +218,8 @@ Preferred communication style: Simple, everyday language.
 ✅ **New Creator Pricing**: Removed "Free Creator" and replaced with "New Creator" at $29/month with 30-day free trial
 ✅ **Updated Revenue Model**: All creators now keep 100% of revenue, no platform revenue sharing
 ✅ **Video Content Limits**: New Creator tier limited to 10 hours of video content (reduced from 50 hours)
+✅ **Creator-Controlled Discounts**: Premium viewer discounts are optional and set by each creator, not automatic 10% on all courses
+✅ **Premium Viewer Revenue**: Platform keeps 100% of premium viewer subscriptions ($29/month) to fund free course offerings for premium viewers
 
 ## Deployment Status
 

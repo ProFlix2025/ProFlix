@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   role: varchar("role").notNull().default("creator"), // Anyone can upload videos and sell courses
   isSystemAccount: boolean("is_system_account").default(false), // For ProFlix Academy
   
-  // Viewer Premium subscription ($29/month) - ad-free + 10% course discount
+  // Viewer Premium subscription ($29/month) - creator-controlled course discounts + free course access
   isPremiumViewer: boolean("is_premium_viewer").default(false),
   premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
@@ -233,7 +233,7 @@ export const ads = pgTable("ads", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Premium viewer subscriptions table - $29/month for ad-free + discounts
+// Premium viewer subscriptions table - $29/month (100% platform revenue) for creator-controlled discounts + free courses
 export const premiumSubscriptions = pgTable("premium_subscriptions", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull(),
