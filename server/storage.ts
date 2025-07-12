@@ -115,6 +115,10 @@ export interface IStorage {
   trackAdImpression(creatorId: string, videoId: number, cpmRate: number): Promise<void>;
   createCourseCheckout(userId: string, videoId: number, price: number): Promise<{ url: string }>;
   
+  // Add to Streaming functionality - future Netflix-style section
+  addVideoToStreaming(id: number): Promise<Video>;
+  getStreamingVideos(limit?: number): Promise<Video[]>;
+  
   // LearnTube operations - YouTube content isolation
   createLearnTubeVideo(video: InsertVideo & { youtubeId: string }): Promise<Video>;
   getLearnTubeVideos(): Promise<Video[]>;
@@ -968,6 +972,33 @@ export class DatabaseStorage implements IStorage {
       .from(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.videoId, videoId)));
     return !!favorite;
+  }
+
+  // Add to Streaming functionality - future Netflix-style section
+  async addVideoToStreaming(id: number): Promise<Video> {
+    const [video] = await db
+      .update(videos)
+      .set({ 
+        isAddedToStreaming: true,
+        updatedAt: new Date()
+      })
+      .where(eq(videos.id, id))
+      .returning();
+    
+    if (!video) {
+      throw new Error('Video not found');
+    }
+    
+    return video;
+  }
+
+  async getStreamingVideos(limit: number = 50): Promise<Video[]> {
+    return await db
+      .select()
+      .from(videos)
+      .where(eq(videos.isAddedToStreaming, true))
+      .orderBy(desc(videos.createdAt))
+      .limit(limit);
   }
 
   // Shared videos operations

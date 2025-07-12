@@ -1656,6 +1656,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add video to streaming endpoint - future Netflix-style section
+  app.post('/api/videos/:id/add-to-streaming', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const videoId = parseInt(req.params.id);
+      
+      // Check if user owns this video
+      const video = await storage.getVideo(videoId);
+      if (!video || video.creatorId !== userId) {
+        return res.status(403).json({ message: 'Unauthorized - You can only add your own videos to streaming' });
+      }
+      
+      if (video.isAddedToStreaming) {
+        return res.status(400).json({ message: 'Video is already added to streaming' });
+      }
+      
+      // Add to streaming
+      const updatedVideo = await storage.addVideoToStreaming(videoId);
+      
+      res.json({ 
+        message: 'Video successfully added to streaming! This will appear in our future Netflix-style section for additional revenue.',
+        video: updatedVideo 
+      });
+    } catch (error) {
+      console.error('Error adding video to streaming:', error);
+      res.status(500).json({ message: 'Failed to add video to streaming' });
+    }
+  });
+
   app.delete('/api/creator/videos/:id', isAuthenticated, async (req: any, res) => {
     try {
       const creatorId = req.user.claims.sub;

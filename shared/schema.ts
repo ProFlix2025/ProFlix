@@ -38,15 +38,16 @@ export const users = pgTable("users", {
   isPremiumViewer: boolean("is_premium_viewer").default(false),
   premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
-  // Pro Creator subscription - enhanced features with tiers
+  // Creator tier system - simplified two-tier model
   isProCreator: boolean("is_pro_creator").default(false),
-  proCreatorTier: varchar("pro_creator_tier").default("free"), // 'free', 'standard', 'plus', 'enterprise'
   proCreatorEndsAt: timestamp("pro_creator_ends_at"),
   proCreatorPlan: varchar("pro_creator_plan"), // 'monthly', 'yearly', 'free_code'
-  courseLimit: integer("course_limit").default(1), // free=1, standard=20, plus=100, enterprise=unlimited
-  currentCourseCount: integer("current_course_count").default(0),
-  videoHourLimit: integer("video_hour_limit").default(5), // free=5 hours course content, pro=50, enterprise=500
+  
+  // Free Creator: 50 hours, 30% platform cut
+  // Pro Creator: Unlimited hours, 100% revenue retention
+  videoHourLimit: integer("video_hour_limit").default(50), // Free creators get 50 hours
   currentVideoHours: integer("current_video_hours").default(0),
+  revenueShare: integer("revenue_share").default(30), // 30% for free creators, 0% for pro creators
   
   // Customer retention tracking
   previousProCreatorTier: varchar("previous_pro_creator_tier"), // Track what tier they downgraded from
@@ -169,9 +170,10 @@ export const videos = pgTable("videos", {
   adRevenue: integer("ad_revenue").default(0), // in cents
   adImpressions: integer("ad_impressions").default(0),
   
-  // Streaming requirements
-  isDonatedToStreaming: boolean("is_donated_to_streaming").default(false), // Required donation
+  // Add to Streaming feature - future Netflix-style expansion
+  isAddedToStreaming: boolean("is_added_to_streaming").default(false), // Creator opted into streaming
   streamingWatchTime: integer("streaming_watch_time").default(0), // Hours watched for royalties
+  streamingRevenue: integer("streaming_revenue").default(0), // Extra revenue from streaming section
   
   views: integer("views").default(0),
   purchases: integer("purchases").default(0),

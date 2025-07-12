@@ -2,45 +2,35 @@
 
 ## Overview
 
-ProFlix is a YouTube-style free video platform where users can upload, watch, and share videos with view counts, likes, comments, and sharing features. The platform monetizes through ads on free content and allows Pro Creators to sell premium courses as upsells underneath their videos.
+ProFlix is a video platform focused on original content creators with a simple two-tier monetization system. The platform takes a revenue share from free creators while offering Pro Creators full profit retention. Future expansion includes a Netflix-style streaming section for premium content.
 
 ### Monetization Model
 
-**Free Video Streaming**
-- Completely free to watch all content (like YouTube)
-- Ad-supported revenue model
+**Original Content Creation**
+- Free video watching for all users
+- Revenue sharing model with creators
 - View counts, likes, shares, comments
-- Creators earn from ad revenue share
+- Future streaming expansion with premium content
 
-**Course Sales System**
-- Pro Creators can sell premium courses ($10-$4,000)
-- Course purchase buttons appear under each video
-- Creators keep 100% of course sales (after payment processing)
-- Integration with Stripe/PayPal for payments
+**Two-Tier Creator System**
+- Free Creators: Upload up to 50 hours, platform takes 30% revenue cut
+- Pro Creators: $99/month subscription, keep 100% of revenue
+- "Add to Streaming" feature for future Netflix-style unlimited content
 
 ### User Account Tiers
 
-**Viewer (Free)**
-- Watch all videos with ads
-- Can purchase individual courses
-- Full access to platform features
-
-**Viewer (Premium) - $29/month**
-- Ad-free viewing experience
-- Course discounts from participating creators
-- Priority support
-
-**Creator (Free)**
-- Upload unlimited videos
-- Participate in ad revenue sharing
-- Cannot sell courses
-- Basic analytics
+**Free Creator**
+- Upload up to 50 hours of video content
+- Platform takes 30% revenue share
+- Basic analytics and creator tools
+- Option to add videos to streaming section
 
 **Pro Creator - $99/month**
-- Upload unlimited videos
-- Full course selling capabilities
+- Unlimited video uploads
+- Keep 100% of revenue
 - Advanced analytics and creator dashboard
-- Custom upsell links under videos
+- Priority "Add to Streaming" consideration
+- Enhanced monetization features
 
 ## System Architecture
 
@@ -187,6 +177,16 @@ Changelog:
   - **Database Schema Update**: Added ad revenue tracking, course sales, premium subscriptions
   - **YouTube-Style Video Player**: New video player with ads, course upsells, and social features
   - **Updated Landing Page**: Now describes YouTube-style functionality instead of premium platform
+- January 12, 2025. **BUSINESS MODEL PIVOT**: Simplified two-tier creator system with original content focus
+  - **Free Creator Tier**: Upload up to 50 hours of video content, platform takes 30% revenue cut
+  - **Pro Creator Tier**: $99/month subscription, unlimited uploads, keep 100% revenue
+  - **"Add to Streaming" Feature**: Future Netflix-style unlimited streaming section for premium content
+  - **Abandoned YouTube Embedding**: Focused on original content creation instead of YouTube integration
+  - **Simplified Monetization**: Clear revenue sharing model without complex course upsells
+  - **Future Streaming Expansion**: Long-term vision for Netflix-style premium content library
+  - **Implemented "Add to Streaming" Feature**: Complete backend API and frontend button functionality
+  - **Updated Landing Page**: Now focuses on simplified two-tier creator system messaging
+  - **Original Content Focus**: Completely removed YouTube dependencies and LearnTube references
 
 ## User Preferences
 

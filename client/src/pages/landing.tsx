@@ -13,17 +13,25 @@ export default function Landing() {
             ProFlix
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-netflix-light-gray">
-            YouTube-Style Free Video Platform
+            Original Content Creator Platform
           </p>
           <p className="text-lg mb-12 text-netflix-light-gray max-w-2xl mx-auto">
-            Watch unlimited free videos with YouTube-style features. Like, share, comment, and subscribe to creators. Pro Creators can sell premium courses directly under their videos.
+            Simple creator system: Free Creators upload 50 hours and keep 70% revenue. Pro Creators ($99/month) get unlimited uploads and keep 100% revenue. Future Netflix-style streaming expansion coming soon.
           </p>
-          <Button 
-            onClick={() => window.location.href = '/api/login'}
-            className="bg-netflix-red hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-lg"
-          >
-            Get Started
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Button 
+              onClick={() => window.location.href = '/api/login'}
+              className="bg-netflix-red hover:bg-red-700 text-white px-8 py-4 text-lg font-semibold rounded-lg"
+            >
+              Start Free (50 Hours)
+            </Button>
+            <Button 
+              onClick={() => window.location.href = '/pro-creator-portal'}
+              className="bg-white text-black hover:bg-gray-200 px-8 py-4 text-lg font-semibold rounded-lg"
+            >
+              Go Pro ($99/month)
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -46,7 +54,7 @@ export default function Landing() {
                 <Video className="w-12 h-12 text-netflix-red mx-auto mb-4" />
                 <h3 className="text-xl font-semibold mb-4">For Creators</h3>
                 <p className="text-netflix-light-gray">
-                  Upload your content easily, organize by categories, and build your audience. Professional dashboard to manage everything.
+                  Upload original content with our simple two-tier system. Free Creators get 50 hours and keep 70% revenue. Pro Creators get unlimited uploads and keep 100%.
                 </p>
               </CardContent>
             </Card>

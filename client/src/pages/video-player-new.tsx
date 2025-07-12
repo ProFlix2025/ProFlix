@@ -24,7 +24,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Navigation from "@/components/Navigation";
-import { YouTubePlayerDirect } from "@/components/YouTubePlayerDirect";
+// Removed YouTube player - focusing on original content only
 
 interface Video {
   id: number;
@@ -38,8 +38,6 @@ interface Video {
   dislikes: number;
   shareCount: number;
   creatorId: string;
-  isLearnTube: boolean;
-  youtubeId: string;
   creator: {
     id: string;
     firstName: string;
@@ -48,9 +46,8 @@ interface Video {
     profileImageUrl: string;
     isProCreator: boolean;
   };
-  isCourse: boolean;
-  coursePrice: number;
-  courseDescription: string;
+  isAddedToStreaming: boolean;
+  streamingRevenue: number;
   categoryId: number;
   subcategoryId: number;
   createdAt: string;
@@ -236,36 +233,22 @@ export default function VideoPlayerNew() {
           ) : (
             /* Video Player */
             <div className="aspect-video bg-black">
-              {video.isLearnTube ? (
-                <YouTubePlayerDirect
-                  videoId={video.youtubeId}
-                  title={video.title}
-                  onLoad={() => {
-                    console.log('✅ YouTube Player loaded:', video.title);
-                    incrementViewMutation.mutate();
-                  }}
-                  onError={(error) => {
-                    console.error('❌ YouTube Player error:', error);
-                    toast({
-                      title: "Video Error",
-                      description: "Unable to load YouTube video. Please try again.",
-                      variant: "destructive",
-                    });
-                  }}
-                  className="w-full h-full"
-                />
-              ) : (
-                <video
-                  src={video.videoUrl}
-                  poster={video.thumbnailUrl}
-                  className="w-full h-full"
-                  controls
-                  autoPlay={isPlaying}
-                  muted={isMuted}
-                  onPlay={handlePlay}
-                  onPause={handlePause}
-                />
-              )}
+              <video
+                src={video.videoUrl}
+                poster={video.thumbnailUrl}
+                className="w-full h-full"
+                controls
+                autoPlay={isPlaying}
+                muted={isMuted}
+                onPlay={() => {
+                  setIsPlaying(true);
+                  incrementViewMutation.mutate();
+                }}
+                onPause={() => setIsPlaying(false)}
+                onLoadedMetadata={() => {
+                  console.log('✅ Original video loaded:', video.title);
+                }}
+              />
             </div>
           )}
         </div>
@@ -280,11 +263,11 @@ export default function VideoPlayerNew() {
                 <span>{video.views?.toLocaleString() || 0} views</span>
                 <span>•</span>
                 <span>{new Date(video.createdAt).toLocaleDateString()}</span>
-                {video.isLearnTube && (
+                {video.isAddedToStreaming && (
                   <>
                     <span>•</span>
-                    <Badge variant="destructive" className="bg-orange-600 hover:bg-orange-700 text-xs">
-                      LearnTube (Temporary)
+                    <Badge variant="outline" className="bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white text-xs">
+                      Added to Streaming
                     </Badge>
                   </>
                 )}
@@ -311,6 +294,37 @@ export default function VideoPlayerNew() {
                   <Share2 className="w-4 h-4" />
                   Share ({video.shareCount || 0})
                 </Button>
+                
+                {/* Add to Streaming Button - Only show if creator owns this video */}
+                {isAuthenticated && user?.id === video.creatorId && !video.isAddedToStreaming && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={async () => {
+                      try {
+                        await apiRequest("POST", `/api/videos/${video.id}/add-to-streaming`);
+                        toast({
+                          title: "Added to Streaming!",
+                          description: "Your video will appear in our future Netflix-style streaming section for additional revenue!",
+                        });
+                        // Refresh the video data
+                        window.location.reload();
+                      } catch (error) {
+                        toast({
+                          title: "Error",
+                          description: "Failed to add video to streaming. Please try again.",
+                          variant: "destructive",
+                        });
+                      }
+                    }}
+                    className="flex items-center gap-2 bg-gradient-to-r from-purple-600 to-pink-600 border-none text-white hover:from-purple-700 hover:to-pink-700"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                    </svg>
+                    Add to Streaming
+                  </Button>
+                )}
               </div>
               
               {/* Description */}
@@ -345,74 +359,69 @@ export default function VideoPlayerNew() {
 
           {/* Sidebar */}
           <div className="space-y-6">
-            {/* Course Upsell */}
-            {video.isCourse && video.creator.isProCreator && (
-              <Card className="bg-gray-900 border-gray-800">
-                <CardContent className="p-6">
-                  <div className="flex items-center gap-2 mb-4">
-                    <ShoppingCart className="w-5 h-5 text-netflix-red" />
-                    <h3 className="font-semibold">Premium Course</h3>
+            {/* Creator Tier Info */}
+            <Card className="bg-gray-900 border-gray-800">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <Star className="w-5 h-5 text-netflix-red" />
+                  <h3 className="font-semibold">Creator Info</h3>
+                </div>
+                
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Creator Type:</span>
+                    <Badge className={video.creator.isProCreator ? "bg-green-600" : "bg-blue-600"}>
+                      {video.creator.isProCreator ? "Pro Creator" : "Free Creator"}
+                    </Badge>
                   </div>
                   
-                  <div className="space-y-4">
-                    <div>
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-2xl font-bold">
-                          ${(discountedPrice / 100).toFixed(2)}
-                        </span>
-                        {isPremiumViewer && (
-                          <Badge className="bg-green-600">
-                            10% OFF
-                          </Badge>
-                        )}
-                      </div>
-                      {isPremiumViewer && (
-                        <p className="text-sm text-gray-400 line-through">
-                          ${(video.coursePrice / 100).toFixed(2)}
-                        </p>
-                      )}
-                    </div>
-                    
-                    <p className="text-sm text-gray-300">
-                      {video.courseDescription}
-                    </p>
-                    
-                    <Button
-                      onClick={handlePurchaseCourse}
-                      className="w-full bg-netflix-red hover:bg-red-700"
-                      disabled={purchaseCourseMutation.isPending}
-                    >
-                      <DollarSign className="w-4 h-4 mr-2" />
-                      {purchaseCourseMutation.isPending ? "Processing..." : "Buy Course"}
-                    </Button>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-400">Revenue Share:</span>
+                    <span className="text-sm font-semibold">
+                      {video.creator.isProCreator ? "100%" : "70%"} to creator
+                    </span>
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                  
+                  {video.isAddedToStreaming && (
+                    <div className="bg-gradient-to-r from-purple-600 to-pink-600 p-3 rounded-lg">
+                      <div className="flex items-center gap-2 text-white">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                        </svg>
+                        <span className="text-sm font-semibold">Added to Streaming</span>
+                      </div>
+                      <p className="text-xs text-gray-200 mt-1">
+                        Part of our future Netflix-style section
+                      </p>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
 
-            {/* Premium Upgrade */}
-            {!isPremiumViewer && (
+            {/* Pro Creator Upgrade */}
+            {!video.creator.isProCreator && (
               <Card className="bg-gradient-to-r from-netflix-red to-red-700 border-none">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-2 mb-4">
                     <Star className="w-5 h-5 text-white" />
-                    <h3 className="font-semibold text-white">Go Premium</h3>
+                    <h3 className="font-semibold text-white">Become Pro Creator</h3>
                   </div>
                   
                   <div className="space-y-4">
                     <ul className="text-sm space-y-2 text-white">
-                      <li>• Ad-free viewing</li>
-                      <li>• 10% off all courses</li>
-                      <li>• Priority support</li>
+                      <li>• Keep 100% of revenue</li>
+                      <li>• Unlimited video uploads</li>
+                      <li>• Priority streaming consideration</li>
                     </ul>
                     
                     <div className="text-white">
-                      <span className="text-2xl font-bold">$29</span>
+                      <span className="text-2xl font-bold">$99</span>
                       <span className="text-sm">/month</span>
                     </div>
                     
                     <Button
-                      onClick={() => window.location.href = "/premium"}
+                      onClick={() => window.location.href = "/pro-creator-portal"}
                       className="w-full bg-white text-netflix-red hover:bg-gray-100"
                     >
                       Upgrade Now
