@@ -106,7 +106,7 @@ export function YouTubeEmbedTest({ videoId, title, description }: YouTubeEmbedTe
             key={`test-${videoId}-${Date.now()}`}
             width="560"
             height="315"
-            src={`https://www.youtube.com/embed/${videoId}?enablejsapi=1&origin=${window.location.origin}&widgetid=1&modestbranding=1&rel=0&showinfo=0`}
+            src={`https://www.youtube-nocookie.com/embed/${videoId}?enablejsapi=1&modestbranding=1&rel=0&showinfo=0`}
             title="YouTube video player"
             frameBorder="0"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

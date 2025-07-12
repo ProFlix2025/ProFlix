@@ -76,19 +76,24 @@ export function YouTubePlayer({ videoId, title, onLoad, onError, className = '' 
     };
   }, [videoId, retryCount, onLoad, onError, debugInfo]);
 
-  // Create iframe URL with proper parameters
+  // Create iframe URL with youtube-nocookie.com for better .app domain compatibility
   const getIframeUrl = () => {
-    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+    // Use youtube-nocookie.com for better embedding on .app domains
+    const baseUrl = `https://www.youtube-nocookie.com/embed/${videoId}`;
     const params = new URLSearchParams({
       enablejsapi: '1',
-      origin: origin,
-      widgetid: '1',
       modestbranding: '1',
       rel: '0',
       showinfo: '0'
     });
     
-    return `https://www.youtube.com/embed/${videoId}?${params.toString()}`;
+    // Only add origin for localhost, remove for production .app domains
+    if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+      params.set('origin', window.location.origin);
+      params.set('widgetid', '1');
+    }
+    
+    return `${baseUrl}?${params.toString()}`;
   };
 
   return (

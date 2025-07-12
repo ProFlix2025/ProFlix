@@ -63,7 +63,7 @@ export default function SimpleYouTubeTest() {
           <div className="relative" style={{ paddingBottom: '56.25%', height: 0 }}>
             <iframe
               id="test-iframe"
-              src="https://www.youtube.com/embed/dQw4w9WgXcQ?enablejsapi=1&modestbranding=1&rel=0"
+              src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?enablejsapi=1&modestbranding=1&rel=0"
               title="YouTube video player"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
