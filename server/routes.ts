@@ -1301,15 +1301,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.delete('/api/admin/learntube/bulk-delete', requireAdminAuth, async (req, res) => {
     try {
-      const result = await storage.bulkDeleteLearnTubeContent();
+      const { confirmation } = req.body;
+      
+      if (confirmation !== 'DELETE') {
+        return res.status(400).json({ 
+          message: 'Invalid confirmation. You must type "DELETE" to confirm bulk deletion.' 
+        });
+      }
+      
+      console.log('🗑️ Admin initiating bulk deletion of all LearnTube videos...');
+      
+      // Get count before deletion for logging
+      const beforeCount = await storage.getLearnTubeVideoCount();
+      
+      // Delete all LearnTube videos
+      const deletedCount = await storage.deleteAllLearnTubeVideos();
+      
+      console.log(`✅ Bulk deleted ${deletedCount} LearnTube videos (was ${beforeCount} total)`);
+      
       res.json({ 
         success: true, 
-        deleted: result.deleted,
-        message: `Successfully deleted ${result.deleted} LearnTube videos and all related data` 
+        message: `Successfully deleted ${deletedCount} LearnTube videos`,
+        deletedCount 
       });
     } catch (error) {
-      console.error('Error in bulk delete LearnTube content:', error);
-      res.status(500).json({ message: 'Failed to delete LearnTube content' });
+      console.error('❌ Error during bulk deletion:', error);
+      res.status(500).json({ message: 'Failed to delete LearnTube videos' });
     }
   });
 
@@ -2390,11 +2407,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      // Auto-generate video data
+      // Auto-generate video data with better title
+      const categoryName = categoryExists.name;
       const videoData = {
         youtubeId: videoId,
-        title: `YouTube Video ${videoId}`,
-        description: `Educational content from YouTube (ID: ${videoId})`,
+        title: `${categoryName} Tutorial - LearnTube Content`,
+        description: `Educational ${categoryName.toLowerCase()} content from YouTube. This is temporary content that will be replaced with original ProFlix videos.`,
         videoUrl: `https://www.youtube.com/embed/${videoId}`,
         thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
         categoryId: parsedCategoryId,
@@ -2536,6 +2554,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('❌ Error fetching Pro Creator codes:', error);
       res.status(500).json({ message: 'Failed to fetch Pro Creator codes' });
+    }
+  });
+
+  // Bulk delete LearnTube videos (Admin only)
+  app.delete('/api/admin/learntube/bulk-delete', requireAdminAuth, async (req, res) => {
+    try {
+      const { confirmation } = req.body;
+      
+      if (confirmation !== 'DELETE') {
+        return res.status(400).json({ 
+          message: 'Invalid confirmation. You must type "DELETE" to confirm bulk deletion.' 
+        });
+      }
+      
+      console.log('🗑️ Admin initiating bulk deletion of all LearnTube videos...');
+      
+      // Get count before deletion for logging
+      const beforeCount = await storage.getLearnTubeVideoCount();
+      
+      // Delete all LearnTube videos
+      const deletedCount = await storage.deleteAllLearnTubeVideos();
+      
+      console.log(`✅ Bulk deleted ${deletedCount} LearnTube videos (was ${beforeCount} total)`);
+      
+      res.json({ 
+        success: true, 
+        message: `Successfully deleted ${deletedCount} LearnTube videos`,
+        deletedCount 
+      });
+    } catch (error) {
+      console.error('❌ Error during bulk deletion:', error);
+      res.status(500).json({ message: 'Failed to delete LearnTube videos' });
     }
   });
 

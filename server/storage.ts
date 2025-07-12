@@ -56,7 +56,7 @@ import {
   type InsertSecurityLog,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc, like, and, sql, count } from "drizzle-orm";
+import { eq, desc, like, and, sql, count, inArray } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -1826,22 +1826,22 @@ export class DatabaseStorage implements IStorage {
     const videoIds = learnTubeVideos.map(v => v.id);
     
     if (videoIds.length > 0) {
-      // Delete related data first
+      // Delete related data first using IN clause (safer than ANY)
       await db
         .delete(comments)
-        .where(sql`${comments.videoId} = ANY(${videoIds})`);
+        .where(inArray(comments.videoId, videoIds));
       
       await db
         .delete(videoLikes)
-        .where(sql`${videoLikes.videoId} = ANY(${videoIds})`);
+        .where(inArray(videoLikes.videoId, videoIds));
       
       await db
         .delete(watchHistory)
-        .where(sql`${watchHistory.videoId} = ANY(${videoIds})`);
+        .where(inArray(watchHistory.videoId, videoIds));
       
       await db
         .delete(favorites)
-        .where(sql`${favorites.videoId} = ANY(${videoIds})`);
+        .where(inArray(favorites.videoId, videoIds));
       
       // Delete all LearnTube videos
       await db
@@ -2049,6 +2049,25 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(proCreatorCodes)
       .orderBy(desc(proCreatorCodes.createdAt));
+  }
+
+  // Bulk delete LearnTube videos
+  async deleteAllLearnTubeVideos(): Promise<number> {
+    const result = await db
+      .delete(videos)
+      .where(eq(videos.source, 'learntube'))
+      .returning();
+    
+    return result.length;
+  }
+
+  async getLearnTubeVideoCount(): Promise<number> {
+    const result = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(videos)
+      .where(eq(videos.source, 'learntube'));
+    
+    return result[0]?.count || 0;
   }
 }
 

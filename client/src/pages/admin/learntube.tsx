@@ -11,6 +11,8 @@ import { Trash2, Youtube, Plus, BarChart3, RefreshCw, AlertTriangle } from 'luci
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 interface LearnTubeVideo {
   id: number;
@@ -48,6 +50,8 @@ export default function LearnTubeAdmin() {
     categoryId: ''
   });
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+  const [deleteConfirmation, setDeleteConfirmation] = useState('');
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -125,18 +129,20 @@ export default function LearnTubeAdmin() {
     }
   });
 
-  // Delete all mutation
+  // Delete all LearnTube videos mutation
   const deleteAllMutation = useMutation({
-    mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/admin/learntube/delete-all');
+    mutationFn: async (confirmation: string) => {
+      const response = await apiRequest('DELETE', '/api/admin/learntube/bulk-delete', { confirmation });
       return response.json();
     },
     onSuccess: (data) => {
       toast({
         title: 'Success',
-        description: `Deleted ${data.deletedCount} videos successfully`,
+        description: `Deleted ${data.deletedCount} LearnTube videos successfully`,
       });
       setSelectedVideos([]);
+      setShowBulkDeleteDialog(false);
+      setDeleteConfirmation('');
       queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] });
     },
     onError: (error: any) => {
@@ -158,6 +164,19 @@ export default function LearnTubeAdmin() {
       return;
     }
     addVideoMutation.mutate(newVideo);
+  };
+
+  const handleBulkDeleteAll = () => {
+    if (deleteConfirmation !== 'DELETE') {
+      toast({
+        title: 'Error',
+        description: 'You must type "DELETE" to confirm bulk deletion',
+        variant: 'destructive',
+      });
+      return;
+    }
+    
+    deleteAllMutation.mutate(deleteConfirmation);
   };
 
   const handleVideoSelect = (videoId: number) => {
@@ -192,12 +211,7 @@ export default function LearnTubeAdmin() {
     }
   };
 
-  const handleDeleteAll = () => {
-    const confirmed = window.confirm('Are you sure you want to delete ALL LearnTube videos? This action cannot be undone.');
-    if (confirmed) {
-      deleteAllMutation.mutate();
-    }
-  };
+
 
   const extractVideoId = (url: string) => {
     const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/);
@@ -226,6 +240,61 @@ export default function LearnTubeAdmin() {
               <Plus className="w-4 h-4 mr-2" />
               Add YouTube Video
             </Button>
+            <Dialog open={showBulkDeleteDialog} onOpenChange={setShowBulkDeleteDialog}>
+              <DialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="bg-red-800 hover:bg-red-900 border-red-700"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete All LearnTube
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="bg-gray-800 border-gray-700">
+                <DialogHeader>
+                  <DialogTitle className="text-white">Delete All LearnTube Videos</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <Alert className="bg-red-900/20 border-red-700/50">
+                    <AlertTriangle className="h-4 w-4" />
+                    <AlertDescription className="text-red-300">
+                      This will permanently delete ALL LearnTube videos. This action cannot be undone.
+                    </AlertDescription>
+                  </Alert>
+                  <div>
+                    <Label htmlFor="delete-confirmation" className="text-white">
+                      Type "DELETE" to confirm bulk deletion:
+                    </Label>
+                    <Input
+                      id="delete-confirmation"
+                      value={deleteConfirmation}
+                      onChange={(e) => setDeleteConfirmation(e.target.value)}
+                      placeholder="Type DELETE here"
+                      className="bg-gray-700 border-gray-600 text-white mt-2"
+                    />
+                  </div>
+                  <div className="flex justify-end space-x-2">
+                    <Button
+                      onClick={() => {
+                        setShowBulkDeleteDialog(false);
+                        setDeleteConfirmation('');
+                      }}
+                      variant="outline"
+                      className="border-gray-600 text-gray-300"
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleBulkDeleteAll}
+                      disabled={deleteConfirmation !== 'DELETE' || deleteAllMutation.isPending}
+                      className="bg-red-600 hover:bg-red-700"
+                    >
+                      {deleteAllMutation.isPending ? 'Deleting...' : 'Delete All'}
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
             <Button
               onClick={() => queryClient.invalidateQueries({ queryKey: ['admin', 'learntube'] })}
               variant="outline"
