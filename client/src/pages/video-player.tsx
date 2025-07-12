@@ -26,6 +26,8 @@ export default function VideoPlayer() {
   const [currentTime, setCurrentTime] = useState(0);
   const [showPaywall, setShowPaywall] = useState(false);
   const [hasTriggeredPaywall, setHasTriggeredPaywall] = useState(false);
+  const [iframeError, setIframeError] = useState(false);
+  const [showEmbedFallback, setShowEmbedFallback] = useState(false);
   const videoId = params.id;
 
   const { data: video, isLoading } = useQuery({
@@ -257,24 +259,45 @@ export default function VideoPlayer() {
                         onLoad={() => {
                           console.log('✅ LearnTube iframe loaded successfully:', video.videoUrl);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
+                          setIframeError(false);
                           // Track view when iframe loads
                           viewMutation.mutate();
                         }}
                         onError={(e) => {
                           console.error('❌ LearnTube iframe error:', e);
                           console.error('Failed video URL:', video.videoUrl);
+                          setIframeError(true);
+                          // Check if we're on localhost and show fallback
+                          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                            setShowEmbedFallback(true);
+                          }
                         }}
                       />
                       
                       {/* Fallback for localhost development */}
-                      <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center pointer-events-none" 
-                           style={{ display: 'none' }} 
-                           id="localhost-fallback">
-                        <div className="text-center text-white p-4">
-                          <p className="text-sm mb-2">YouTube embedding blocked on localhost</p>
-                          <p className="text-xs text-gray-400">Will work in production deployment</p>
+                      {showEmbedFallback && (
+                        <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center">
+                          <div className="text-center text-white p-6 max-w-sm">
+                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                              </svg>
+                            </div>
+                            <h3 className="text-lg font-semibold mb-2">Development Mode</h3>
+                            <p className="text-sm text-gray-300 mb-3">
+                              YouTube embedding is blocked on localhost. This video will work properly in production.
+                            </p>
+                            <a 
+                              href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+                            >
+                              Watch on YouTube
+                            </a>
+                          </div>
                         </div>
-                      </div>
+                      )}
                     </div>
                   ) : (
                     <video
