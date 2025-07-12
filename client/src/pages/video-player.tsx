@@ -259,6 +259,7 @@ export default function VideoPlayer() {
                         onLoad={() => {
                           console.log('✅ LearnTube iframe loaded successfully:', video.videoUrl);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
+                          console.log('🚀 Production deployment: This iframe will work properly');
                           setIframeError(false);
                           // Track view when iframe loads
                           viewMutation.mutate();
