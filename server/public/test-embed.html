@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YouTube Embed Test - ProFlix</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #000;
+            color: #fff;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: #111;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        .embed-container {
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #222;
+            border-radius: 8px;
+        }
+        iframe {
+            width: 100%;
+            height: 400px;
+            border: none;
+        }
+        .test-info {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>YouTube Embed Test - ProFlix</h1>
+        <p>Testing YouTube embeds with ChatGPT's recommended format for production on proflix.app</p>
+        
+        <div class="embed-container">
+            <h2>Test 1: Rick Roll (Known Working Video)</h2>
+            <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            <div class="test-info">
+                <strong>URL:</strong> https://www.youtube.com/embed/dQw4w9WgXcQ<br>
+                <strong>Format:</strong> Clean embed URL without tracking parameters<br>
+                <strong>Referrer:</strong> no-referrer-when-downgrade
+            </div>
+        </div>
+
+        <div class="embed-container">
+            <h2>Test 2: Me at the Zoo (First YouTube Video)</h2>
+            <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/jNQXAC9IVRw"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            <div class="test-info">
+                <strong>URL:</strong> https://www.youtube.com/embed/jNQXAC9IVRw<br>
+                <strong>Format:</strong> Clean embed URL without tracking parameters<br>
+                <strong>Referrer:</strong> no-referrer-when-downgrade
+            </div>
+        </div>
+
+        <div class="embed-container">
+            <h2>Test 3: Gangnam Style (Popular Video)</h2>
+            <iframe
+                width="560"
+                height="315"
+                src="https://www.youtube.com/embed/9bZkp7q19f0"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+            <div class="test-info">
+                <strong>URL:</strong> https://www.youtube.com/embed/9bZkp7q19f0<br>
+                <strong>Format:</strong> Clean embed URL without tracking parameters<br>
+                <strong>Referrer:</strong> no-referrer-when-downgrade
+            </div>
+        </div>
+
+        <div style="margin-top: 30px; padding: 20px; background-color: #0d4f3c; border-radius: 8px;">
+            <h3>✅ Test Instructions</h3>
+            <ol>
+                <li>Access this test page at: <strong>https://proflix.app/test-embed.html</strong></li>
+                <li>If videos load properly here, the iframe format is correct</li>
+                <li>If videos don't load, check browser console for errors</li>
+                <li>Compare with main video player at: <strong>https://proflix.app/video/[ID]</strong></li>
+            </ol>
+        </div>
+
+        <div style="margin-top: 20px; padding: 20px; background-color: #4a1e1e; border-radius: 8px;">
+            <h3>🔍 Debug Information</h3>
+            <p><strong>Domain:</strong> <span id="domain"></span></p>
+            <p><strong>Protocol:</strong> <span id="protocol"></span></p>
+            <p><strong>User Agent:</strong> <span id="userAgent"></span></p>
+            <p><strong>Viewport:</strong> <span id="viewport"></span></p>
+        </div>
+    </div>
+
+    <script>
+        // Debug information
+        document.getElementById('domain').textContent = window.location.hostname;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('userAgent').textContent = navigator.userAgent;
+        document.getElementById('viewport').textContent = window.innerWidth + 'x' + window.innerHeight;
+
+        // Log iframe load events
+        document.querySelectorAll('iframe').forEach((iframe, index) => {
+            iframe.addEventListener('load', () => {
+                console.log(`✅ Test ${index + 1} iframe loaded successfully`);
+            });
+            
+            iframe.addEventListener('error', (e) => {
+                console.error(`❌ Test ${index + 1} iframe failed to load:`, e);
+            });
+        });
+
+        console.log('🧪 YouTube embed test page loaded');
+        console.log('📍 Domain:', window.location.hostname);
+        console.log('🔒 Protocol:', window.location.protocol);
+    </script>
+</body>
+</html>
