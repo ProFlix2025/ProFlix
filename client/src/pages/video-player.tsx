@@ -152,9 +152,9 @@ export default function VideoPlayer() {
     },
   });
 
-  // Increment view count when video starts playing
+  // Increment view count when video starts playing (only for non-LearnTube videos)
   useEffect(() => {
-    if (video && videoRef.current) {
+    if (video && videoRef.current && !video.isLearnTube) {
       const handlePlay = () => {
         viewMutation.mutate();
       };
@@ -169,9 +169,9 @@ export default function VideoPlayer() {
     }
   }, [video, viewMutation]);
 
-  // Monitor video time for preview restrictions
+  // Monitor video time for preview restrictions (only for non-LearnTube videos)
   useEffect(() => {
-    if (video && videoRef.current) {
+    if (video && videoRef.current && !video.isLearnTube) {
       const handleTimeUpdate = () => {
         const time = videoRef.current?.currentTime || 0;
         setCurrentTime(time);
@@ -243,18 +243,34 @@ export default function VideoPlayer() {
             <Card className="bg-netflix-black border-netflix-border">
               <CardContent className="p-0">
                 <div className="relative video-aspect rounded-lg overflow-hidden">
-                  <video
-                    ref={videoRef}
-                    className="w-full h-full"
-                    controls
-                    poster={video.thumbnailUrl}
-                  >
-                    <source src={video.videoUrl} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
+                  {/* Check if this is a LearnTube video (YouTube embed) */}
+                  {video.isLearnTube ? (
+                    <iframe
+                      src={video.videoUrl}
+                      title={video.title}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      allowFullScreen
+                      onLoad={() => {
+                        // Track view when iframe loads
+                        viewMutation.mutate();
+                      }}
+                    />
+                  ) : (
+                    <video
+                      ref={videoRef}
+                      className="w-full h-full"
+                      controls
+                      poster={video.thumbnailUrl}
+                    >
+                      <source src={video.videoUrl} type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
+                  )}
                   
-                  {/* Preview Time Indicator */}
-                  {video.offerFreePreview && !hasPurchased && !showPaywall && currentTime > 0 && (
+                  {/* Preview Time Indicator - only for non-LearnTube videos */}
+                  {video.offerFreePreview && !hasPurchased && !showPaywall && currentTime > 0 && !video.isLearnTube && (
                     <div className="absolute top-4 right-4 bg-black bg-opacity-75 text-white text-sm px-3 py-2 rounded-lg">
                       <div className="flex items-center space-x-2">
                         <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -263,8 +279,8 @@ export default function VideoPlayer() {
                     </div>
                   )}
                   
-                  {/* Preview Paywall Overlay */}
-                  {showPaywall && (
+                  {/* Preview Paywall Overlay - only for non-LearnTube videos */}
+                  {showPaywall && !video.isLearnTube && (
                     <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center">
                       <div className="text-center p-8 max-w-md">
                         <div className="mb-6">
@@ -326,6 +342,11 @@ export default function VideoPlayer() {
                 </div>
                 <Badge variant="secondary">{video.category?.name}</Badge>
                 <Badge variant="outline">{video.subcategory?.name}</Badge>
+                {video.isLearnTube && (
+                  <Badge variant="destructive" className="bg-orange-600 hover:bg-orange-700">
+                    LearnTube (Temporary)
+                  </Badge>
+                )}
               </div>
               
               <div className="flex items-center justify-between mb-6">
