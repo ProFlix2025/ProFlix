@@ -30,10 +30,14 @@ export default function VideoPlayer() {
   const [showEmbedFallback, setShowEmbedFallback] = useState(false);
   const videoId = params.id;
 
-  // Auto-trigger fallback for localhost development
+  // Only show fallback for localhost - production should work
   useEffect(() => {
     if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      console.log('🔧 Development mode: Auto-showing YouTube fallback');
       setShowEmbedFallback(true);
+    } else {
+      console.log('🚀 Production mode: YouTube iframe should work');
+      setShowEmbedFallback(false);
     }
   }, []);
 
@@ -263,10 +267,12 @@ export default function VideoPlayer() {
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         allowFullScreen
                         referrerPolicy="strict-origin-when-cross-origin"
+                        sandbox="allow-same-origin allow-scripts allow-forms allow-popups"
                         onLoad={() => {
                           console.log('✅ LearnTube iframe loaded successfully:', video.videoUrl);
                           console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
                           console.log('🚀 Production deployment: This iframe will work properly');
+                          console.log('📍 Current hostname:', window.location.hostname);
                           setIframeError(false);
                           // Track view when iframe loads
                           viewMutation.mutate();
@@ -274,15 +280,15 @@ export default function VideoPlayer() {
                         onError={(e) => {
                           console.error('❌ LearnTube iframe error:', e);
                           console.error('Failed video URL:', video.videoUrl);
+                          console.error('📍 Current hostname:', window.location.hostname);
+                          console.error('🔍 Video ID:', video.youtubeId);
                           setIframeError(true);
-                          // Check if we're on localhost and show fallback
-                          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-                            setShowEmbedFallback(true);
-                          }
+                          // Always show fallback if there's an error
+                          setShowEmbedFallback(true);
                         }}
                       />
                       
-                      {/* Fallback for localhost development */}
+                      {/* Fallback for embedding issues */}
                       {showEmbedFallback && (
                         <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center">
                           <div className="text-center text-white p-6 max-w-sm">
@@ -291,15 +297,22 @@ export default function VideoPlayer() {
                                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                               </svg>
                             </div>
-                            <h3 className="text-lg font-semibold mb-2">Development Mode</h3>
+                            <h3 className="text-lg font-semibold mb-2">Video Unavailable</h3>
                             <p className="text-sm text-gray-300 mb-3">
-                              YouTube embedding is blocked on localhost. This video will work properly in production.
+                              {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+                                ? "YouTube embedding is blocked on localhost. This video will work properly in production."
+                                : "This video cannot be embedded. YouTube may have restricted this video from being embedded on external sites."
+                              }
                             </p>
                             <a 
                               href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
+                              onClick={() => {
+                                // Track view when user clicks to watch on YouTube
+                                viewMutation.mutate();
+                              }}
                             >
                               Watch on YouTube
                             </a>
