@@ -24,6 +24,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Navigation from "@/components/Navigation";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
 
 interface Video {
   id: number;
@@ -37,6 +38,8 @@ interface Video {
   dislikes: number;
   shareCount: number;
   creatorId: string;
+  isLearnTube: boolean;
+  youtubeId: string;
   creator: {
     id: string;
     firstName: string;
@@ -233,16 +236,36 @@ export default function VideoPlayerNew() {
           ) : (
             /* Video Player */
             <div className="aspect-video bg-black">
-              <video
-                src={video.videoUrl}
-                poster={video.thumbnailUrl}
-                className="w-full h-full"
-                controls
-                autoPlay={isPlaying}
-                muted={isMuted}
-                onPlay={handlePlay}
-                onPause={handlePause}
-              />
+              {video.isLearnTube ? (
+                <YouTubePlayer
+                  videoId={video.youtubeId}
+                  title={video.title}
+                  onLoad={() => {
+                    console.log('✅ YouTube Player loaded:', video.title);
+                    incrementViewMutation.mutate();
+                  }}
+                  onError={(error) => {
+                    console.error('❌ YouTube Player error:', error);
+                    toast({
+                      title: "Video Error",
+                      description: "Unable to load YouTube video. Please try again.",
+                      variant: "destructive",
+                    });
+                  }}
+                  className="w-full h-full"
+                />
+              ) : (
+                <video
+                  src={video.videoUrl}
+                  poster={video.thumbnailUrl}
+                  className="w-full h-full"
+                  controls
+                  autoPlay={isPlaying}
+                  muted={isMuted}
+                  onPlay={handlePlay}
+                  onPause={handlePause}
+                />
+              )}
             </div>
           )}
         </div>
@@ -254,9 +277,17 @@ export default function VideoPlayerNew() {
             <div className="mb-6">
               <h1 className="text-2xl font-bold mb-2">{video.title}</h1>
               <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                <span>{video.views.toLocaleString()} views</span>
+                <span>{video.views?.toLocaleString() || 0} views</span>
                 <span>•</span>
                 <span>{new Date(video.createdAt).toLocaleDateString()}</span>
+                {video.isLearnTube && (
+                  <>
+                    <span>•</span>
+                    <Badge variant="destructive" className="bg-orange-600 hover:bg-orange-700 text-xs">
+                      LearnTube (Temporary)
+                    </Badge>
+                  </>
+                )}
               </div>
               
               {/* Action Buttons */}
@@ -268,7 +299,7 @@ export default function VideoPlayerNew() {
                   className="flex items-center gap-2"
                 >
                   <ThumbsUp className="w-4 h-4" />
-                  {video.likes}
+                  {video.likes || 0}
                 </Button>
                 
                 <Button
@@ -278,7 +309,7 @@ export default function VideoPlayerNew() {
                   className="flex items-center gap-2"
                 >
                   <Share2 className="w-4 h-4" />
-                  Share ({video.shareCount})
+                  Share ({video.shareCount || 0})
                 </Button>
               </div>
               

@@ -40,6 +40,7 @@ import AllCategories from "@/pages/all-categories";
 import Categories from "@/pages/categories";
 import Subcategories from "@/pages/subcategories";
 import YouTubeDebug from "@/pages/youtube-debug";
+import SimpleYouTubeTest from "@/pages/simple-youtube-test";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -108,6 +109,7 @@ function Router() {
           <Route path="/category/:slug" component={CategoryView} />
           <Route path="/video/:id" component={VideoPlayerNew} />
           <Route path="/youtube-debug" component={YouTubeDebug} />
+          <Route path="/simple-youtube-test" component={SimpleYouTubeTest} />
           <Route component={NotFound} />
         </Switch>
       </div>
