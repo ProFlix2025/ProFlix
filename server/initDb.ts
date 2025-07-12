@@ -212,6 +212,20 @@ export async function initializeDatabase() {
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_pro_tube BOOLEAN DEFAULT FALSE;`);
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS can_run_ads BOOLEAN DEFAULT TRUE;`);
       await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS video_type VARCHAR DEFAULT 'free';`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_course BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS course_price INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS course_description TEXT;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_free_content BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS offers_premium_discount BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS ad_revenue INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS ad_impressions INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_donated_to_streaming BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS streaming_watch_time INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS purchases INTEGER DEFAULT 0;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS offer_free_preview BOOLEAN DEFAULT FALSE;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS tags TEXT;`);
+      await db.execute(sql`ALTER TABLE videos ADD COLUMN IF NOT EXISTS language VARCHAR DEFAULT 'en';`);
       
       console.log('✅ Missing columns added successfully');
     } catch (error) {
