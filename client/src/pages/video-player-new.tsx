@@ -24,7 +24,7 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import Navigation from "@/components/Navigation";
-import { YouTubePlayer } from "@/components/YouTubePlayer";
+import { YouTubePlayerRobust } from "@/components/YouTubePlayerRobust";
 
 interface Video {
   id: number;
@@ -237,7 +237,7 @@ export default function VideoPlayerNew() {
             /* Video Player */
             <div className="aspect-video bg-black">
               {video.isLearnTube ? (
-                <YouTubePlayer
+                <YouTubePlayerRobust
                   videoId={video.youtubeId}
                   title={video.title}
                   onLoad={() => {
