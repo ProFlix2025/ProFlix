@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Direct YouTube Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #000; color: #fff; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .test { margin: 20px 0; padding: 20px; border: 1px solid #333; border-radius: 8px; }
+        .video-container { position: relative; width: 100%; height: 400px; background: #000; }
+        .iframe-container { width: 100%; height: 100%; }
+        iframe { width: 100%; height: 100%; border: none; }
+        .play-button { 
+            position: absolute; 
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            background: #ff0000; 
+            border: none; 
+            border-radius: 50%; 
+            width: 80px; 
+            height: 80px; 
+            cursor: pointer; 
+            z-index: 10;
+            color: white;
+            font-size: 24px;
+        }
+        .play-button:hover { background: #cc0000; }
+        .status { margin: 10px 0; padding: 10px; border-radius: 4px; }
+        .success { background: #0f5132; color: #d1e7dd; }
+        .error { background: #58151c; color: #f8d7da; }
+        .info { background: #055160; color: #b6effb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Direct YouTube Test</h1>
+        <p>Testing direct YouTube interaction to resolve "thumbnail shows but won't play" issue</p>
+        
+        <div class="test">
+            <h3>Test: User-Triggered YouTube Play</h3>
+            <div class="video-container">
+                <div class="iframe-container">
+                    <iframe 
+                        id="youtube-iframe"
+                        src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ?autoplay=0&mute=0&controls=1&modestbranding=1&rel=0&showinfo=0&enablejsapi=1"
+                        title="YouTube video player"
+                        frameborder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                        referrerpolicy="no-referrer-when-downgrade">
+                    </iframe>
+                </div>
+                <button id="play-button" class="play-button" onclick="triggerPlay()">▶</button>
+            </div>
+            <div id="status" class="status info">Click the play button to test YouTube interaction</div>
+        </div>
+
+        <div class="test">
+            <h3>Environment Info</h3>
+            <ul>
+                <li>Domain: <span id="domain"></span></li>
+                <li>Protocol: <span id="protocol"></span></li>
+                <li>Is .app domain: <span id="isapp"></span></li>
+                <li>User Agent: <span id="useragent"></span></li>
+            </ul>
+        </div>
+
+        <div class="test">
+            <h3>🎯 Testing Theory</h3>
+            <p>The issue may be that YouTube requires user interaction to play videos on certain domains. 
+            This test forces user interaction before attempting to play the video.</p>
+            <ul>
+                <li>Iframe loads (✅ working - you see thumbnail)</li>
+                <li>User clicks play button (triggers autoplay)</li>
+                <li>Video should start playing (🎯 testing this)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Display environment info
+        document.getElementById('domain').textContent = window.location.hostname;
+        document.getElementById('protocol').textContent = window.location.protocol;
+        document.getElementById('isapp').textContent = window.location.hostname.endsWith('.app') ? 'YES' : 'NO';
+        document.getElementById('useragent').textContent = navigator.userAgent.substring(0, 60) + '...';
+
+        function triggerPlay() {
+            const iframe = document.getElementById('youtube-iframe');
+            const playButton = document.getElementById('play-button');
+            const status = document.getElementById('status');
+            
+            // Hide play button
+            playButton.style.display = 'none';
+            
+            // Update status
+            status.textContent = 'Triggering YouTube play...';
+            status.className = 'status info';
+            
+            // Update iframe src to include autoplay
+            const currentSrc = iframe.src;
+            const newSrc = currentSrc.replace('autoplay=0', 'autoplay=1');
+            iframe.src = newSrc;
+            
+            // Also try postMessage
+            try {
+                iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+            } catch (e) {
+                console.log('PostMessage failed:', e);
+            }
+            
+            // Check result after 3 seconds
+            setTimeout(() => {
+                status.innerHTML = 'Video should be playing now. If not, YouTube may be blocking playback on this domain.<br><a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" target="_blank" style="color: #ff0000;">Open in YouTube</a>';
+                status.className = 'status info';
+            }, 3000);
+        }
+
+        // Listen for messages from YouTube iframe
+        window.addEventListener('message', function(event) {
+            if (event.origin !== 'https://www.youtube-nocookie.com') return;
+            
+            console.log('YouTube iframe message:', event.data);
+            
+            const status = document.getElementById('status');
+            if (event.data.toString().includes('playing')) {
+                status.textContent = '✅ Video is playing!';
+                status.className = 'status success';
+            }
+        });
+    </script>
+</body>
+</html>
