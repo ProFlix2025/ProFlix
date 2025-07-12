@@ -1766,7 +1766,7 @@ export class DatabaseStorage implements IStorage {
           source: 'learntube',
           isLearnTube: true,
           youtubeId: video.youtubeId,
-          creatorId: 'learntube-admin', // Special creator for YouTube content
+          creatorId: 'system', // System user for YouTube content
           isPublished: true,
           isCourse: false, // LearnTube videos cannot be courses
           coursePrice: 0,
