@@ -19,7 +19,7 @@ const creatorTiers = [
     popular: true,
     features: [
       "30-day free trial",
-      "Upload up to 50 hours of video content",
+      "Upload up to 10 hours of video content",
       "Keep 100% of course sales revenue",
       "Basic analytics dashboard",
       "Community features (likes, comments, shares)",
@@ -28,7 +28,7 @@ const creatorTiers = [
       "Course creation and monetization"
     ],
     limitations: [
-      "50-hour limit on video content",
+      "10-hour limit on video content",
       "Standard support only"
     ],
     cta: "Start Free Trial",

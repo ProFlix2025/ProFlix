@@ -853,7 +853,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "User not authenticated" });
       }
 
-      if (!['free', 'pro', 'enterprise'].includes(tier)) {
+      if (!['new', 'pro', 'enterprise'].includes(tier)) {
         return res.status(400).json({ error: 'Invalid tier' });
       }
 
@@ -861,11 +861,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateUserCreatorTier(userId, tier);
 
       // Set video hour limits based on tier
-      let videoHourLimit = 5; // Free tier default
+      let videoHourLimit = 10; // New Creator tier default
       if (tier === 'pro') {
-        videoHourLimit = 50; // Pro tier
+        videoHourLimit = -1; // Pro tier - unlimited (represented as -1)
       } else if (tier === 'enterprise') {
-        videoHourLimit = 500; // Enterprise tier
+        videoHourLimit = -1; // Enterprise tier - unlimited
       }
 
       // Update video hour limit

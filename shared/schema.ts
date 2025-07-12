@@ -39,15 +39,17 @@ export const users = pgTable("users", {
   premiumViewerEndsAt: timestamp("premium_viewer_ends_at"),
   
   // Creator tier system - simplified two-tier model
+  creatorTier: varchar("creator_tier").default("new"), // 'new', 'pro' 
   isProCreator: boolean("is_pro_creator").default(false),
   proCreatorEndsAt: timestamp("pro_creator_ends_at"),
   proCreatorPlan: varchar("pro_creator_plan"), // 'monthly', 'yearly', 'free_code'
+  newCreatorTrialEndsAt: timestamp("new_creator_trial_ends_at"), // 30-day free trial
   
-  // Free Creator: 50 hours, 30% platform cut
-  // Pro Creator: Unlimited hours, 100% revenue retention
-  videoHourLimit: integer("video_hour_limit").default(50), // Free creators get 50 hours
+  // New Creator: $29/month (30-day free trial), 10 hours, 100% revenue retention
+  // Pro Creator: $99/month, unlimited hours, 100% revenue retention
+  videoHourLimit: integer("video_hour_limit").default(10), // New creators get 10 hours
   currentVideoHours: integer("current_video_hours").default(0),
-  revenueShare: integer("revenue_share").default(30), // 30% for free creators, 0% for pro creators
+  revenueShare: integer("revenue_share").default(0), // All creators keep 100% of revenue
   
   // Customer retention tracking
   previousProCreatorTier: varchar("previous_pro_creator_tier"), // Track what tier they downgraded from

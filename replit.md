@@ -13,7 +13,7 @@ ProFlix is a video platform focused on original content creators with a simple t
 - Future streaming expansion with premium content
 
 **Two-Tier Creator System**
-- New Creators: $29/month (30-day free trial), upload up to 50 hours, keep 100% of revenue
+- New Creators: $29/month (30-day free trial), upload up to 10 hours, keep 100% of revenue
 - Pro Creators: $99/month subscription, unlimited uploads, keep 100% of revenue
 - "Add to Streaming" feature for future Netflix-style unlimited content
 
@@ -21,7 +21,7 @@ ProFlix is a video platform focused on original content creators with a simple t
 
 **New Creator - $29/month**
 - 30-day free trial
-- Upload up to 50 hours of video content
+- Upload up to 10 hours of video content
 - Keep 100% of course sales revenue
 - Basic analytics and creator tools
 - Option to add videos to streaming section
@@ -212,6 +212,7 @@ Preferred communication style: Simple, everyday language.
 ✅ **Removed Ad References**: Eliminated all ad-related language since platform has no advertising model
 ✅ **New Creator Pricing**: Removed "Free Creator" and replaced with "New Creator" at $29/month with 30-day free trial
 ✅ **Updated Revenue Model**: All creators now keep 100% of revenue, no platform revenue sharing
+✅ **Video Content Limits**: New Creator tier limited to 10 hours of video content (reduced from 50 hours)
 
 ## Deployment Status
 

@@ -91,7 +91,7 @@ export default function ProCreatorPortal() {
                 <p className="text-green-400 text-2xl font-bold">$29/month</p>
                 <p className="text-green-400 text-sm">30-day free trial!</p>
                 <ul className="text-netflix-light-gray text-sm mt-2 space-y-1">
-                  <li>• Up to 50 hours of video content</li>
+                  <li>• Up to 10 hours of video content</li>
                   <li>• 100% course profit retention</li>
                   <li>• Basic analytics</li>
                   <li>• Community support</li>
