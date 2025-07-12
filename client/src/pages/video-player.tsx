@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { ThumbsUp, ThumbsDown, Plus, X, Eye, MessageCircle, Bell, BellOff, Share } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { YouTubePlayer } from "@/components/YouTubePlayer";
 
 export default function VideoPlayer() {
   const params = useParams();
@@ -28,18 +29,29 @@ export default function VideoPlayer() {
   const [hasTriggeredPaywall, setHasTriggeredPaywall] = useState(false);
   const [iframeError, setIframeError] = useState(false);
   const [showEmbedFallback, setShowEmbedFallback] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const videoId = params.id;
 
-  // Only show fallback for localhost - production should work
+  // Enhanced YouTube iframe debugging
+  const [embedDebugInfo, setEmbedDebugInfo] = useState({
+    hostname: window.location.hostname,
+    protocol: window.location.protocol,
+    userAgent: navigator.userAgent,
+    isProduction: window.location.hostname.includes('proflix.app') || window.location.hostname.includes('onrender.com'),
+    timestamp: new Date().toISOString()
+  });
+
+  // Reset iframe state when video changes
   useEffect(() => {
-    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      console.log('🔧 Development mode: Auto-showing YouTube fallback');
-      setShowEmbedFallback(true);
-    } else {
-      console.log('🚀 Production mode: YouTube iframe should work');
+    if (videoId) {
+      setIframeError(false);
       setShowEmbedFallback(false);
+      setIframeLoaded(false);
+      setRetryCount(0);
+      console.log('🔄 Video changed, resetting iframe state for video ID:', videoId);
     }
-  }, []);
+  }, [videoId]);
 
   const { data: video, isLoading } = useQuery({
     queryKey: [`/api/videos/${videoId}`],
@@ -258,68 +270,18 @@ export default function VideoPlayer() {
                 <div className="relative video-aspect rounded-lg overflow-hidden">
                   {/* Check if this is a LearnTube video (YouTube embed) */}
                   {video.isLearnTube ? (
-                    <div className="w-full h-full bg-black flex items-center justify-center relative">
-                      <iframe
-                        width="560"
-                        height="315"
-                        src={video.videoUrl?.replace(/\?si=.*$/, '')} // Remove ?si= parameter
-                        title="YouTube video player"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        allowFullScreen
-                        referrerPolicy="no-referrer-when-downgrade"
-                        style={{ width: '100%', height: '100%', minHeight: '400px' }}
-                        onLoad={() => {
-                          console.log('✅ YouTube iframe loaded successfully:', video.title);
-                          console.log('Video details:', { title: video.title, youtubeId: video.youtubeId });
-                          console.log('📍 Current hostname:', window.location.hostname);
-                          setIframeError(false);
-                          setShowEmbedFallback(false);
-                          // Track view when iframe loads
-                          viewMutation.mutate();
-                        }}
-                        onError={(e) => {
-                          console.error('❌ YouTube iframe failed to load:', video.title, e);
-                          console.error('Failed video URL:', video.videoUrl);
-                          console.error('📍 Current hostname:', window.location.hostname);
-                          console.error('🔍 Video ID:', video.youtubeId);
-                          setIframeError(true);
-                          setShowEmbedFallback(true);
-                        }}
-                      />
-                      
-                      {/* Fallback for embedding issues */}
-                      {showEmbedFallback && (
-                        <div className="absolute inset-0 bg-black bg-opacity-90 flex items-center justify-center">
-                          <div className="text-center text-white p-6 max-w-sm">
-                            <div className="w-12 h-12 bg-red-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                              <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                              </svg>
-                            </div>
-                            <h3 className="text-lg font-semibold mb-2">Video Unavailable</h3>
-                            <p className="text-sm text-gray-300 mb-3">
-                              {window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-                                ? "YouTube embedding is blocked on localhost. This video will work properly in production."
-                                : "This video cannot be embedded. YouTube may have restricted this video from being embedded on external sites."
-                              }
-                            </p>
-                            <a 
-                              href={`https://www.youtube.com/watch?v=${video.youtubeId}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="inline-block bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded font-medium"
-                              onClick={() => {
-                                // Track view when user clicks to watch on YouTube
-                                viewMutation.mutate();
-                              }}
-                            >
-                              Watch on YouTube
-                            </a>
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                    <YouTubePlayer
+                      videoId={video.youtubeId}
+                      title={video.title}
+                      onLoad={() => {
+                        console.log('✅ YouTube Player loaded:', video.title);
+                        viewMutation.mutate();
+                      }}
+                      onError={(error) => {
+                        console.error('❌ YouTube Player error:', error);
+                      }}
+                      className="min-h-[400px]"
+                    />
                   ) : (
                     <video
                       ref={videoRef}

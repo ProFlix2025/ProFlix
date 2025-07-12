@@ -39,6 +39,7 @@ import ReportVideo from "@/pages/report-video";
 import AllCategories from "@/pages/all-categories";
 import Categories from "@/pages/categories";
 import Subcategories from "@/pages/subcategories";
+import YouTubeDebug from "@/pages/youtube-debug";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -106,6 +107,7 @@ function Router() {
           <Route path="/subcategories" component={Subcategories} />
           <Route path="/category/:slug" component={CategoryView} />
           <Route path="/video/:id" component={VideoPlayerNew} />
+          <Route path="/youtube-debug" component={YouTubeDebug} />
           <Route component={NotFound} />
         </Switch>
       </div>
